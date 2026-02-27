@@ -1,37 +1,36 @@
 package com.budget.buddy.budget_buddy_api.repository;
 
+import com.budget.buddy.budget_buddy_api.base.BaseRepository;
 import com.budget.buddy.budget_buddy_api.entity.CategoryEntity;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.NoRepositoryBean;
 
-/**
- * Repository for Category entity operations using Spring Data JDBC.
- */
-@Repository
-public interface CategoryRepository extends CrudRepository<CategoryEntity, String> {
+@NoRepositoryBean
+public interface CategoryRepository extends BaseRepository<CategoryEntity, String> {
 
   /**
-   * Find all categories.
+   * Find all categories by owner ID.
    *
-   * @return list of all categories
+   * @param ownerId the ID of the owner
+   * @return list of categories owned by the specified owner
    */
-  List<CategoryEntity> findAll();
+  Optional<CategoryEntity> findByIdAndOwnerId(String id, String ownerId);
 
   /**
-   * Find a category by ID.
+   * Find all categories by owner's username.
    *
-   * @param id category ID
-   * @return optional containing the category if found
+   * @param username the username of the owner
+   * @return list of categories owned by the specified username
    */
-  Optional<CategoryEntity> findById(String id);
+  List<CategoryEntity> findAllByOwnerUsername(String username);
 
   /**
-   * Find all categories by name.
+   * Count the number of categories owned by a specific username.
    *
-   * @param name category name
-   * @return list of categories with matching name
+   * @param username the username of the owner
+   * @return the count of categories owned by the specified username
    */
-  List<CategoryEntity> findByName(String name);
+  long countByOwnerUsername(String username);
+
 }

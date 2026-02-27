@@ -1,4 +1,4 @@
-package com.budget.buddy.budget_buddy_api.entity;
+package com.budget.buddy.budget_buddy_api.base;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -22,7 +22,7 @@ public class BaseEntityListener extends AbstractRelationalEventListener<BaseEnti
   }
 
   @Override
-  protected void onBeforeConvert(BeforeConvertEvent<BaseEntity> event) {
+  protected void onBeforeConvert(@NonNull BeforeConvertEvent<BaseEntity> event) {
     super.onBeforeConvert(event);
 
     var entity = event.getEntity();

@@ -41,8 +41,8 @@ public class CategoriesController {
       @RequestParam(defaultValue = "20") int limit,
       @RequestParam(defaultValue = "0") int offset) {
 
-    var categories = categoryService.listCategories(limit, offset);
-    var total = categoryService.countCategories();
+    var categories = categoryService.list(limit, offset);
+    var total = categoryService.count();
 
     var meta = new PaginationMeta();
     meta.setLimit(limit);
@@ -64,7 +64,7 @@ public class CategoriesController {
    */
   @PostMapping("/v1/categories")
   public ResponseEntity<Category> createCategory(@Valid @RequestBody CategoryCreate request) {
-    var created = categoryService.createCategory(request);
+    var created = categoryService.create(request);
     return ResponseEntity
         .created(URI.create("/v1/categories/" + created.getId()))
         .body(created);
@@ -78,7 +78,7 @@ public class CategoriesController {
    */
   @GetMapping("/v1/categories/{categoryId}")
   public ResponseEntity<Category> getCategory(@PathVariable String categoryId) {
-    var category = categoryService.getCategory(categoryId);
+    var category = categoryService.read(categoryId);
     return ResponseEntity.ok(category);
   }
 
@@ -94,7 +94,7 @@ public class CategoriesController {
       @PathVariable String categoryId,
       @Valid @RequestBody CategoryUpdate request) {
 
-    var updated = categoryService.updateCategory(categoryId, request);
+    var updated = categoryService.update(categoryId, request);
     return ResponseEntity.ok(updated);
   }
 
@@ -106,7 +106,7 @@ public class CategoriesController {
    */
   @DeleteMapping("/v1/categories/{categoryId}")
   public ResponseEntity<Void> deleteCategory(@PathVariable String categoryId) {
-    categoryService.deleteCategory(categoryId);
+    categoryService.delete(categoryId);
     return ResponseEntity.noContent().build();
   }
 }

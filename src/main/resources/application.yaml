@@ -15,7 +15,7 @@ spring:
       mode: always
 jwt:
   secret: ${BUDGET_BUDDY_API_JWT_SECRET}
-  access-token-validity-seconds: 900 # 15 minutes
+  access-token-validity-seconds: 86400 # 1 day
   refresh-token-validity-seconds: 1209600 # 14 days
 
 logging:

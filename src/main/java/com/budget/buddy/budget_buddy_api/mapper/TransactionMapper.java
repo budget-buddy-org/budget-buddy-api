@@ -2,6 +2,8 @@ package com.budget.buddy.budget_buddy_api.mapper;
 
 import com.budget.buddy.budget_buddy_api.entity.TransactionEntity;
 import com.budget.buddy.budget_buddy_api.model.Transaction;
+import com.budget.buddy.budget_buddy_api.model.TransactionCreate;
+import com.budget.buddy.budget_buddy_api.model.TransactionUpdate;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -32,4 +34,8 @@ public interface TransactionMapper {
   default JsonNullable<String> wrapStringNullable(String value) {
     return value != null ? JsonNullable.of(value) : JsonNullable.undefined();
   }
+
+  TransactionEntity toEntity(TransactionCreate request);
+
+  TransactionEntity toEntity(TransactionUpdate request);
 }

@@ -26,6 +26,9 @@ repositories {
 }
 
 dependencies {
+  val mapstructVersion = "1.6.3"
+  val lombokVersion = "1.18.42"
+
   implementation("org.springframework.boot:spring-boot-h2console")
   implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -38,7 +41,9 @@ dependencies {
   implementation("org.openapitools:jackson-databind-nullable:0.2.6")
   implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final")
   implementation("io.jsonwebtoken:jjwt-api:0.13.0")
-  implementation("org.mapstruct:mapstruct:1.5.5.Final")
+
+  compileOnly("org.projectlombok:lombok:${lombokVersion}")
+  compileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
 
   runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
   runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
@@ -47,8 +52,10 @@ dependencies {
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
+  annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+  annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
+  annotationProcessor("org.projectlombok:lombok:$lombokVersion")
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-  annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.assertj:assertj-core")

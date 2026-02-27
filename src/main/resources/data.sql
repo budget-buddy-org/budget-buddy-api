@@ -8,5 +8,10 @@ VALUES ('admin', 'ROLE_ADMIN');
 INSERT INTO authorities (username, authority)
 VALUES ('admin', 'ROLE_USER');
 
-INSERT INTO categories (id, version, name, created_at, updated_at)
-VALUES ('5910a910-4ed1-47e8-b0e5-73b27f0d5add', 1, 'Food', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO categories (id, version, name, owner_id, created_at, updated_at)
+VALUES ('5910a910-4ed1-47e8-b0e5-73b27f0d5add',
+        1,
+        'Food',
+        'a788506a-45e8-4e87-92e9-974bd5863311',
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP);

@@ -1,6 +1,5 @@
 package com.budget.buddy.budget_buddy_api.service;
 
-import com.budget.buddy.budget_buddy_api.entity.TransactionEntity;
 import com.budget.buddy.budget_buddy_api.mapper.TransactionMapper;
 import com.budget.buddy.budget_buddy_api.model.Transaction;
 import com.budget.buddy.budget_buddy_api.model.TransactionCreate;
@@ -41,18 +40,10 @@ public class TransactionService {
 
   @Transactional
   public Transaction createTransaction(TransactionCreate request) {
-
-    var entity = new TransactionEntity(
-        null,
-        request.getAmount(),
-        request.getType().getValue(),
-        request.getCurrency(),
-        request.getDate()
-    );
-    entity.setCategoryId(request.getCategoryId());
-    entity.setDescription(request.getDescription());
+    var entity = transactionMapper.toEntity(request);
 
     var saved = transactionRepository.save(entity);
+
     return transactionMapper.toTransaction(saved);
   }
 
@@ -61,21 +52,8 @@ public class TransactionService {
     var entity = transactionRepository.findById(transactionId)
         .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
 
-    if (request.getCategoryId() != null) {
-      entity.setCategoryId(request.getCategoryId());
-    }
-    if (request.getAmount() != null) {
-      entity.setAmount(request.getAmount());
-    }
-    if (request.getType() != null) {
-      entity.setType(request.getType().getValue());
-    }
-    if (request.getDate() != null) {
-      entity.setDate(request.getDate());
-    }
-    if (request.getDescription() != null) {
-      entity.setDescription(request.getDescription());
-    }
+    entity = transactionMapper.toEntity(request);
+    entity.setId(transactionId);
 
     var saved = transactionRepository.save(entity);
     return transactionMapper.toTransaction(saved);

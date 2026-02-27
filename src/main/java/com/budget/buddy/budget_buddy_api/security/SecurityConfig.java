@@ -1,7 +1,5 @@
-package com.budget.buddy.budget_buddy_api.config;
+package com.budget.buddy.budget_buddy_api.security;
 
-import com.budget.buddy.budget_buddy_api.security.JwtAuthenticationFilter;
-import com.budget.buddy.budget_buddy_api.security.JwtTokenProvider;
 import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
