@@ -1,9 +1,9 @@
 package com.budget.buddy.budget_buddy_api.base.crudl;
 
 import com.budget.buddy.budget_buddy_api.base.BaseEntity;
+import com.budget.buddy.budget_buddy_api.base.BaseMapper;
 import com.budget.buddy.budget_buddy_api.base.BaseRepository;
-import com.budget.buddy.budget_buddy_api.exception.EntityNotFoundException;
-import com.budget.buddy.budget_buddy_api.mapper.BaseMapper;
+import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
  * @param <U> Update request type (DTO)
  */
 @RequiredArgsConstructor
-public abstract class AbstractCRUDLService<E extends BaseEntity, R, C, U> implements CRUDLService<R, C, U> {
+public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U> implements CRUDLService<ID, R, C, U> {
 
   private static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
 
   @Getter
-  private final BaseRepository<E, String> repository;
+  private final BaseRepository<E, ID> repository;
+  
   @Getter
   private final BaseMapper<E, R, C, U> mapper;
 
@@ -35,21 +36,21 @@ public abstract class AbstractCRUDLService<E extends BaseEntity, R, C, U> implem
   }
 
   @Override
-  public R read(String id) {
+  public R read(ID id) {
     E entity = readInternal(id);
     return mapper.toModel(entity);
   }
 
   @Transactional
   @Override
-  public R update(String id, U updateRequest) {
+  public R update(ID id, U updateRequest) {
     E updatedEntity = updateInternal(id, updateRequest);
     return mapper.toModel(updatedEntity);
   }
 
   @Transactional
   @Override
-  public void delete(String id) {
+  public void delete(ID id) {
     repository.deleteById(id);
   }
 
@@ -72,7 +73,7 @@ public abstract class AbstractCRUDLService<E extends BaseEntity, R, C, U> implem
     return repository.count();
   }
 
-  protected E readInternal(String id) {
+  protected E readInternal(ID id) {
     return repository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));
   }
@@ -86,7 +87,7 @@ public abstract class AbstractCRUDLService<E extends BaseEntity, R, C, U> implem
     return repository.save(entity);
   }
 
-  protected E updateInternal(String id, U updateRequest) {
+  protected E updateInternal(ID id, U updateRequest) {
     if (!repository.existsById(id)) {
       throw new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id));
     }

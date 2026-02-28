@@ -12,7 +12,7 @@ import org.springframework.data.repository.Repository;
  * @param <ID> the type of the entity's identifier
  */
 @NoRepositoryBean
-public interface BaseRepository<E extends BaseEntity, ID> extends Repository<E, ID> {
+public interface BaseRepository<E extends BaseEntity<ID>, ID> extends Repository<E, ID> {
 
   /**
    * Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely.

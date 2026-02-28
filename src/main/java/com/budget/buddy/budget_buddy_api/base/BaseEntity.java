@@ -15,11 +15,11 @@ import org.springframework.data.relational.core.mapping.Column;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class BaseEntity {
+public abstract class BaseEntity<ID> {
 
   @Id
   @Column("id")
-  private String id;
+  private ID id;
 
   @Version
   @Column("version")
@@ -30,5 +30,9 @@ public abstract class BaseEntity {
 
   @Column("updated_at")
   private OffsetDateTime updatedAt;
+
+  public boolean isNew() {
+    return id == null;
+  }
 
 }

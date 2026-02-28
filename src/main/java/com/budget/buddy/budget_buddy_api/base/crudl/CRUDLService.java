@@ -1,16 +1,17 @@
 package com.budget.buddy.budget_buddy_api.base.crudl;
 
-import com.budget.buddy.budget_buddy_api.exception.EntityNotFoundException;
+import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import java.util.List;
 
 /**
  * Generic CRUDL (Create, Read, Update, Delete, List) service interface for managing entities.
  *
+ * @param <ID> The type of the unique identifier for the entities managed by the service.
  * @param <R> The type of the resource/model returned by the service methods.
  * @param <C> The type of the create request object used for creating new entities.
  * @param <U> The type of the update request object used for updating existing entities.
  */
-public interface CRUDLService<R, C, U> {
+public interface CRUDLService<ID, R, C, U> {
 
   /**
    * Create a new entity based on the provided create request object.
@@ -27,7 +28,7 @@ public interface CRUDLService<R, C, U> {
    * @return The resource/model representing the entity with the specified ID.
    * @throws EntityNotFoundException If no entity with the specified ID exists.
    */
-  R read(String id) throws EntityNotFoundException;
+  R read(ID id) throws EntityNotFoundException;
 
   /**
    * Update an existing entity identified by its unique identifier using the provided update request object.
@@ -37,7 +38,7 @@ public interface CRUDLService<R, C, U> {
    * @return The updated resource/model representing the modified entity.
    * @throws EntityNotFoundException If no entity with the specified ID exists.
    */
-  R update(String id, U entity) throws EntityNotFoundException;
+  R update(ID id, U entity) throws EntityNotFoundException;
 
   /**
    * Delete an existing entity by its unique identifier.
@@ -45,7 +46,7 @@ public interface CRUDLService<R, C, U> {
    * @param id The unique identifier of the entity to delete.
    * @throws EntityNotFoundException If no entity with the specified ID exists.
    */
-  void delete(String id) throws EntityNotFoundException;
+  void delete(ID id) throws EntityNotFoundException;
 
   /**
    * List all existing entities.
