@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.user;
 
-import com.budget.buddy.budget_buddy_api.base.BaseEntity;
+import com.budget.buddy.budget_buddy_api.base.crudl.BaseEntity;
 import com.budget.buddy.budget_buddy_api.base.security.AuthService;
 import java.util.Optional;
 import java.util.UUID;

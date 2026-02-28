@@ -22,12 +22,15 @@ public interface CategoryJDBCRepository extends CrudRepository<CategoryEntity, U
       WHERE u.username = :username
       """;
 
+  @Override
   @Query(FIND_ALL_BY_OWNER_USERNAME_QUERY)
   List<CategoryEntity> findAllByOwnerUsername(String username);
 
+  @Override
   @Query(COUNT_BY_OWNER_USERNAME_QUERY)
   long countByOwnerUsername(String username);
 
+  @Override
   Optional<CategoryEntity> findByIdAndOwnerId(UUID id, UUID ownerId);
 
 }

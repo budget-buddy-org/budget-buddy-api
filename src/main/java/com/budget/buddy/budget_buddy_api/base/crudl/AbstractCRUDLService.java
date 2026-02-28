@@ -1,8 +1,5 @@
 package com.budget.buddy.budget_buddy_api.base.crudl;
 
-import com.budget.buddy.budget_buddy_api.base.BaseEntity;
-import com.budget.buddy.budget_buddy_api.base.BaseMapper;
-import com.budget.buddy.budget_buddy_api.base.BaseRepository;
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import java.util.List;
 import lombok.Getter;
@@ -24,7 +21,7 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
 
   @Getter
   private final BaseRepository<E, ID> repository;
-  
+
   @Getter
   private final BaseMapper<E, R, C, U> mapper;
 

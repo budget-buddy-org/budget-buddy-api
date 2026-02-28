@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.category;
 
-import com.budget.buddy.budget_buddy_api.base.BaseRepository;
+import com.budget.buddy.budget_buddy_api.base.crudl.BaseRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

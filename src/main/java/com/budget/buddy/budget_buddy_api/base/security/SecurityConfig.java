@@ -37,7 +37,7 @@ public class SecurityConfig {
 
     http
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/h2-console/**").permitAll()
+            .requestMatchers("/actuator/**").permitAll()
             .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
             .requestMatchers("/v1/auth/**").permitAll()
             .anyRequest().authenticated()

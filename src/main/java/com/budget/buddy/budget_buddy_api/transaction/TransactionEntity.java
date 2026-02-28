@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import com.budget.buddy.budget_buddy_api.base.BaseEntity;
+import com.budget.buddy.budget_buddy_api.base.crudl.BaseEntity;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;

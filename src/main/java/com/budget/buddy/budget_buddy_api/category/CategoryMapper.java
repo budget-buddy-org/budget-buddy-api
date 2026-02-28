@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.category;
 
-import com.budget.buddy.budget_buddy_api.base.BaseMapper;
+import com.budget.buddy.budget_buddy_api.base.crudl.BaseMapper;
 import com.budget.buddy.budget_buddy_api.model.Category;
 import com.budget.buddy.budget_buddy_api.model.CategoryCreate;
 import com.budget.buddy.budget_buddy_api.model.CategoryUpdate;

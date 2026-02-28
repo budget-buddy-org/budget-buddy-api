@@ -14,7 +14,7 @@ server:
 
 security:
   jwt:
-    secret: ${BUDGET_BUDDY_API_JWT_SECRET}
+    secret:
     access-token-validity-seconds: 900 # 15 minutes
     refresh-token-validity-seconds: 1209600 # 14 days
 

@@ -1,4 +1,4 @@
-package com.budget.buddy.budget_buddy_api.base.config;
+package com.budget.buddy.budget_buddy_api.base;
 
 import java.sql.Timestamp;
 import java.time.Clock;

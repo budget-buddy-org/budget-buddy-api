@@ -1,4 +1,4 @@
-package com.budget.buddy.budget_buddy_api.base.config;
+package com.budget.buddy.budget_buddy_api.base;
 
 import com.budget.buddy.budget_buddy_api.model.Problem;
 import jakarta.validation.ConstraintViolation;
@@ -27,6 +27,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -72,6 +73,12 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(NoSuchElementException.class)
   public ResponseEntity<Problem> handleNotFound(NoSuchElementException ex) {
     log.debug("Entity not found: {}", ex.getMessage());
+    return problemResponse(HttpStatus.NOT_FOUND, "Resource not found", ex.getMessage(), Collections.emptyMap());
+  }
+
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<Problem> handleNoResourceFoundException(NoResourceFoundException ex) {
+    log.debug("Resource not found: {}", ex.getMessage());
     return problemResponse(HttpStatus.NOT_FOUND, "Resource not found", ex.getMessage(), Collections.emptyMap());
   }
 

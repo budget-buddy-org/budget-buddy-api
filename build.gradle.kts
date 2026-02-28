@@ -1,3 +1,5 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
 plugins {
   java
   id("org.springframework.boot") version "4.0.3"
@@ -28,28 +30,24 @@ repositories {
 dependencies {
   val mapstructVersion = "1.6.3"
   val lombokVersion = "1.18.42"
+  val jjwtVersion = "0.13.0"
 
-  implementation("org.springframework.boot:spring-boot-h2console")
-  implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
   implementation("org.springframework.boot:spring-boot-starter-security")
+  implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
-  implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
-  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
-  implementation("jakarta.annotation:jakarta.annotation-api:2.1.1")
-  implementation("jakarta.validation:jakarta.validation-api:3.0.2")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
-  implementation("org.openapitools:jackson-databind-nullable:0.2.6")
-  implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final")
-  implementation("io.jsonwebtoken:jjwt-api:0.13.0")
+  implementation("org.springframework.boot:spring-boot-h2console")
+  implementation("org.springdoc:springdoc-openapi-starter-common:3.0.1")
+  implementation("org.openapitools:jackson-databind-nullable:0.2.9")
+  implementation("io.jsonwebtoken:jjwt-api:${jjwtVersion}")
 
   compileOnly("org.projectlombok:lombok:${lombokVersion}")
   compileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
 
-  runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
-  runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
-  runtimeOnly("com.h2database:h2:2.2.224")
-  runtimeOnly("org.postgresql:postgresql:42.7.3")
+  runtimeOnly("io.jsonwebtoken:jjwt-impl:${jjwtVersion}")
+  runtimeOnly("io.jsonwebtoken:jjwt-jackson:${jjwtVersion}")
+  runtimeOnly("com.h2database:h2:2.4.240")
+  runtimeOnly("org.postgresql:postgresql:42.7.10")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
@@ -67,7 +65,7 @@ tasks.withType<Test> {
 }
 
 // OpenAPI Generator configuration
-tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("openapi") {
+tasks.register<GenerateTask>("openapi") {
   generatorName.set("spring")
   inputSpec.set("$rootDir/src/main/resources/openapi.yaml")
   outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
@@ -75,7 +73,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("ope
   modelPackage.set("com.budget.buddy.budget_buddy_api.model")
   configOptions.set(
     mapOf(
-      "useSpringboot3" to "true",
+      "useSpringBoot4" to "true",
       "generateApis" to "true",
       "generateModels" to "true",
       "generateSupportingFiles" to "false",

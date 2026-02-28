@@ -1,4 +1,4 @@
-package com.budget.buddy.budget_buddy_api.base;
+package com.budget.buddy.budget_buddy_api.base.crudl;
 
 import java.util.List;
 
