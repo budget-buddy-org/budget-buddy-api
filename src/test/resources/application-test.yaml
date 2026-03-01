@@ -13,7 +13,8 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
 
-jwt:
-  secret: b8b5df3c84d87da3c33ed324dfa2109b55fef11a2432f076e630b55a13d789a8
-  access-token-validity-seconds: 900 # 15 minutes
-  refresh-token-validity-seconds: 1209600 # 14 days
+security:
+  jwt:
+    secret: b8b5df3c84d87da3c33ed324dfa2109b55fef11a2432f076e630b55a13d789a8
+    access-token-validity-seconds: 900 # 15 minutes
+    refresh-token-validity-seconds: 1209600 # 14 days

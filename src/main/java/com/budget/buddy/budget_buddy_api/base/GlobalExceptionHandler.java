@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
         .title(title)
         .status(status.value())
         .errors(errors)
-        .detail(detail == null ? "" : detail);
+        .detail(detail);
 
     var headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);

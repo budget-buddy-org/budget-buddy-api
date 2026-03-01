@@ -10,7 +10,7 @@ import org.springframework.data.relational.core.mapping.event.BeforeSaveEvent;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BaseEntityListener<ID> extends AbstractRelationalEventListener<BaseEntity<ID>> {
+public class BaseEntityListener<ENTITY extends BaseEntity<ID>, ID> extends AbstractRelationalEventListener<ENTITY> {
 
   private final Clock clock;
   private final Supplier<ID> idGenerator;
@@ -21,7 +21,7 @@ public class BaseEntityListener<ID> extends AbstractRelationalEventListener<Base
   }
 
   @Override
-  protected void onBeforeConvert(@NonNull BeforeConvertEvent<BaseEntity<ID>> event) {
+  protected void onBeforeConvert(@NonNull BeforeConvertEvent<ENTITY> event) {
     super.onBeforeConvert(event);
 
     var entity = event.getEntity();
@@ -32,7 +32,7 @@ public class BaseEntityListener<ID> extends AbstractRelationalEventListener<Base
   }
 
   @Override
-  protected void onBeforeSave(@NonNull BeforeSaveEvent<BaseEntity<ID>> event) {
+  protected void onBeforeSave(@NonNull BeforeSaveEvent<ENTITY> event) {
     super.onBeforeSave(event);
 
     var entity = event.getEntity();
