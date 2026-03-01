@@ -1,13 +1,21 @@
 spring:
   application:
     name: budget-buddy-api
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: ${DB_DRIVER}
   devtools:
     add-properties: false
+  docker:
+    compose:
+      enabled: false
+  sql:
+    init:
+      mode: never
+  h2:
+    console:
+      enabled: false
+
+springdoc:
+  api-docs:
+    enabled: false
 
 server:
   port: ${SERVER_PORT:8080}

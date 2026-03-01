@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" factoryName="Spring Boot" name="Application (local)" type="SpringBootApplicationConfigurationType">
+  <configuration default="false" factoryName="Spring Boot" name="Application (local, postgres)" type="SpringBootApplicationConfigurationType">
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.budget.buddy.budget_buddy_api.*"/>
@@ -12,7 +12,7 @@
     <module name="budget-buddy-api.main"/>
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.budget.buddy.budget_buddy_api.Application"/>
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UnknownPolicyInFreeMode"/>
-    <option name="ACTIVE_PROFILES" value="local"/>
+    <option name="ACTIVE_PROFILES" value="local, postgres"/>
     <selectedOptions>
       <option name="environmentVariables"/>
     </selectedOptions>

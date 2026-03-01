@@ -1,7 +1,7 @@
 -- Keep existing tables for now (can be removed later if not needed)
 CREATE TABLE IF NOT EXISTS users
 (
-    id         VARCHAR(36) PRIMARY KEY,
+    id         UUID PRIMARY KEY,
     version    INT                  NOT NULL,
     username   VARCHAR(255)         NOT NULL UNIQUE,
     password   VARCHAR(255)         NOT NULL,
@@ -19,15 +19,13 @@ CREATE TABLE IF NOT EXISTS authorities
     UNIQUE (username, authority)
 );
 
-CREATE UNIQUE INDEX ix_auth_username ON authorities (username, authority);
-
 -- Categories table
 CREATE TABLE IF NOT EXISTS categories
 (
-    id         VARCHAR(36) PRIMARY KEY,
+    id         UUID PRIMARY KEY,
     version    INT          NOT NULL,
     name       VARCHAR(255) NOT NULL,
-    owner_id   VARCHAR(36)  NOT NULL,
+    owner_id   UUID         NOT NULL,
     created_at TIMESTAMP    NOT NULL,
     updated_at TIMESTAMP    NOT NULL,
     FOREIGN KEY (owner_id) REFERENCES users (id)
@@ -36,9 +34,9 @@ CREATE TABLE IF NOT EXISTS categories
 -- Transactions table
 CREATE TABLE IF NOT EXISTS transactions
 (
-    id          VARCHAR(36) PRIMARY KEY,
+    id          UUID PRIMARY KEY,
     version     INT         NOT NULL,
-    category_id VARCHAR(36),
+    category_id UUID,
     amount      INT         NOT NULL,
     type        VARCHAR(50) NOT NULL,
     currency    VARCHAR(3)  NOT NULL,

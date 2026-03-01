@@ -1,0 +1,11 @@
+spring:
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data-postgres.sql
+  docker:
+    compose:
+      enabled: true
+      profiles:
+        active: "postgres"
+      file: etc/docker-compose/compose-postgres.yaml

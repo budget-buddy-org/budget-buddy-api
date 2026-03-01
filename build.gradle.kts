@@ -50,6 +50,7 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql:42.7.10")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
+  developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 
   annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
   annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")

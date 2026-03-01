@@ -5,12 +5,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -37,16 +35,16 @@ public class SecurityConfig {
 
     http
         .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/h2-console/**").permitAll()
             .requestMatchers("/actuator/**").permitAll()
-            .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
             .requestMatchers("/v1/auth/**").permitAll()
             .anyRequest().authenticated()
         )
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-        .httpBasic(Customizer.withDefaults())
+        .httpBasic(AbstractHttpConfigurer::disable)
         .csrf(AbstractHttpConfigurer::disable)
-        .headers(headers -> headers.frameOptions(FrameOptionsConfig::disable));
+        .formLogin(AbstractHttpConfigurer::disable);
 
     return http.build();
   }
