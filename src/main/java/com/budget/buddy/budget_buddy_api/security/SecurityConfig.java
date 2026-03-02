@@ -1,4 +1,4 @@
-package com.budget.buddy.budget_buddy_api.base.security;
+package com.budget.buddy.budget_buddy_api.security;
 
 import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
