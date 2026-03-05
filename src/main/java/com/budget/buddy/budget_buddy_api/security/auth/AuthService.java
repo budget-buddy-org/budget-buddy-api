@@ -1,6 +1,7 @@
-package com.budget.buddy.budget_buddy_api.security;
+package com.budget.buddy.budget_buddy_api.security.auth;
 
 import com.budget.buddy.budget_buddy_api.model.AuthToken;
+import com.budget.buddy.budget_buddy_api.security.JwtTokenProvider;
 import io.jsonwebtoken.JwtException;
 import java.util.Optional;
 import java.util.function.Predicate;
