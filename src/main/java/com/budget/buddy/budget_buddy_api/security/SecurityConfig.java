@@ -1,4 +1,4 @@
-package com.budget.buddy.budget_buddy_api.base.security;
+package com.budget.buddy.budget_buddy_api.security;
 
 import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +43,7 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         .httpBasic(AbstractHttpConfigurer::disable)
-        .csrf(AbstractHttpConfigurer::disable)
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/v1/*"))
         .formLogin(AbstractHttpConfigurer::disable);
 
     return http.build();
