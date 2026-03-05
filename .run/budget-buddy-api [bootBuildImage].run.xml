@@ -1,0 +1,28 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" factoryName="Gradle" name="budget-buddy-api [bootBuildImage]" type="GradleRunConfiguration">
+    <DebugAllEnabled>false</DebugAllEnabled>
+    <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
+    <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+    <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+    <ExternalSystemSettings>
+      <option name="executionName"/>
+      <option name="externalProjectPath" value="$PROJECT_DIR$"/>
+      <option name="externalSystemIdString" value="GRADLE"/>
+      <option name="scriptParameters" value=""/>
+      <option name="taskDescriptions">
+        <list/>
+      </option>
+      <option name="taskNames">
+        <list>
+          <option value="bootBuildImage"/>
+          <option value="--imageName=glebremniov/budget-buddy-api"/>
+        </list>
+      </option>
+      <option name="vmOptions" value=""/>
+    </ExternalSystemSettings>
+    <GradleCoverageDisabled>false</GradleCoverageDisabled>
+    <GradleProfilingDisabled>false</GradleProfilingDisabled>
+    <RunAsTest>false</RunAsTest>
+    <method v="2"/>
+  </configuration>
+</component>
