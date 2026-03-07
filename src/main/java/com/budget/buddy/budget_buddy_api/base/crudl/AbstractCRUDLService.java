@@ -89,14 +89,19 @@ public abstract class AbstractCRUDLService<E extends BaseEntity<ID>, ID, R, C, U
   }
 
   protected E updateInternal(ID id, U updateRequest) {
-    if (!repository.existsById(id)) {
-      throw new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id));
-    }
+    var existingEntity = readInternal(id);
 
-    E entity = mapper.toEntityForUpdate(updateRequest);
-    entity.setId(id);
+    E updatedEntity = mapper.toEntityForUpdate(updateRequest);
+    transferBaseEntityFields(existingEntity, updatedEntity);
 
-    return repository.save(entity);
+    return repository.save(updatedEntity);
+  }
+
+  protected void transferBaseEntityFields(E from, E to) {
+    to.setId(from.getId());
+    to.setVersion(from.getVersion());
+    to.setCreatedAt(from.getCreatedAt());
+    to.setUpdatedAt(from.getUpdatedAt());
   }
 
 }

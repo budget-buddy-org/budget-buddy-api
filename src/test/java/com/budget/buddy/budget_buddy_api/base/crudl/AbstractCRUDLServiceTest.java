@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -97,10 +98,16 @@ class AbstractCRUDLServiceTest {
     void should_SaveEntity() {
       // Given
       var id = "testId";
+      var existingEntity = new DummyEntity();
+      existingEntity.setId(existingEntity.getId());
+      existingEntity.setVersion(1);
+      existingEntity.setCreatedAt(OffsetDateTime.now().minusDays(1));
+      existingEntity.setUpdatedAt(OffsetDateTime.now());
+
       var updateRequest = new Object();
       var updatedEntity = new DummyEntity();
       var expected = new Object();
-      when(repository.existsById(id)).thenReturn(true);
+      when(repository.findById(id)).thenReturn(Optional.of(existingEntity));
       when(mapper.toEntityForUpdate(updateRequest)).thenReturn(updatedEntity);
       when(repository.save(updatedEntity)).thenReturn(updatedEntity);
       when(mapper.toModel(updatedEntity)).thenReturn(expected);
@@ -110,7 +117,13 @@ class AbstractCRUDLServiceTest {
 
       // Then
       assertThat(actual).isEqualTo(expected);
-      verify(repository).existsById(id);
+      assertThat(updatedEntity)
+          .returns(existingEntity.getId(), BaseEntity::getId)
+          .returns(existingEntity.getVersion(), BaseEntity::getVersion)
+          .returns(existingEntity.getCreatedAt(), BaseEntity::getCreatedAt)
+          .returns(existingEntity.getUpdatedAt(), BaseEntity::getUpdatedAt);
+
+      verify(repository).findById(id);
       verify(mapper).toEntityForUpdate(updateRequest);
       verify(repository).save(updatedEntity);
       verify(mapper).toModel(updatedEntity);
@@ -121,13 +134,13 @@ class AbstractCRUDLServiceTest {
       // Given
       var id = "nonExistentId";
       var updateRequest = new Object();
-      when(repository.existsById(id)).thenReturn(false);
+      when(repository.findById(id)).thenReturn(Optional.empty());
 
       // When / Then
       assertThatThrownBy(() -> service.update(id, updateRequest))
           .isInstanceOf(EntityNotFoundException.class)
           .hasMessageContaining("Entity not found with id: " + id);
-      verify(repository).existsById(id);
+      verify(repository).findById(id);
       verifyNoInteractions(mapper);
     }
   }
