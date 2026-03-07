@@ -1,6 +1,7 @@
 package com.budget.buddy.budget_buddy_api.security.auth;
 
 import com.budget.buddy.budget_buddy_api.model.AuthToken;
+import com.budget.buddy.budget_buddy_api.security.jwt.JwtProperties;
 import com.budget.buddy.budget_buddy_api.security.jwt.JwtProvider;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -24,8 +25,8 @@ public class AuthService {
   private static final String TOKEN_TYPE = "Bearer";
 
   private final AuthenticationManager authenticationManager;
-  private final JwtProvider accessTokenProvider;
-  private final JwtProvider refreshTokenProvider;
+  private final JwtProperties tokenProperties;
+  private final JwtProvider tokenProvider;
   private final UserDetailsService userDetailsService;
   private final JwtDecoder jwtDecoder;
 
@@ -51,9 +52,9 @@ public class AuthService {
         .unauthenticated(username, password);
     authenticationManager.authenticate(authenticationRequest);
 
-    var accessToken = accessTokenProvider.create(username);
-    var refreshToken = refreshTokenProvider.create(username);
-    var expiresIn = (int) accessTokenProvider.getValiditySeconds();
+    var accessToken = tokenProvider.create(username, tokenProperties.accessTokenValiditySeconds());
+    var refreshToken = tokenProvider.create(username, tokenProperties.refreshTokenValiditySeconds());
+    var expiresIn = (int) tokenProperties.accessTokenValiditySeconds();
 
     return buildAuthToken(accessToken, refreshToken, expiresIn);
   }
@@ -69,8 +70,8 @@ public class AuthService {
     var username = decoded.getSubject();
     userDetailsService.loadUserByUsername(username);
 
-    var accessToken = accessTokenProvider.create(username);
-    var expiresIn = (int) accessTokenProvider.getValiditySeconds();
+    var accessToken = tokenProvider.create(username, tokenProperties.accessTokenValiditySeconds());
+    var expiresIn = (int) tokenProperties.accessTokenValiditySeconds();
 
     return buildAuthToken(accessToken, refreshToken, expiresIn);
   }
