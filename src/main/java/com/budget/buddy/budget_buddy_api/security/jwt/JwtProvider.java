@@ -1,44 +1,38 @@
 package com.budget.buddy.budget_buddy_api.security.jwt;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.budget.buddy.budget_buddy_api.security.jwt.JwtProperties.TokenProperties;
 import java.time.Clock;
 import java.time.Instant;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 
+@RequiredArgsConstructor
 public class JwtProvider {
 
   private final Clock clock;
-  private final Algorithm algorithm;
-  private final JWTVerifier jwtVerifier;
-  private final TokenProperties tokenProperties;
-
-  public JwtProvider(Clock clock, TokenProperties tokenProperties) {
-    this.clock = clock;
-    this.algorithm = Algorithm.HMAC512(tokenProperties.secret());
-    this.jwtVerifier = JWT.require(algorithm).build();
-    this.tokenProperties = tokenProperties;
-  }
+  @Getter
+  private final long validitySeconds;
+  private final JwtEncoder jwtEncoder;
 
   public String create(String username) {
+    var claims = buildClaims(username);
+
+    return jwtEncoder
+        .encode(JwtEncoderParameters.from(claims))
+        .getTokenValue();
+  }
+
+  private JwtClaimsSet buildClaims(String username) {
     var now = Instant.now(clock);
-    var expiresAt = now.plusSeconds(tokenProperties.validitySeconds());
+    var expiresAt = now.plusSeconds(validitySeconds);
 
-    return JWT.create()
-        .withSubject(username)
-        .withIssuedAt(now)
-        .withExpiresAt(expiresAt)
-        .sign(algorithm);
-  }
-
-  public String getSubject(String token) {
-    return jwtVerifier.verify(token)
-        .getSubject();
-  }
-
-  public long getValiditySeconds() {
-    return tokenProperties.validitySeconds();
+    return JwtClaimsSet.builder()
+        .subject(username)
+        .issuedAt(now)
+        .expiresAt(expiresAt)
+        .build();
   }
 
 }

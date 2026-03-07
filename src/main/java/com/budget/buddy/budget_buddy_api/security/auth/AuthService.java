@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -26,6 +27,7 @@ public class AuthService {
   private final JwtProvider accessTokenProvider;
   private final JwtProvider refreshTokenProvider;
   private final UserDetailsService userDetailsService;
+  private final JwtDecoder jwtDecoder;
 
   private static AuthToken buildAuthToken(String accessToken, String refreshToken, int expiresInSeconds) {
     var token = new AuthToken();
@@ -45,7 +47,9 @@ public class AuthService {
    * @return AuthToken containing access and refresh tokens
    */
   public AuthToken login(String username, String password) {
-    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+    var authenticationRequest = UsernamePasswordAuthenticationToken
+        .unauthenticated(username, password);
+    authenticationManager.authenticate(authenticationRequest);
 
     var accessToken = accessTokenProvider.create(username);
     var refreshToken = refreshTokenProvider.create(username);
@@ -61,7 +65,8 @@ public class AuthService {
    * @return AuthToken with new access token
    */
   public AuthToken refresh(String refreshToken) {
-    var username = refreshTokenProvider.getSubject(refreshToken);
+    var decoded = jwtDecoder.decode(refreshToken);
+    var username = decoded.getSubject();
     userDetailsService.loadUserByUsername(username);
 
     var accessToken = accessTokenProvider.create(username);

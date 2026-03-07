@@ -23,3 +23,8 @@ server:
 logging:
   level:
     root: INFO
+
+security:
+  jwt:
+    access-token-validity-seconds: 900 # 15 minutes
+    refresh-token-validity-seconds: 1209600 # 14 days

@@ -3,12 +3,8 @@ server:
 
 security:
   jwt:
-    access-token:
-      secret: access-token-secret
-      validity-seconds: 86400 # 1 day
-    refresh-token:
-      secret: refresh-token-secret
-      validity-seconds: 1209600 # 14 days
+    access-token-validity-seconds: 86400 # 1 day
+    refresh-token-validity-seconds: 1209600 # 14 days
 
 logging:
   level:

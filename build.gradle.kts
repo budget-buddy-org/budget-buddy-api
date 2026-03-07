@@ -33,16 +33,15 @@ dependencies {
   val postgreVersion = "42.7.10"
   val lombokMapstructBindingVersion = "0.2.0"
   val jacksonDatabindNullableVersion = "0.2.9"
-  val javaJwtVersion = "4.5.1"
 
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
   implementation("org.springframework.boot:spring-boot-starter-security")
+  implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-h2console")
   implementation("org.springdoc:springdoc-openapi-starter-common:${openApiVerification}")
   implementation("org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}")
-  implementation("com.auth0:java-jwt:${javaJwtVersion}")
 
   compileOnly("org.projectlombok:lombok:${lombokVersion}")
   compileOnly("org.mapstruct:mapstruct:${mapstructVersion}")

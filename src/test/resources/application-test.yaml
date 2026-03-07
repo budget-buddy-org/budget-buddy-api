@@ -7,9 +7,6 @@ spring:
 
 security:
   jwt:
-    access-token:
-      secret: dde435ee1f3a08ac33823232f4be169b7b04fe35396677053b08e594c7bbe0406969bd623b964c662f797f65bf0c4b50a1d236668d1e002c58be759208828bb1
-      validity-seconds: 86400 # 1 day
-    refresh-token:
-      secret: 52749cdbaeefea366f3c5a5cc6b94a5ac2d9ca14a9fb3752597cee414394a12507dc839091aaba83b1a3536e806c7014b89fdfe097a8951597d06c0a04a606cd
-      validity-seconds: 1209600 # 14 days
+    secret: df187efc1d1805492852ea8c2742a8b16620143f000328d894af3d5242cdbcb9
+    access-token-validity-seconds: 86400 # 1 day
+    refresh-token-validity-seconds: 1209600 # 14 days
