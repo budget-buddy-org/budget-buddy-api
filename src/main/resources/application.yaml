@@ -1,30 +1,6 @@
 spring:
   application:
     name: budget-buddy-api
-  devtools:
-    add-properties: false
-  docker:
-    compose:
-      enabled: false
-  sql:
-    init:
-      mode: never
-  h2:
-    console:
-      enabled: false
-
-springdoc:
-  api-docs:
-    enabled: false
 
 server:
   port: ${SERVER_PORT:8080}
-
-logging:
-  level:
-    root: INFO
-
-security:
-  jwt:
-    access-token-validity-seconds: 900 # 15 minutes
-    refresh-token-validity-seconds: 1209600 # 14 days

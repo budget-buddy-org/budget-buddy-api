@@ -1,0 +1,32 @@
+spring:
+  docker:
+    compose:
+      enabled: false
+  devtools:
+    add-properties: false
+  h2:
+    console:
+      enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+springdoc:
+  api-docs:
+    enabled: false
+
+security:
+  jwt:
+    secret: ${BUDGET_BUDDY_API_JWT_SECRET}
+    access-token-validity-seconds: ${BUDGET_BUDDY_API_JWT_ACCESS_TOKEN_VALIDITY_SECONDS}
+    refresh-token-validity-seconds: ${BUDGET_BUDDY_API_JWT_REFRESH_TOKEN_VALIDITY_SECONDS}
+
+logging:
+  level:
+    root: INFO
