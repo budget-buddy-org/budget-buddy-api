@@ -65,16 +65,6 @@ dependencies {
 
 tasks.named<Test>("test") {
   useJUnitPlatform()
-  exclude("**/*IntegrationTest.class")
-  finalizedBy("jacocoTestReport")
-}
-
-tasks.register<Test>("testIntegration") {
-  group = "verification"
-  description = "Runs integration tests"
-  useJUnitPlatform()
-  include("**/*IntegrationTest.class")
-  finalizedBy("jacocoTestReport")
 }
 
 tasks.openApiGenerate {
