@@ -1,6 +1,5 @@
 package com.budget.buddy.budget_buddy_api.security.auth;
 
-import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_api.security.jwt.JwtProperties;
 import com.budget.buddy.budget_buddy_api.security.jwt.JwtProvider;
@@ -11,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +51,7 @@ public class AuthService {
     authenticationManager.authenticate(authenticationRequest);
 
     var user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        .orElseThrow(() -> UsernameNotFoundException.fromUsername(username));
 
     var subject = user.getId().toString();
     var accessToken = tokenProvider.create(subject, tokenProperties.accessTokenValiditySeconds());
