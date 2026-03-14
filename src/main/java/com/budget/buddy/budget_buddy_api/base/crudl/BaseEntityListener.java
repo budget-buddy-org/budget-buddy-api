@@ -8,7 +8,7 @@ import org.springframework.data.relational.core.mapping.event.BeforeConvertEvent
 
 @SuppressWarnings("java:S119")
 @RequiredArgsConstructor
-public class BaseEntityListener<ENTITY extends BaseEntity<ID>, ID>
+public abstract class BaseEntityListener<ENTITY extends BaseEntity<ID>, ID>
     extends AbstractRelationalEventListener<ENTITY> {
 
   private final Supplier<ID> idGenerator;

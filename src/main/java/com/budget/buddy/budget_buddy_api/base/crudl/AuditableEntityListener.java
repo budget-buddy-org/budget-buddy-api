@@ -7,7 +7,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.data.relational.core.mapping.event.BeforeSaveEvent;
 
 @SuppressWarnings("java:S119")
-public class AuditableEntityListener<ENTITY extends AuditableEntity<ID>, ID>
+public abstract class AuditableEntityListener<ENTITY extends AuditableEntity<ID>, ID>
     extends BaseEntityListener<ENTITY, ID> {
 
   private final Clock clock;

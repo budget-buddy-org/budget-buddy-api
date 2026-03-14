@@ -1,7 +1,6 @@
 package com.budget.buddy.budget_buddy_api.security.refresh.token;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
@@ -13,15 +12,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface RefreshTokenRepository extends CrudRepository<RefreshTokenEntity, String> {
-
-  /**
-   * Find a valid (non-expired) refresh token
-   */
-  default Optional<RefreshTokenEntity> findValidToken(String token, OffsetDateTime now) {
-    return findByIdAndExpiresAtGreaterThanEqual(token, now);
-  }
-
-  Optional<RefreshTokenEntity> findByIdAndExpiresAtGreaterThanEqual(String id, OffsetDateTime expiresAt);
 
   /**
    * Delete all refresh tokens for a user (logout all sessions)

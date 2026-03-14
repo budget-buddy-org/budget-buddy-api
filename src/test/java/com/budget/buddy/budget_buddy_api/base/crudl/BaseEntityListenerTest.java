@@ -21,7 +21,7 @@ class BaseEntityListenerTest {
   private Supplier<String> idGenerator;
 
   @InjectMocks
-  private BaseEntityListener<DummyEntity, String> listener;
+  private DummyBaseEntityListener listener;
 
   @Test
   void onBeforeConvert_ShouldSetId_When_NewEntity() {
@@ -55,4 +55,10 @@ class BaseEntityListenerTest {
     verifyNoInteractions(idGenerator);
   }
 
+  private static final class DummyBaseEntityListener extends BaseEntityListener<DummyEntity, String> {
+
+    public DummyBaseEntityListener(Supplier<String> idGenerator) {
+      super(idGenerator);
+    }
+  }
 }

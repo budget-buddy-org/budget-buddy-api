@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.relational.core.conversion.BatchingAggregateChange;
@@ -19,7 +20,7 @@ class AuditableEntityListenerTest {
 
   @BeforeEach
   void setUp() {
-    listener = new AuditableEntityListener<>(null, FIXED_CLOCK);
+    listener = new DummyAuditableEntityListener(null, FIXED_CLOCK);
   }
 
   @Test
@@ -60,6 +61,13 @@ class AuditableEntityListenerTest {
 
   private static final class DummyAuditableEntity extends AuditableEntity<String> {
     // No additional fields needed for testing
+  }
+
+  private static final class DummyAuditableEntityListener extends AuditableEntityListener<DummyAuditableEntity, String> {
+
+    public DummyAuditableEntityListener(Supplier<String> idGenerator, Clock clock) {
+      super(idGenerator, clock);
+    }
   }
 
 }
