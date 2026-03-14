@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,27 +17,25 @@ import org.springframework.transaction.annotation.Transactional;
 public class RefreshTokenService {
 
   private final Clock clock;
-  private final RefreshTokenProvider provider;
   private final RefreshTokenRepository repository;
+  private final RefreshTokenProperties properties;
 
   /**
    * Create and persist a new refresh token for the given user
    *
    * @param userId user ID
-   * @param validitySeconds token validity in seconds
    * @return opaque refresh token string
    */
   @Transactional
-  public String create(UUID userId, long validitySeconds) {
+  public String create(UUID userId) {
     var now = OffsetDateTime.now(clock);
-    var token = new RefreshTokenEntity(
-        provider.get(),
-        userId,
-        now.plusSeconds(validitySeconds),
-        now
-    );
+    var token = RefreshTokenEntity.builder()
+        .userId(userId)
+        .createdAt(now)
+        .expiresAt(now.plusSeconds(properties.validitySeconds()))
+        .build();
     repository.save(token);
-    return token.getToken();
+    return token.getId();
   }
 
   /**
@@ -50,8 +49,12 @@ public class RefreshTokenService {
   public RefreshTokenEntity rotate(String refreshToken) {
     var now = OffsetDateTime.now(clock);
 
-    var tokenEntity = repository.findValidToken(refreshToken, now)
-        .orElseThrow(() -> new BadCredentialsException("Invalid or expired refresh token"));
+    var tokenEntity = repository.findById(refreshToken)
+        .orElseThrow(() -> new BadCredentialsException("Refresh token is invalid"));
+
+    if (now.isAfter(tokenEntity.getExpiresAt())) {
+      throw new AccountExpiredException("Refresh token is expired");
+    }
 
     repository.delete(tokenEntity);
     return tokenEntity;

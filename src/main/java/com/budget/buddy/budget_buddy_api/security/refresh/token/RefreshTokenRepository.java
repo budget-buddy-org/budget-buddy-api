@@ -17,14 +17,16 @@ public interface RefreshTokenRepository extends CrudRepository<RefreshTokenEntit
   /**
    * Find a valid (non-expired) refresh token
    */
-  @Query("SELECT * FROM refresh_tokens WHERE token = :token AND expires_at > :now")
-  Optional<RefreshTokenEntity> findValidToken(String token, OffsetDateTime now);
+  default Optional<RefreshTokenEntity> findValidToken(String token, OffsetDateTime now) {
+    return findByIdAndExpiresAtGreaterThanEqual(token, now);
+  }
+
+  Optional<RefreshTokenEntity> findByIdAndExpiresAtGreaterThanEqual(String id, OffsetDateTime expiresAt);
 
   /**
    * Delete all refresh tokens for a user (logout all sessions)
    */
   @Modifying
-  @Query("DELETE FROM refresh_tokens WHERE user_id = :userId")
   void deleteAllByUserId(UUID userId);
 
   /**

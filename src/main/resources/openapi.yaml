@@ -20,7 +20,6 @@ security:
   - BearerAuth: [ ]
 
 paths:
-
   /v1/auth/login:
     post:
       tags: [ auth ]
@@ -327,7 +326,6 @@ paths:
           $ref: "#/components/responses/NotFound"
 
 components:
-
   securitySchemes:
     BearerAuth:
       type: http
@@ -335,7 +333,6 @@ components:
       bearerFormat: JWT
 
   parameters:
-
     categoryId:
       name: categoryId
       in: path
@@ -372,7 +369,6 @@ components:
         default: 0
 
   responses:
-
     BadRequest:
       description: Bad request
       content:
@@ -402,7 +398,6 @@ components:
             $ref: "#/components/schemas/Problem"
 
   schemas:
-
     RegisterRequest:
       type: object
       required: [ username, password ]

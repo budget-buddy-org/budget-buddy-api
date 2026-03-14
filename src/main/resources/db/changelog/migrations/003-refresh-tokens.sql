@@ -1,9 +1,9 @@
 --liquibase formatted sql
 
---changeset g.remniov@gmail.com:004-refresh-tokens
+--changeset g.remniov@gmail.com:003-refresh-tokens
 CREATE TABLE refresh_tokens
 (
-    token      VARCHAR(255) NOT NULL PRIMARY KEY,
+    id VARCHAR(255) NOT NULL PRIMARY KEY,
     user_id    UUID         NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     expires_at TIMESTAMP    NOT NULL,
     created_at TIMESTAMP    NOT NULL

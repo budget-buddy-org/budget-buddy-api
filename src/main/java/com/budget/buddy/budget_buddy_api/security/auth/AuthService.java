@@ -71,9 +71,9 @@ public class AuthService {
     var user = userService.findByUsername(username)
         .orElseThrow(() -> UsernameNotFoundException.fromUsername(username));
 
-    var accessToken = jwtProvider.create(user.id().toString(), jwtProperties.accessTokenValiditySeconds());
-    var refreshToken = refreshTokenService.create(user.id(), jwtProperties.refreshTokenValiditySeconds());
-    var expiresIn = (int) jwtProperties.accessTokenValiditySeconds();
+    var accessToken = jwtProvider.create(user.id().toString(), jwtProperties.validitySeconds());
+    var refreshToken = refreshTokenService.create(user.id());
+    var expiresIn = (int) jwtProperties.validitySeconds();
 
     return buildAuthToken(accessToken, refreshToken, expiresIn);
   }
@@ -89,9 +89,9 @@ public class AuthService {
     var tokenEntity = refreshTokenService.rotate(refreshToken);
     var user = requireEnabledUser(tokenEntity.getUserId());
 
-    var newAccessToken = jwtProvider.create(user.id().toString(), jwtProperties.accessTokenValiditySeconds());
-    var newRefreshToken = refreshTokenService.create(user.id(), jwtProperties.refreshTokenValiditySeconds());
-    var expiresIn = (int) jwtProperties.accessTokenValiditySeconds();
+    var newAccessToken = jwtProvider.create(user.id().toString(), jwtProperties.validitySeconds());
+    var newRefreshToken = refreshTokenService.create(user.id());
+    var expiresIn = (int) jwtProperties.validitySeconds();
 
     return buildAuthToken(newAccessToken, newRefreshToken, expiresIn);
   }
