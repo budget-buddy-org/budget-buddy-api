@@ -12,7 +12,7 @@ public abstract class AuditableEntityListener<ENTITY extends AuditableEntity<ID>
 
   private final Clock clock;
 
-  public AuditableEntityListener(Supplier<ID> idGenerator, Clock clock) {
+  protected AuditableEntityListener(Supplier<ID> idGenerator, Clock clock) {
     super(idGenerator);
     this.clock = clock;
   }
