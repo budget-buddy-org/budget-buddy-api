@@ -20,24 +20,12 @@ public class AuthController implements AuthApi {
 
   private final AuthService authService;
 
-  /**
-   * Authenticate user and receive access + refresh tokens
-   *
-   * @param request login credentials (username, password)
-   * @return AuthToken with access_token, refresh_token, and expires_in
-   */
   @Override
   public ResponseEntity<AuthToken> loginUser(@Valid LoginRequest request) {
     var token = authService.login(request.getUsername(), request.getPassword());
     return ResponseEntity.ok(token);
   }
 
-  /**
-   * Exchange a refresh token for a new access token
-   *
-   * @param request request containing refresh_token
-   * @return AuthToken with new access_token
-   */
   @Override
   public ResponseEntity<AuthToken> refreshToken(@Valid RefreshTokenRequest request) {
     var token = authService.refresh(request.getRefreshToken());
@@ -48,5 +36,11 @@ public class AuthController implements AuthApi {
   public ResponseEntity<Void> registerUser(RegisterRequest registerRequest) {
     authService.register(registerRequest);
     return ResponseEntity.status(HttpStatus.CREATED).build();
+  }
+
+  @Override
+  public ResponseEntity<Void> logoutUser() {
+    authService.logout();
+    return ResponseEntity.noContent().build();
   }
 }
