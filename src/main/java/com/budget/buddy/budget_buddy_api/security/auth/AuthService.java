@@ -2,11 +2,11 @@ package com.budget.buddy.budget_buddy_api.security.auth;
 
 import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
-import com.budget.buddy.budget_buddy_api.security.jwt.JwtProperties;
-import com.budget.buddy.budget_buddy_api.security.jwt.JwtProvider;
+import com.budget.buddy.budget_buddy_api.security.auth.token.AuthTokenService;
 import com.budget.buddy.budget_buddy_api.security.refresh.token.RefreshTokenService;
 import com.budget.buddy.budget_buddy_api.user.UserDto;
 import com.budget.buddy.budget_buddy_api.user.UserService;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,22 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
-  private static final String TOKEN_TYPE = "Bearer";
-
-  private final JwtProperties jwtProperties;
-  private final JwtProvider jwtProvider;
   private final AuthenticationManager authenticationManager;
   private final UserService userService;
   private final RefreshTokenService refreshTokenService;
-
-  private static AuthToken buildAuthToken(String accessToken, String refreshToken, int expiresInSeconds) {
-    var token = new AuthToken();
-    token.setAccessToken(accessToken);
-    token.setRefreshToken(refreshToken);
-    token.setTokenType(TOKEN_TYPE);
-    token.setExpiresIn(expiresInSeconds);
-    return token;
-  }
+  private final AuthTokenService authTokenService;
 
   /**
    * Register a new user with default role
@@ -71,11 +59,7 @@ public class AuthService {
     var user = userService.findByUsername(username)
         .orElseThrow(() -> UsernameNotFoundException.fromUsername(username));
 
-    var accessToken = jwtProvider.create(user.id().toString(), jwtProperties.validitySeconds());
-    var refreshToken = refreshTokenService.create(user.id());
-    var expiresIn = (int) jwtProperties.validitySeconds();
-
-    return buildAuthToken(accessToken, refreshToken, expiresIn);
+    return authTokenService.createToken(user);
   }
 
   /**
@@ -89,11 +73,7 @@ public class AuthService {
     var tokenEntity = refreshTokenService.rotate(refreshToken);
     var user = requireEnabledUser(tokenEntity.getUserId());
 
-    var newAccessToken = jwtProvider.create(user.id().toString(), jwtProperties.validitySeconds());
-    var newRefreshToken = refreshTokenService.create(user.id());
-    var expiresIn = (int) jwtProperties.validitySeconds();
-
-    return buildAuthToken(newAccessToken, newRefreshToken, expiresIn);
+    return authTokenService.createToken(user);
   }
 
   /**
@@ -112,7 +92,7 @@ public class AuthService {
    * @return UserDto if user exists and is enabled
    * @throws DisabledException if user is disabled
    */
-  public UserDto requireEnabledUser(java.util.UUID userId) {
+  public UserDto requireEnabledUser(UUID userId) {
     var user = userService.read(userId);
 
     if (!user.enabled()) {
