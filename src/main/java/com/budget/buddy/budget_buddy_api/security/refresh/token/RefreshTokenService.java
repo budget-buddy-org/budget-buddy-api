@@ -1,5 +1,7 @@
 package com.budget.buddy.budget_buddy_api.security.refresh.token;
 
+import com.budget.buddy.budget_buddy_api.security.TokenService;
+import com.budget.buddy.budget_buddy_api.user.UserDto;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -14,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
-public class RefreshTokenService {
+public class RefreshTokenService implements TokenService<String> {
 
   private final Clock clock;
   private final RefreshTokenRepository repository;
@@ -23,14 +25,15 @@ public class RefreshTokenService {
   /**
    * Create and persist a new refresh token for the given user
    *
-   * @param userId user ID
+   * @param user user ID
    * @return opaque refresh token string
    */
   @Transactional
-  public String create(UUID userId) {
+  @Override
+  public String createToken(UserDto user) {
     var now = OffsetDateTime.now(clock);
     var token = RefreshTokenEntity.builder()
-        .userId(userId)
+        .userId(user.id())
         .createdAt(now)
         .expiresAt(now.plusSeconds(properties.validitySeconds()))
         .build();
