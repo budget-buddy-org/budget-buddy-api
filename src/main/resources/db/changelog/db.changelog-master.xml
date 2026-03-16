@@ -8,5 +8,6 @@
   <include file="migrations/001-initial-schema.sql" relativeToChangelogFile="true"/>
   <include file="migrations/003-refresh-tokens.sql" relativeToChangelogFile="true"/>
   <include file="migrations/004-timestamp-with-timezone.sql" relativeToChangelogFile="true"/>
+  <include file="migrations/005-add-owner-id.sql" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
