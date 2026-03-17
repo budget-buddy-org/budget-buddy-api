@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
@@ -18,7 +19,8 @@ public interface TransactionRepository extends BaseRepository<TransactionEntity,
 
   String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_DESC = """
       SELECT * FROM transactions
-      WHERE (:startDate::date IS NULL OR date >= :startDate::date)
+      WHERE owner_id = :ownerId
+      AND (:startDate::date IS NULL OR date >= :startDate::date)
       AND (:endDate::date IS NULL OR date <= :endDate::date)
       AND (:categoryId::uuid IS NULL OR category_id = :categoryId::uuid)
       ORDER BY date DESC
@@ -28,7 +30,8 @@ public interface TransactionRepository extends BaseRepository<TransactionEntity,
 
   String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_ASC = """
       SELECT * FROM transactions
-      WHERE (:startDate::date IS NULL OR date >= :startDate::date)
+      WHERE owner_id = :ownerId
+      AND (:startDate::date IS NULL OR date >= :startDate::date)
       AND (:endDate::date IS NULL OR date <= :endDate::date)
       AND (:categoryId::uuid IS NULL OR category_id = :categoryId::uuid)
       ORDER BY date ASC
@@ -36,7 +39,16 @@ public interface TransactionRepository extends BaseRepository<TransactionEntity,
       OFFSET :offset
       """;
 
+  String COUNT_BY_FILTERS = """
+      SELECT COUNT(*) FROM transactions
+      WHERE owner_id = :ownerId
+      AND (:startDate::date IS NULL OR date >= :startDate::date)
+      AND (:endDate::date IS NULL OR date <= :endDate::date)
+      AND (:categoryId::uuid IS NULL OR category_id = :categoryId::uuid)
+      """;
+
   default List<TransactionEntity> findAllByFilters(
+      @Param("ownerId") UUID ownerId,
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
       @Param("categoryId") UUID categoryId,
@@ -48,12 +60,13 @@ public interface TransactionRepository extends BaseRepository<TransactionEntity,
         .orElse(Direction.DESC);
 
     return order.isAscending()
-        ? findAllByFiltersOrderByDateAsc(startDate, endDate, categoryId, pageable.getPageSize(), pageable.getOffset())
-        : findAllByFiltersOrderByDateDesc(startDate, endDate, categoryId, pageable.getPageSize(), pageable.getOffset());
+        ? findAllByFiltersOrderByDateAsc(ownerId, startDate, endDate, categoryId, pageable.getPageSize(), pageable.getOffset())
+        : findAllByFiltersOrderByDateDesc(ownerId, startDate, endDate, categoryId, pageable.getPageSize(), pageable.getOffset());
   }
 
   @Query(FIND_ALL_BY_FILTERS_ORDER_BY_DATE_DESC)
   List<TransactionEntity> findAllByFiltersOrderByDateDesc(
+      @Param("ownerId") UUID ownerId,
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
       @Param("categoryId") UUID categoryId,
@@ -63,6 +76,7 @@ public interface TransactionRepository extends BaseRepository<TransactionEntity,
 
   @Query(FIND_ALL_BY_FILTERS_ORDER_BY_DATE_ASC)
   List<TransactionEntity> findAllByFiltersOrderByDateAsc(
+      @Param("ownerId") UUID ownerId,
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
       @Param("categoryId") UUID categoryId,
@@ -70,13 +84,15 @@ public interface TransactionRepository extends BaseRepository<TransactionEntity,
       @Param("offset") long offset
   );
 
-  @Query("SELECT COUNT(*) FROM transactions " +
-      "WHERE (:startDate::date IS NULL OR date >= :startDate::date) " +
-      "AND (:endDate::date IS NULL OR date <= :endDate::date) " +
-      "AND (:categoryId::uuid IS NULL OR category_id = :categoryId::uuid)")
+  @Query(COUNT_BY_FILTERS)
   long countByFilters(
+      @Param("ownerId") UUID ownerId,
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
       @Param("categoryId") UUID categoryId
   );
+
+  Optional<TransactionEntity> findByIdAndOwnerId(UUID transactionId, UUID ownerId);
+
+  Page<TransactionEntity> findAllByOwnerId(UUID ownerId, Pageable pageable);
 }

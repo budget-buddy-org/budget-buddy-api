@@ -46,4 +46,7 @@ public class TransactionEntity extends AuditableEntity<UUID> {
   @Column("description")
   private String description;
 
+  @Column("owner_id")
+  private UUID ownerId;
+
 }
