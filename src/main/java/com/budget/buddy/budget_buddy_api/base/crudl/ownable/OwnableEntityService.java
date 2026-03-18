@@ -1,0 +1,78 @@
+package com.budget.buddy.budget_buddy_api.base.crudl.ownable;
+
+import com.budget.buddy.budget_buddy_api.base.crudl.base.AbstractBaseEntityService;
+import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
+import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
+import com.budget.buddy.budget_buddy_api.security.auth.AuthUtils;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+@SuppressWarnings("java:S119")
+public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
+    extends AbstractBaseEntityService<E, ID, R, C, U> {
+
+  private static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
+
+  private final OwnableEntityRepository<E, ID> repository;
+  private final OwnableEntityMapper<E, ID, R, C, U, ?> mapper;
+  private final Converter<String, ID> idConverter;
+
+  protected OwnableEntityService(
+      OwnableEntityRepository<E, ID> repository,
+      OwnableEntityMapper<E, ID, R, C, U, ?> mapper,
+      Iterable<BaseEntityValidator<E>> entityValidators,
+      Converter<String, ID> idConverter
+  ) {
+    super(repository, mapper, entityValidators);
+    this.repository = repository;
+    this.mapper = mapper;
+    this.idConverter = idConverter;
+  }
+
+  protected ID getOwnerId() {
+    return AuthUtils.requireCurrentUserId(idConverter);
+  }
+
+  @Override
+  protected Page<E> listInternal(Pageable pageRequest) {
+    return repository.findAllByOwnerId(getOwnerId(), pageRequest);
+  }
+
+  @Override
+  protected void deleteInternal(ID id) {
+    var entity = readInternal(id);
+    repository.delete(entity);
+  }
+
+  @Override
+  protected E updateInternal(ID id, U updateRequest) {
+    E existingEntity = readInternal(id);
+    mapper.patchEntity(updateRequest, existingEntity);
+    validate(existingEntity);
+    return repository.save(existingEntity);
+  }
+
+  @Override
+  protected E readInternal(ID id) {
+    return repository.findByIdAndOwnerId(id, getOwnerId())
+        .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));
+  }
+
+  @Override
+  protected boolean existsByIdInternal(ID id) {
+    return repository.existsByIdAndOwnerId(id, getOwnerId());
+  }
+
+  @Override
+  protected E createInternal(C createRequest) {
+    E entity = mapper.toEntity(createRequest, getOwnerId());
+    validate(entity);
+    return repository.save(entity);
+  }
+
+  @Override
+  public long countInternal() {
+    return repository.countByOwnerId(getOwnerId());
+  }
+}

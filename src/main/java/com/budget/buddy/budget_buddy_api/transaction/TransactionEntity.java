@@ -1,14 +1,14 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.AuditableEntity;
+import com.budget.buddy.budget_buddy_api.base.crudl.auditable.AuditableEntity;
+import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntity;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -18,28 +18,26 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("transactions")
 @Getter
 @Setter
-@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true, onlyExplicitlyIncluded = true)
-public class TransactionEntity extends AuditableEntity<UUID> {
+public class TransactionEntity extends AuditableEntity implements OwnableEntity<UUID> {
 
-  @ToString.Include
+  @Id
+  @Column("id")
+  private UUID id;
+
   @Column("category_id")
   private UUID categoryId;
 
-  @ToString.Include
   @Column("amount")
   private Integer amount;
 
-  @ToString.Include
   @Column("type")
   private TransactionType type;
 
   @Column("currency")
   private String currency;
 
-  @ToString.Include
   @Column("date")
   private LocalDate date;
 

@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.category;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.BaseMapper;
+import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntityMapper;
 import com.budget.buddy.budget_buddy_api.generated.model.Category;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
@@ -14,8 +14,6 @@ import org.mapstruct.MappingConstants;
  */
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CategoryMapper
-    extends BaseMapper<CategoryEntity, Category, CategoryCreate, CategoryUpdate, PaginatedCategories> {
-
-  CategoryEntity toEntity(CategoryCreate request, UUID ownerId);
+    extends OwnableEntityMapper<CategoryEntity, UUID, Category, CategoryCreate, CategoryUpdate, PaginatedCategories> {
 
 }

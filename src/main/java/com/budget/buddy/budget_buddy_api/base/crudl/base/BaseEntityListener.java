@@ -1,4 +1,4 @@
-package com.budget.buddy.budget_buddy_api.base.crudl;
+package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
@@ -6,8 +6,8 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.data.relational.core.mapping.event.BeforeConvertCallback;
 import org.springframework.stereotype.Component;
 
-@Component
 @SuppressWarnings("java:S119")
+@Component
 @RequiredArgsConstructor
 public class BaseEntityListener<ENTITY extends BaseEntity<ID>, ID>
     implements BeforeConvertCallback<ENTITY> {

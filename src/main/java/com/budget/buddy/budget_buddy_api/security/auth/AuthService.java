@@ -81,7 +81,7 @@ public class AuthService {
    */
   @Transactional
   public void logout() {
-    var userId = AuthUtils.requireCurrentUserId();
+    var userId = AuthUtils.requireCurrentUserId(UUID::fromString);
     refreshTokenService.revokeAll(userId);
   }
 

@@ -1,9 +1,8 @@
-package com.budget.buddy.budget_buddy_api.base.crudl;
+package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
+import java.util.Collections;
 import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,17 +19,31 @@ import org.springframework.transaction.annotation.Transactional;
 @SuppressWarnings("java:S119")
 @Slf4j
 @Transactional
-@RequiredArgsConstructor
-public abstract class AbstractBaseService<E extends BaseEntity<ID>, ID, R, C, U>
-    implements BaseService<ID, R, C, U> {
+public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R, C, U>
+    implements BaseEntityService<ID, R, C, U> {
 
   private static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
 
-  @Getter
-  private final BaseRepository<E, ID> repository;
+  private final BaseEntityRepository<E, ID> repository;
+  private final BaseEntityMapper<E, R, C, U, ?> mapper;
+  private final Iterable<BaseEntityValidator<E>> validators;
 
-  @Getter
-  private final BaseMapper<E, R, C, U, ?> mapper;
+  protected AbstractBaseEntityService(
+      BaseEntityRepository<E, ID> repository,
+      BaseEntityMapper<E, R, C, U, ?> mapper
+  ) {
+    this(repository, mapper, Collections.emptyList());
+  }
+
+  protected AbstractBaseEntityService(
+      BaseEntityRepository<E, ID> repository,
+      BaseEntityMapper<E, R, C, U, ?> mapper,
+      Iterable<BaseEntityValidator<E>> validators
+  ) {
+    this.repository = repository;
+    this.mapper = mapper;
+    this.validators = validators;
+  }
 
   @Override
   public R create(C createRequest) {
@@ -84,11 +97,21 @@ public abstract class AbstractBaseService<E extends BaseEntity<ID>, ID, R, C, U>
   @Override
   public long count() {
     log.debug("Count all entities");
-    return repository.count();
+    return countInternal();
+  }
+
+  @Override
+  public boolean existsById(ID id) {
+    return existsByIdInternal(id);
+  }
+
+  protected boolean existsByIdInternal(ID id) {
+    return repository.existsById(id);
   }
 
   protected E createInternal(C createRequest) {
     E entity = mapper.toEntity(createRequest);
+    validate(entity);
     return repository.save(entity);
   }
 
@@ -100,6 +123,7 @@ public abstract class AbstractBaseService<E extends BaseEntity<ID>, ID, R, C, U>
   protected E updateInternal(ID id, U updateRequest) {
     E existingEntity = readInternal(id);
     mapper.patchEntity(updateRequest, existingEntity);
+    validate(existingEntity);
     return repository.save(existingEntity);
   }
 
@@ -114,6 +138,14 @@ public abstract class AbstractBaseService<E extends BaseEntity<ID>, ID, R, C, U>
 
   protected Page<E> listInternal(Pageable pageRequest) {
     return repository.findAll(pageRequest);
+  }
+
+  protected long countInternal() {
+    return repository.count();
+  }
+
+  protected void validate(E entity) {
+    validators.forEach(v -> v.validate(entity));
   }
 
 }

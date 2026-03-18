@@ -1,4 +1,4 @@
-package com.budget.buddy.budget_buddy_api.base.crudl;
+package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
 import java.net.URI;
@@ -6,14 +6,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 
 @SuppressWarnings("java:S119")
-public abstract class BaseController<ID, R, C, U, L> {
+public abstract class BaseEntityController<ID, R, C, U, L> {
 
-  private final BaseService<ID, R, C, U> service;
-  private final BaseMapper<?, R, C, U, L> mapper;
+  private final BaseEntityService<ID, R, C, U> service;
+  private final BaseEntityMapper<?, R, C, U, L> mapper;
 
-  protected BaseController(
-      BaseService<ID, R, C, U> service,
-      BaseMapper<?, R, C, U, L> mapper
+  protected BaseEntityController(
+      BaseEntityService<ID, R, C, U> service,
+      BaseEntityMapper<?, R, C, U, L> mapper
   ) {
     this.service = service;
     this.mapper = mapper;

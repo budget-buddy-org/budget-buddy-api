@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.category;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.BaseController;
+import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityController;
 import com.budget.buddy.budget_buddy_api.generated.api.CategoriesApi;
 import com.budget.buddy.budget_buddy_api.generated.model.Category;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CategoryController
-    extends BaseController<UUID, Category, CategoryCreate, CategoryUpdate, PaginatedCategories>
+    extends BaseEntityController<UUID, Category, CategoryCreate, CategoryUpdate, PaginatedCategories>
     implements CategoriesApi {
 
   public CategoryController(CategoryService service, CategoryMapper mapper) {

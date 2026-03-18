@@ -486,7 +486,7 @@ components:
 
     Transaction:
       type: object
-      required: [ id, amount, type, currency, date ]
+      required: [ id, categoryId, amount, type, currency, date ]
       properties:
         id:
           type: string
@@ -525,7 +525,7 @@ components:
 
     TransactionCreate:
       type: object
-      required: [ amount, type, currency, date ]
+      required: [ categoryId, amount, type, currency, date ]
       properties:
         categoryId:
           type: string

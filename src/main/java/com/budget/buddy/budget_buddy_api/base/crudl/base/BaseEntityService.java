@@ -1,4 +1,4 @@
-package com.budget.buddy.budget_buddy_api.base.crudl;
+package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import java.util.List;
@@ -14,7 +14,7 @@ import org.springframework.data.domain.Pageable;
  * @param <U> The type of the update request object used for updating existing entities.
  */
 @SuppressWarnings("java:S119")
-public interface BaseService<ID, R, C, U> {
+public interface BaseEntityService<ID, R, C, U> {
 
   /**
    * Create a new entity based on the provided createRequest request object.
@@ -73,4 +73,8 @@ public interface BaseService<ID, R, C, U> {
    */
   long count();
 
+  /**
+   *
+   */
+  boolean existsById(ID id);
 }

@@ -1,4 +1,4 @@
-package com.budget.buddy.budget_buddy_api.base.crudl;
+package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -20,7 +20,7 @@ class BaseEntityListenerTest {
   private Supplier<String> idGenerator;
 
   @InjectMocks
-  private DummyBaseEntityListener listener;
+  private BaseEntityListener<DummyEntity, String> listener;
 
   @Test
   void onBeforeConvert_ShouldSetId_When_NewEntity() {
@@ -52,10 +52,4 @@ class BaseEntityListenerTest {
     verifyNoInteractions(idGenerator);
   }
 
-  private static final class DummyBaseEntityListener extends BaseEntityListener<DummyEntity, String> {
-
-    public DummyBaseEntityListener(Supplier<String> idGenerator) {
-      super(idGenerator);
-    }
-  }
 }

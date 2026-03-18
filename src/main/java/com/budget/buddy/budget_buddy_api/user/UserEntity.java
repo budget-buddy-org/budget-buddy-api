@@ -1,13 +1,14 @@
 package com.budget.buddy.budget_buddy_api.user;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.AuditableEntity;
+import com.budget.buddy.budget_buddy_api.base.crudl.auditable.AuditableEntity;
+import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntity;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -17,20 +18,21 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("users")
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true, onlyExplicitlyIncluded = true)
-public class UserEntity extends AuditableEntity<UUID> {
+public class UserEntity extends AuditableEntity implements BaseEntity<UUID> {
 
-  @ToString.Include
+  @Id
+  @Column("id")
+  private UUID id;
+
   @Column("username")
   private String username;
 
   @Column("password")
   private String password;
 
-  @ToString.Include
   @Column("enabled")
   private boolean enabled;
 

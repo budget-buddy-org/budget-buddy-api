@@ -1,13 +1,13 @@
 package com.budget.buddy.budget_buddy_api.category;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.AuditableEntity;
+import com.budget.buddy.budget_buddy_api.base.crudl.auditable.AuditableEntity;
+import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntity;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -17,11 +17,13 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("categories")
 @Getter
 @Setter
-@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
-public class CategoryEntity extends AuditableEntity<UUID> {
+public class CategoryEntity extends AuditableEntity implements OwnableEntity<UUID> {
+
+  @Id
+  @Column("id")
+  private UUID id;
 
   @Column("name")
   private String name;
