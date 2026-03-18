@@ -2,7 +2,7 @@ package com.budget.buddy.budget_buddy_api.security.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.budget.buddy.budget_buddy_api.BaseIntegrationTest;
+import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
 import com.budget.buddy.budget_buddy_api.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_api.generated.model.LoginRequest;
 import com.budget.buddy.budget_buddy_api.generated.model.RefreshTokenRequest;
@@ -15,44 +15,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
-class AuthIntegrationTest extends BaseIntegrationTest {
+class AuthIntegrationTest extends BaseMvcIntegrationTest {
 
   static final String USERNAME = "testuser";
   static final String PASSWORD = "testpassword123";
 
   @Autowired
-  MockMvcTester mvc;
-  @Autowired
   RefreshTokenRepository refreshTokenRepository;
 
   // ── helpers ────────────────────────────────────────────────────────────────
-
-  String json(Object obj) {
-    return objectMapper.writeValueAsString(obj);
-  }
-
-  void register(String username, String password) {
-    var exchange = mvc.post().uri("/v1/auth/register")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new RegisterRequest().username(username).password(password)))
-        .exchange();
-
-    assertThat(exchange).hasStatus(HttpStatus.CREATED);
-  }
-
-  AuthToken login(String username, String password) throws Exception {
-    var exchange = mvc.post().uri("/v1/auth/login")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new LoginRequest().username(username).password(password)))
-        .exchange();
-
-    assertThat(exchange).hasStatus(HttpStatus.OK);
-
-    return objectMapper.readValue(
-        exchange.getResponse().getContentAsString(), AuthToken.class);
-  }
 
   AuthToken refresh(String refreshToken) throws Exception {
     var exchange = mvc.post().uri("/v1/auth/refresh")
