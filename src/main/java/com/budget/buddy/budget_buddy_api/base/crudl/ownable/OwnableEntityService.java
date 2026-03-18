@@ -82,7 +82,7 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
   protected void validate(E entity) {
     super.validate(entity);
 
-    if (entity.getOwnerId().equals(getRequieredOnwerId())) {
+    if (!entity.getOwnerId().equals(getRequieredOnwerId())) {
       throw new IllegalArgumentException("Entity has invalid owner");
     }
   }
