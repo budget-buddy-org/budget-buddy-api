@@ -34,13 +34,13 @@ public class TransactionService extends
       TransactionFilter filter,
       Pageable pageable
   ) {
-    var entities = repository.findAllByFilter(filter.withOwnerId(getOwnerId()), pageable);
+    var entities = repository.findAllByFilter(filter.withOwnerId(getRequieredOnwerId()), pageable);
     return mapper.toModelList(entities);
   }
 
 
   public long count(TransactionFilter filter) {
-    return repository.countByFilter(filter.withOwnerId(getOwnerId()));
+    return repository.countByFilter(filter.withOwnerId(getRequieredOnwerId()));
   }
 
 }

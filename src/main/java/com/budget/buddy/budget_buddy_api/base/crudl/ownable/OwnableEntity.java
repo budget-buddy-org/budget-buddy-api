@@ -5,8 +5,8 @@ import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntity;
 @SuppressWarnings("java:S119")
 public interface OwnableEntity<ID> extends BaseEntity<ID> {
 
-  ID getId();
+  ID getOwnerId();
 
-  void setId(ID id);
+  void setOwnerId(ID id);
 
 }

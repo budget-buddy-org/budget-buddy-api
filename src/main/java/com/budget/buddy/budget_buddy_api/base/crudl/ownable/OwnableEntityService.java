@@ -1,6 +1,7 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.ownable;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.AbstractBaseEntityService;
+import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityMapper;
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import com.budget.buddy.budget_buddy_api.security.auth.AuthUtils;
@@ -15,12 +16,12 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
   private static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
 
   private final OwnableEntityRepository<E, ID> repository;
-  private final OwnableEntityMapper<E, ID, R, C, U, ?> mapper;
+  private final BaseEntityMapper<E, R, C, U, ?> mapper;
   private final Converter<String, ID> idConverter;
 
   protected OwnableEntityService(
       OwnableEntityRepository<E, ID> repository,
-      OwnableEntityMapper<E, ID, R, C, U, ?> mapper,
+      BaseEntityMapper<E, R, C, U, ?> mapper,
       Iterable<BaseEntityValidator<E>> entityValidators,
       Converter<String, ID> idConverter
   ) {
@@ -30,13 +31,13 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
     this.idConverter = idConverter;
   }
 
-  protected ID getOwnerId() {
+  protected ID getRequieredOnwerId() {
     return AuthUtils.requireCurrentUserId(idConverter);
   }
 
   @Override
   protected Page<E> listInternal(Pageable pageRequest) {
-    return repository.findAllByOwnerId(getOwnerId(), pageRequest);
+    return repository.findAllByOwnerId(getRequieredOnwerId(), pageRequest);
   }
 
   @Override
@@ -55,24 +56,34 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
 
   @Override
   protected E readInternal(ID id) {
-    return repository.findByIdAndOwnerId(id, getOwnerId())
+    return repository.findByIdAndOwnerId(id, getRequieredOnwerId())
         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));
   }
 
   @Override
   protected boolean existsByIdInternal(ID id) {
-    return repository.existsByIdAndOwnerId(id, getOwnerId());
+    return repository.existsByIdAndOwnerId(id, getRequieredOnwerId());
   }
 
   @Override
   protected E createInternal(C createRequest) {
-    E entity = mapper.toEntity(createRequest, getOwnerId());
+    E entity = mapper.toEntity(createRequest);
+    entity.setOwnerId(getRequieredOnwerId());
     validate(entity);
     return repository.save(entity);
   }
 
   @Override
   public long countInternal() {
-    return repository.countByOwnerId(getOwnerId());
+    return repository.countByOwnerId(getRequieredOnwerId());
+  }
+
+  @Override
+  protected void validate(E entity) {
+    super.validate(entity);
+
+    if (entity.getOwnerId().equals(getRequieredOnwerId())) {
+      throw new IllegalArgumentException("Entity has invalid owner");
+    }
   }
 }
