@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
 
 @Configuration
 public class ApplicationConfig {
@@ -17,6 +18,11 @@ public class ApplicationConfig {
   @Bean
   Supplier<UUID> idGenerator() {
     return UUID::randomUUID;
+  }
+
+  @Bean
+  Converter<String, UUID> ownerIdConverter() {
+    return UUID::fromString;
   }
 
 }

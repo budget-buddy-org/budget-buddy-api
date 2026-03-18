@@ -1,4 +1,4 @@
-package com.budget.buddy.budget_buddy_api.base.crudl;
+package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
 import java.util.List;
@@ -6,7 +6,7 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-public interface BaseMapper<E extends BaseEntity<?>, R, C, U, L> {
+public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
 
   E toEntity(C createRequest);
 

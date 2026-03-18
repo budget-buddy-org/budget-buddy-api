@@ -1,10 +1,12 @@
 package com.budget.buddy.budget_buddy_api.user;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.AbstractBaseService;
+import com.budget.buddy.budget_buddy_api.base.crudl.base.AbstractBaseEntityService;
+import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,14 +15,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @Service
-public class UserService extends AbstractBaseService<UserEntity, UUID, UserDto, RegisterRequest, Object> {
+public class UserService extends AbstractBaseEntityService<UserEntity, UUID, UserDto, RegisterRequest, Object> {
 
   private final UserRepository repository;
   private final UserMapper mapper;
   private final AuthorityRepository authorityRepository;
 
-  public UserService(UserRepository repository, UserMapper mapper, AuthorityRepository authorityRepository) {
-    super(repository, mapper);
+  public UserService(
+      UserRepository repository,
+      UserMapper mapper,
+      AuthorityRepository authorityRepository,
+      Set<BaseEntityValidator<UserEntity>> validators
+  ) {
+    super(repository, mapper, validators);
     this.repository = repository;
     this.mapper = mapper;
     this.authorityRepository = authorityRepository;

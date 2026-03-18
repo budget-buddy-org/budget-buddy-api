@@ -1,11 +1,10 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.BaseRepository;
+import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntityRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
@@ -15,11 +14,11 @@ import org.springframework.data.repository.query.Param;
 /**
  * Repository for Transaction entity operations using Spring Data JDBC.
  */
-public interface TransactionRepository extends BaseRepository<TransactionEntity, UUID> {
+public interface TransactionRepository extends OwnableEntityRepository<TransactionEntity, UUID> {
 
-  String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_DESC = """
+  String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_DESC_QUERY = """
       SELECT * FROM transactions
-      WHERE owner_id = :ownerId
+      WHERE owner_id = :ownerId::uuid
       AND (:startDate::date IS NULL OR date >= :startDate::date)
       AND (:endDate::date IS NULL OR date <= :endDate::date)
       AND (:categoryId::uuid IS NULL OR category_id = :categoryId::uuid)
@@ -28,9 +27,9 @@ public interface TransactionRepository extends BaseRepository<TransactionEntity,
       OFFSET :offset
       """;
 
-  String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_ASC = """
+  String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_ASC_QUERY = """
       SELECT * FROM transactions
-      WHERE owner_id = :ownerId
+      WHERE owner_id = :ownerId::uuid
       AND (:startDate::date IS NULL OR date >= :startDate::date)
       AND (:endDate::date IS NULL OR date <= :endDate::date)
       AND (:categoryId::uuid IS NULL OR category_id = :categoryId::uuid)
@@ -39,19 +38,16 @@ public interface TransactionRepository extends BaseRepository<TransactionEntity,
       OFFSET :offset
       """;
 
-  String COUNT_BY_FILTERS = """
+  String COUNT_BY_FILTERS_QUERY = """
       SELECT COUNT(*) FROM transactions
-      WHERE owner_id = :ownerId
+      WHERE owner_id = :ownerId::uuid
       AND (:startDate::date IS NULL OR date >= :startDate::date)
       AND (:endDate::date IS NULL OR date <= :endDate::date)
       AND (:categoryId::uuid IS NULL OR category_id = :categoryId::uuid)
       """;
 
-  default List<TransactionEntity> findAllByFilters(
-      @Param("ownerId") UUID ownerId,
-      @Param("startDate") LocalDate startDate,
-      @Param("endDate") LocalDate endDate,
-      @Param("categoryId") UUID categoryId,
+  default List<TransactionEntity> findAllByFilter(
+      TransactionFilter filter,
       Pageable pageable
   ) {
     var order = Optional.of(pageable.getSort())
@@ -60,12 +56,12 @@ public interface TransactionRepository extends BaseRepository<TransactionEntity,
         .orElse(Direction.DESC);
 
     return order.isAscending()
-        ? findAllByFiltersOrderByDateAsc(ownerId, startDate, endDate, categoryId, pageable.getPageSize(), pageable.getOffset())
-        : findAllByFiltersOrderByDateDesc(ownerId, startDate, endDate, categoryId, pageable.getPageSize(), pageable.getOffset());
+        ? findAllByFilterOrderByDateAsc(filter.ownerId(), filter.start(), filter.end(), filter.categoryId(), pageable.getPageSize(), pageable.getOffset())
+        : findAllByFilterOrderByDateDesc(filter.ownerId(), filter.start(), filter.end(), filter.categoryId(), pageable.getPageSize(), pageable.getOffset());
   }
 
-  @Query(FIND_ALL_BY_FILTERS_ORDER_BY_DATE_DESC)
-  List<TransactionEntity> findAllByFiltersOrderByDateDesc(
+  @Query(FIND_ALL_BY_FILTERS_ORDER_BY_DATE_DESC_QUERY)
+  List<TransactionEntity> findAllByFilterOrderByDateDesc(
       @Param("ownerId") UUID ownerId,
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
@@ -74,8 +70,8 @@ public interface TransactionRepository extends BaseRepository<TransactionEntity,
       @Param("offset") long offset
   );
 
-  @Query(FIND_ALL_BY_FILTERS_ORDER_BY_DATE_ASC)
-  List<TransactionEntity> findAllByFiltersOrderByDateAsc(
+  @Query(FIND_ALL_BY_FILTERS_ORDER_BY_DATE_ASC_QUERY)
+  List<TransactionEntity> findAllByFilterOrderByDateAsc(
       @Param("ownerId") UUID ownerId,
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
@@ -84,15 +80,15 @@ public interface TransactionRepository extends BaseRepository<TransactionEntity,
       @Param("offset") long offset
   );
 
-  @Query(COUNT_BY_FILTERS)
-  long countByFilters(
+  default long countByFilter(TransactionFilter filter) {
+    return countByFilter(filter.ownerId(), filter.start(), filter.end(), filter.categoryId());
+  }
+
+  @Query(COUNT_BY_FILTERS_QUERY)
+  long countByFilter(
       @Param("ownerId") UUID ownerId,
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
       @Param("categoryId") UUID categoryId
   );
-
-  Optional<TransactionEntity> findByIdAndOwnerId(UUID transactionId, UUID ownerId);
-
-  Page<TransactionEntity> findAllByOwnerId(UUID ownerId, Pageable pageable);
 }

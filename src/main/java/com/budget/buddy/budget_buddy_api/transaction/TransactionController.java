@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.BaseController;
+import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityController;
 import com.budget.buddy.budget_buddy_api.generated.api.TransactionsApi;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class TransactionController
-    extends BaseController<UUID, Transaction, TransactionCreate, TransactionUpdate, PaginatedTransactions>
+    extends BaseEntityController<UUID, Transaction, TransactionCreate, TransactionUpdate, PaginatedTransactions>
     implements TransactionsApi {
 
   private static final Sort DEFAULT_SORT = Sort.by(Direction.DESC, "date");
@@ -49,8 +49,9 @@ public class TransactionController
         .orElse(DEFAULT_SORT);
 
     var pageable = PageRequest.of(offset, limit, sort);
-    var items = service.list(categoryId, start, end, pageable);
-    var total = service.count(categoryId, start, end);
+    var filter = TransactionFilter.withEmptyOwnerId(categoryId, start, end);
+    var items = service.list(filter, pageable);
+    var total = service.count(filter);
 
     var meta = new PaginationMeta()
         .limit(limit)

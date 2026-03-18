@@ -33,14 +33,13 @@ public class RefreshTokenService implements TokenService<String> {
   @Override
   public String createToken(UserDto user) {
     var now = OffsetDateTime.now(clock);
-    var token = RefreshTokenEntity.builder()
-        .token(tokenProvider.get())
-        .userId(user.id())
-        .createdAt(now)
-        .expiresAt(now.plusSeconds(properties.validitySeconds()))
-        .build();
-    return repository.save(token)
-        .getToken();
+    var entity = new RefreshTokenEntity();
+    entity.setToken(tokenProvider.get());
+    entity.setUserId(user.id());
+    entity.setCreatedAt(now);
+    entity.setExpiresAt(now.plusSeconds(properties.validitySeconds()));
+
+    return repository.save(entity).getToken();
   }
 
   /**

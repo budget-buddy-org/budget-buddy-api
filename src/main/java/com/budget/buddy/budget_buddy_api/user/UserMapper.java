@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.user;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.BaseMapper;
+import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityMapper;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
 import com.budget.buddy.budget_buddy_api.generated.model.RegisterRequest;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class UserMapper implements BaseMapper<UserEntity, UserDto, RegisterRequest, Object, Object> {
+public class UserMapper implements BaseEntityMapper<UserEntity, UserDto, RegisterRequest, Object, Object> {
 
   private final PasswordEncoder passwordEncoder;
 

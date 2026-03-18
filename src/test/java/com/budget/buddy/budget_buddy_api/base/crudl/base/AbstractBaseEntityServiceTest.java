@@ -1,4 +1,4 @@
-package com.budget.buddy.budget_buddy_api.base.crudl;
+package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -21,15 +21,15 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
-class AbstractBaseServiceTest {
+class AbstractBaseEntityServiceTest {
 
   @Mock
-  private BaseMapper<DummyEntity, Object, Object, Object, Object> mapper;
+  private BaseEntityMapper<DummyEntity, Object, Object, Object, Object> mapper;
 
   @Mock
-  private BaseRepository<DummyEntity, String> repository;
+  private BaseEntityRepository<DummyEntity, String> repository;
 
-  private AbstractBaseService<DummyEntity, String, Object, Object, Object> service;
+  private AbstractBaseEntityService<DummyEntity, String, Object, Object, Object> service;
 
   @BeforeEach
   void setUp() {

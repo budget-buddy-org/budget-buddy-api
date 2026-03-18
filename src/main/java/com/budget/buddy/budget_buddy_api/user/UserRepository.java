@@ -1,6 +1,6 @@
 package com.budget.buddy.budget_buddy_api.user;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.BaseRepository;
+import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityRepository;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
  * Repository for User entity operations using Spring Data JDBC.
  */
 @Repository
-public interface UserRepository extends BaseRepository<UserEntity, UUID> {
+public interface UserRepository extends BaseEntityRepository<UserEntity, UUID> {
 
   /**
    * Find user by username
