@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
  * @param <C> The type of the create request object used for creating new entities.
  * @param <U> The type of the update request object used for updating existing entities.
  */
-@SuppressWarnings("java:S119")
 public interface BaseEntityService<ID, R, C, U> {
 
   /**
@@ -74,7 +73,10 @@ public interface BaseEntityService<ID, R, C, U> {
   long count();
 
   /**
+   * Checks if an entity exists by its unique identifier.
    *
+   * @param id the unique identifier
+   * @return true if the entity exists, false otherwise
    */
   boolean existsById(ID id);
 }

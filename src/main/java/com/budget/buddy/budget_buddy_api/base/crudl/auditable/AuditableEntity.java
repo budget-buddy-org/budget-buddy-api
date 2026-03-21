@@ -10,7 +10,10 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Column;
 
-@SuppressWarnings("java:S119")
+/**
+ * Base class for auditable entities.
+ * Includes versioning and timestamp fields for creation and updates.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

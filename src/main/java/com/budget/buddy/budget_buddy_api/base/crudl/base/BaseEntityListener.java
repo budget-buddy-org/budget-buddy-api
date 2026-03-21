@@ -6,7 +6,6 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.data.relational.core.mapping.event.BeforeConvertCallback;
 import org.springframework.stereotype.Component;
 
-@SuppressWarnings("java:S119")
 @Component
 @RequiredArgsConstructor
 public class BaseEntityListener<ENTITY extends BaseEntity<ID>, ID>
