@@ -91,6 +91,21 @@ testing {
   }
 }
 
+configurations {
+  compileOnly {
+    extendsFrom(configurations.annotationProcessor.get())
+  }
+  named("integrationTestImplementation") {
+    extendsFrom(configurations.testImplementation.get())
+  }
+  named("integrationTestCompileOnly") {
+    extendsFrom(configurations.testCompileOnly.get())
+  }
+  named("integrationTestAnnotationProcessor") {
+    extendsFrom(configurations.testAnnotationProcessor.get())
+  }
+}
+
 tasks.openApiGenerate {
   generatorName.set("spring")
   inputSpec.set("${rootDir}/src/main/resources/openapi.yaml")
@@ -110,21 +125,6 @@ tasks.openApiGenerate {
       "useJakartaEe" to "true"
     )
   )
-}
-
-configurations {
-  compileOnly {
-    extendsFrom(configurations.annotationProcessor.get())
-  }
-  named("integrationTestImplementation") {
-    extendsFrom(configurations.testImplementation.get())
-  }
-  named("integrationTestCompileOnly") {
-    extendsFrom(configurations.testCompileOnly.get())
-  }
-  named("integrationTestAnnotationProcessor") {
-    extendsFrom(configurations.testAnnotationProcessor.get())
-  }
 }
 
 sourceSets {
@@ -163,7 +163,6 @@ tasks.jacocoTestReport {
     xml.required = true
   }
   executionData(fileTree(layout.buildDirectory).include("jacoco/*.exec"))
-
   classDirectories.setFrom(files(classDirectories.files.map {
     fileTree(it).matching {
       exclude("**/generated/**")
@@ -171,8 +170,14 @@ tasks.jacocoTestReport {
   }))
 }
 
-sonarqube {
+tasks.named("sonar") {
+  dependsOn(tasks.jacocoTestReport)
+}
+
+sonar {
   properties {
+    property("sonar.projectKey", "glebremniov_budget-buddy-api")
+    property("sonar.organization", "glebremniov")
     property(
       "sonar.coverage.jacoco.xmlReportPaths",
       layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.absolutePath
