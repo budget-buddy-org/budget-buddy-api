@@ -42,9 +42,7 @@ jobs:
       - name: Build and test
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew build sonar \
-          -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }} \
-          -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+        run: ./gradlew build sonar
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
