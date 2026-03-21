@@ -9,7 +9,6 @@ plugins {
 }
 
 group = "com.budget.buddy"
-version = "0.0.1-SNAPSHOT"
 description = "API for Budget Buddy App"
 
 java {
@@ -92,26 +91,6 @@ testing {
   }
 }
 
-tasks.openApiGenerate {
-  generatorName.set("spring")
-  inputSpec.set("${rootDir}/src/main/resources/openapi.yaml")
-  outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
-  apiPackage.set("com.budget.buddy.budget_buddy_api.generated.api")
-  modelPackage.set("com.budget.buddy.budget_buddy_api.generated.model")
-  configOptions.set(
-    mapOf(
-      "useSpringBoot4" to "true",
-      "openApiNullable" to "true",
-      "generateSupportingFiles" to "false",
-      "useTags" to "true",
-      "interfaceOnly" to "true",
-      "skipOperationExample" to "true",
-      "sourceFolder" to "src/main/java",
-      "useJakartaEe" to "true"
-    )
-  )
-}
-
 configurations {
   compileOnly {
     extendsFrom(configurations.annotationProcessor.get())
@@ -125,6 +104,27 @@ configurations {
   named("integrationTestAnnotationProcessor") {
     extendsFrom(configurations.testAnnotationProcessor.get())
   }
+}
+
+tasks.openApiGenerate {
+  generatorName.set("spring")
+  inputSpec.set("${rootDir}/src/main/resources/openapi.yaml")
+  outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
+  apiPackage.set("com.budget.buddy.budget_buddy_api.generated.api")
+  modelPackage.set("com.budget.buddy.budget_buddy_api.generated.model")
+  configOptions.set(
+    mapOf(
+      "useSpringBoot4" to "true",
+//      "useJSpecify" to "true", // https://github.com/OpenAPITools/openapi-generator/pull/23256
+      "openApiNullable" to "true",
+      "generateSupportingFiles" to "false",
+      "useTags" to "true",
+      "interfaceOnly" to "true",
+      "skipOperationExample" to "true",
+      "sourceFolder" to "src/main/java",
+      "useJakartaEe" to "true"
+    )
+  )
 }
 
 sourceSets {
@@ -158,13 +158,11 @@ tasks.named("check") {
 }
 
 tasks.jacocoTestReport {
-  dependsOn(tasks.test, tasks.named("integrationTest"))
+  dependsOn(tasks.test)
   reports {
-    html.required = true
     xml.required = true
   }
   executionData(fileTree(layout.buildDirectory).include("jacoco/*.exec"))
-
   classDirectories.setFrom(files(classDirectories.files.map {
     fileTree(it).matching {
       exclude("**/generated/**")
@@ -172,8 +170,14 @@ tasks.jacocoTestReport {
   }))
 }
 
-sonarqube {
+tasks.named("sonar") {
+  dependsOn(tasks.jacocoTestReport)
+}
+
+sonar {
   properties {
+    property("sonar.projectKey", "glebremniov_budget-buddy-api")
+    property("sonar.organization", "glebremniov")
     property(
       "sonar.coverage.jacoco.xmlReportPaths",
       layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.absolutePath
