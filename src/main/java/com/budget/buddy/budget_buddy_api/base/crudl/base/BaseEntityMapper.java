@@ -3,6 +3,7 @@ package com.budget.buddy.budget_buddy_api.base.crudl.base;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginationMeta;
 import java.util.List;
 import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
@@ -23,6 +24,12 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    * @param createRequest the create request
    * @return the mapped entity
    */
+  @BeanMapping(ignoreByDefault = false)
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "version", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  @Mapping(target = "ownerId", ignore = true)
   E toEntity(C createRequest);
 
   /**
@@ -57,5 +64,10 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    * @param existingEntity the entity to patch
    */
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "version", ignore = true)
+  @Mapping(target = "createdAt", ignore = true)
+  @Mapping(target = "updatedAt", ignore = true)
+  @Mapping(target = "ownerId", ignore = true)
   void patchEntity(U patchRequest, @MappingTarget E existingEntity);
 }
