@@ -176,6 +176,8 @@ tasks.named("sonar") {
 
 sonar {
   properties {
+    property("sonar.projectKey", "glebremniov_budget-buddy-api")
+    property("sonar.organization", "glebremniov")
     property(
       "sonar.coverage.jacoco.xmlReportPaths",
       layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.absolutePath
