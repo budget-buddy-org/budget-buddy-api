@@ -30,15 +30,15 @@ class UserMapperTest {
     @Test
     void shouldMapRegisterRequestToUserEntity() {
       // Given
-      RegisterRequest request = new RegisterRequest();
+      var request = new RegisterRequest();
       request.setUsername("testuser");
       request.setPassword("password123");
-      String encodedPassword = "encoded_password";
+      var encodedPassword = "encoded_password";
 
       when(passwordEncoder.encode(anyString())).thenReturn(encodedPassword);
 
       // When
-      UserEntity entity = userMapper.toEntity(request);
+      var entity = userMapper.toEntity(request);
 
       // Then
       assertThat(entity).isNotNull();
@@ -54,8 +54,8 @@ class UserMapperTest {
     @Test
     void shouldMapUserEntityToUserDto() {
       // Given
-      UUID userId = UUID.randomUUID();
-      UserEntity entity = UserEntity.builder()
+      var userId = UUID.randomUUID();
+      var entity = UserEntity.builder()
           .id(userId)
           .username("testuser")
           .enabled(true)
@@ -63,7 +63,7 @@ class UserMapperTest {
           .build();
 
       // When
-      UserDto dto = userMapper.toModel(entity);
+      var dto = userMapper.toModel(entity);
 
       // Then
       assertThat(dto).isNotNull();

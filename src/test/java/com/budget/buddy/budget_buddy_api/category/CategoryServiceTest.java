@@ -45,14 +45,14 @@ class CategoryServiceTest {
   }
 
   private void setupMockAuthentication() {
-    Jwt jwt = mock(Jwt.class);
+    var jwt = mock(Jwt.class);
     when(jwt.getSubject()).thenReturn(currentUserId.toString());
     when(ownerIdConverter.convert(currentUserId.toString())).thenReturn(currentUserId);
 
-    Authentication authentication = mock(Authentication.class);
+    var authentication = mock(Authentication.class);
     when(authentication.getPrincipal()).thenReturn(jwt);
 
-    SecurityContext securityContext = mock(SecurityContext.class);
+    var securityContext = mock(SecurityContext.class);
     when(securityContext.getAuthentication()).thenReturn(authentication);
     SecurityContextHolder.setContext(securityContext);
   }
@@ -63,8 +63,8 @@ class CategoryServiceTest {
     @Test
     void should_CreateCategory_WithOwnerId() {
       // Given
-      CategoryCreate createRequest = new CategoryCreate("Groceries");
-      CategoryEntity entity = new CategoryEntity();
+      var createRequest = new CategoryCreate("Groceries");
+      var entity = new CategoryEntity();
       when(mapper.toEntity(createRequest)).thenReturn(entity);
       when(repository.save(entity)).thenReturn(entity);
       when(mapper.toModel(entity)).thenReturn(new Category());
@@ -80,13 +80,13 @@ class CategoryServiceTest {
     @Test
     void should_ReadCategory_When_OwnedByUser() {
       // Given
-      UUID categoryId = UUID.randomUUID();
-      CategoryEntity entity = new CategoryEntity();
+      var categoryId = UUID.randomUUID();
+      var entity = new CategoryEntity();
       when(repository.findByIdAndOwnerId(categoryId, currentUserId)).thenReturn(Optional.of(entity));
       when(mapper.toModel(entity)).thenReturn(new Category());
 
       // When
-      Category result = categoryService.read(categoryId);
+      var result = categoryService.read(categoryId);
 
       // Then
       assertThat(result).isNotNull();
@@ -96,7 +96,7 @@ class CategoryServiceTest {
     @Test
     void should_ThrowException_When_CategoryNotFoundOrNotOwned() {
       // Given
-      UUID categoryId = UUID.randomUUID();
+      var categoryId = UUID.randomUUID();
       when(repository.findByIdAndOwnerId(categoryId, currentUserId)).thenReturn(Optional.empty());
 
       // When & Then
@@ -107,9 +107,9 @@ class CategoryServiceTest {
     @Test
     void should_UpdateCategory_When_OwnedByUser() {
       // Given
-      UUID categoryId = UUID.randomUUID();
-      CategoryUpdate updateRequest = new CategoryUpdate().name("New Name");
-      CategoryEntity entity = new CategoryEntity();
+      var categoryId = UUID.randomUUID();
+      var updateRequest = new CategoryUpdate().name("New Name");
+      var entity = new CategoryEntity();
       when(repository.findByIdAndOwnerId(categoryId, currentUserId)).thenReturn(Optional.of(entity));
       when(repository.save(entity)).thenReturn(entity);
       when(mapper.toModel(entity)).thenReturn(new Category());
@@ -125,8 +125,8 @@ class CategoryServiceTest {
     @Test
     void should_DeleteCategory_When_OwnedByUser() {
       // Given
-      UUID categoryId = UUID.randomUUID();
-      CategoryEntity entity = new CategoryEntity();
+      var categoryId = UUID.randomUUID();
+      var entity = new CategoryEntity();
       when(repository.findByIdAndOwnerId(categoryId, currentUserId)).thenReturn(Optional.of(entity));
 
       // When

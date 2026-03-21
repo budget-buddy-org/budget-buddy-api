@@ -1,5 +1,7 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionCreate;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
@@ -10,8 +12,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class TransactionMapperTest {
 

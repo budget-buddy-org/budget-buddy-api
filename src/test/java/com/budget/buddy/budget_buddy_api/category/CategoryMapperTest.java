@@ -1,5 +1,7 @@
 package com.budget.buddy.budget_buddy_api.category;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.budget.buddy.budget_buddy_api.generated.model.Category;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
@@ -9,8 +11,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class CategoryMapperTest {
 

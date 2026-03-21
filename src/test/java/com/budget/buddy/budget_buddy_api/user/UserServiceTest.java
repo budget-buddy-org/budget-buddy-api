@@ -41,11 +41,11 @@ class UserServiceTest {
     @Test
     void should_ReturnTrue_When_UsernameExists() {
       // Given
-      String username = "existingUser";
+      var username = "existingUser";
       when(repository.existsByUsername(username)).thenReturn(true);
 
       // When
-      boolean exists = userService.existsByUsername(username);
+      var exists = userService.existsByUsername(username);
 
       // Then
       assertThat(exists).isTrue();
@@ -59,15 +59,15 @@ class UserServiceTest {
     @Test
     void should_ReturnUserDto_When_UsernameExists() {
       // Given
-      String username = "testUser";
-      UserEntity entity = new UserEntity();
-      UserDto dto = new UserDto(UUID.randomUUID(), username, true);
+      var username = "testUser";
+      var entity = new UserEntity();
+      var dto = new UserDto(UUID.randomUUID(), username, true);
 
       when(repository.findByUsername(username)).thenReturn(Optional.of(entity));
       when(mapper.toModel(entity)).thenReturn(dto);
 
       // When
-      Optional<UserDto> result = userService.findByUsername(username);
+      var result = userService.findByUsername(username);
 
       // Then
       assertThat(result).contains(dto);
@@ -82,15 +82,15 @@ class UserServiceTest {
     @Test
     void should_CreateUserAndAddAuthority() {
       // Given
-      RegisterRequest request = new RegisterRequest("newuser", "password");
-      UserEntity entity = new UserEntity();
+      var request = new RegisterRequest("newuser", "password");
+      var entity = new UserEntity();
       entity.setUsername("newuser");
 
       when(repository.save(any(UserEntity.class))).thenReturn(entity);
       when(mapper.toEntity(request)).thenReturn(new UserEntity());
 
       // When
-      UserEntity result = userService.createInternal(request);
+      var result = userService.createInternal(request);
 
       // Then
       assertThat(result).isNotNull();
@@ -105,16 +105,16 @@ class UserServiceTest {
     @Test
     void should_ReturnUserDto_When_UserIsEnabled() {
       // Given
-      UUID userId = UUID.randomUUID();
-      UserEntity entity = new UserEntity();
+      var userId = UUID.randomUUID();
+      var entity = new UserEntity();
       entity.setEnabled(true);
-      UserDto dto = new UserDto(userId, "user", true);
+      var dto = new UserDto(userId, "user", true);
 
       when(repository.findById(userId)).thenReturn(Optional.of(entity));
       when(mapper.toModel(entity)).thenReturn(dto);
 
       // When
-      UserDto result = userService.requireEnabledUser(userId);
+      var result = userService.requireEnabledUser(userId);
 
       // Then
       assertThat(result).isEqualTo(dto);
@@ -123,8 +123,8 @@ class UserServiceTest {
     @Test
     void should_ThrowException_When_UserIsDisabled() {
       // Given
-      UUID userId = UUID.randomUUID();
-      UserEntity entity = new UserEntity();
+      var userId = UUID.randomUUID();
+      var entity = new UserEntity();
       entity.setEnabled(false);
 
       when(repository.findById(userId)).thenReturn(Optional.of(entity));
@@ -140,12 +140,38 @@ class UserServiceTest {
   class UnsupportedOperationsTests {
 
     @Test
-    void should_ThrowException_On_UnsupportedOperations() {
-      UUID id = UUID.randomUUID();
-      assertThatThrownBy(() -> userService.update(id, new Object())).isInstanceOf(UnsupportedOperationException.class);
-      assertThatThrownBy(() -> userService.delete(id)).isInstanceOf(UnsupportedOperationException.class);
+    void should_ThrowException_On_Update() {
+      // Given
+      var id = UUID.randomUUID();
+      var patch = new Object();
+
+      // When & Then
+      assertThatThrownBy(() -> userService.update(id, patch))
+          .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    void should_ThrowException_On_Delete() {
+      // Given
+      var id = UUID.randomUUID();
+
+      // When & Then
+      assertThatThrownBy(() -> userService.delete(id))
+          .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    void should_ThrowException_On_List() {
       assertThatThrownBy(() -> userService.list()).isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    void should_ThrowException_On_ListWithPageable() {
       assertThatThrownBy(() -> userService.list(null)).isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    void should_ThrowException_On_Count() {
       assertThatThrownBy(() -> userService.count()).isInstanceOf(UnsupportedOperationException.class);
     }
   }
