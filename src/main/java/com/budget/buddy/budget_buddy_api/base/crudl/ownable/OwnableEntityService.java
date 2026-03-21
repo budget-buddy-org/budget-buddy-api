@@ -20,7 +20,6 @@ import org.springframework.data.domain.Pageable;
  * @param <C>  the create request type (DTO)
  * @param <U>  the update request type (DTO)
  */
-@SuppressWarnings("java:S119")
 public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
     extends AbstractBaseEntityService<E, ID, R, C, U> {
 

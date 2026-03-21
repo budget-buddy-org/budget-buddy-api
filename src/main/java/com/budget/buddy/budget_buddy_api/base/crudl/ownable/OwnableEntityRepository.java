@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.NoRepositoryBean;
 
-@SuppressWarnings("java:S119")
 @NoRepositoryBean
 public interface OwnableEntityRepository<E extends OwnableEntity<ID>, ID>
     extends BaseEntityRepository<E, ID> {

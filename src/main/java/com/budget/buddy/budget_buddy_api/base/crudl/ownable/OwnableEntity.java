@@ -7,7 +7,6 @@ import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntity;
  *
  * @param <ID> the user identifier type
  */
-@SuppressWarnings("java:S119")
 public interface OwnableEntity<ID> extends BaseEntity<ID> {
 
   /**

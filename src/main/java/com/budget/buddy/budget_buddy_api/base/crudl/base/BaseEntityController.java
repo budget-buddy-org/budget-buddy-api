@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
  * @param <U>  the update request type (DTO)
  * @param <L>  the list response type (DTO)
  */
-@SuppressWarnings("java:S119")
 public abstract class BaseEntityController<ID, R, C, U, L> {
 
   private final BaseEntityService<ID, R, C, U> service;

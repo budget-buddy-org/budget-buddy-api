@@ -11,7 +11,6 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @param <ID> the type of the entity's identifier
  */
 @NoRepositoryBean
-@SuppressWarnings("java:S119")
 public interface BaseEntityRepository<E extends BaseEntity<ID>, ID>
     extends ListCrudRepository<E, ID>, ListPagingAndSortingRepository<E, ID> {
 

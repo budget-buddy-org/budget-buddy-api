@@ -8,7 +8,6 @@ import org.springframework.data.domain.Persistable;
  *
  * @param <ID> the identifier type
  */
-@SuppressWarnings("java:S119")
 public interface BaseEntity<ID> extends Persistable<ID> {
 
   /**

@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
  * @param <C> The type of the create request object used for creating new entities.
  * @param <U> The type of the update request object used for updating existing entities.
  */
-@SuppressWarnings("java:S119")
 public interface BaseEntityService<ID, R, C, U> {
 
   /**

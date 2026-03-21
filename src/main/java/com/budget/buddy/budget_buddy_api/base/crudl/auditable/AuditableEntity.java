@@ -14,7 +14,6 @@ import org.springframework.data.relational.core.mapping.Column;
  * Base class for auditable entities.
  * Includes versioning and timestamp fields for creation and updates.
  */
-@SuppressWarnings("java:S119")
 @Getter
 @Setter
 @NoArgsConstructor
