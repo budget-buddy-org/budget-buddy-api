@@ -52,11 +52,8 @@ public class RefreshTokenService implements TokenService<String> {
   public RefreshTokenEntity rotate(String refreshToken) {
     var now = OffsetDateTime.now(clock);
 
-    var tokenEntity = repository.findValidToken(refreshToken, now)
+    return repository.deleteAndReturnValidToken(refreshToken, now)
         .orElseThrow(() -> new BadCredentialsException("Refresh token is invalid"));
-
-    repository.delete(tokenEntity);
-    return tokenEntity;
   }
 
   /**

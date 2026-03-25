@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
  * Repository for refresh token operations.
  */
 @Repository
-public interface RefreshTokenRepository extends CrudRepository<RefreshTokenEntity, String> {
+public interface RefreshTokenRepository extends CrudRepository<RefreshTokenEntity, UUID> {
 
   /**
    * Find a valid (non-expired) refresh token in a single query
@@ -33,4 +33,11 @@ public interface RefreshTokenRepository extends CrudRepository<RefreshTokenEntit
   @Query("DELETE FROM refresh_tokens WHERE expires_at < :now")
   void deleteAllExpired(OffsetDateTime now);
 
+  /**
+   * Atomically consume a valid refresh token.
+   * Returns the deleted entity if found and not expired, empty otherwise.
+   * Eliminates TOCTOU race condition in token rotation.
+   */
+  @Query("DELETE FROM refresh_tokens WHERE token = :token AND expires_at > :now RETURNING *")
+  Optional<RefreshTokenEntity> deleteAndReturnValidToken(String token, OffsetDateTime now);
 }

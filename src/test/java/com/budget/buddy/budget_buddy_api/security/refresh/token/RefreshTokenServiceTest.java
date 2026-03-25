@@ -92,8 +92,8 @@ class RefreshTokenServiceTest {
       var oldToken = "old-token";
       var tokenEntity = new RefreshTokenEntity();
       tokenEntity.setToken(oldToken);
-
-      when(repository.findValidToken(oldToken, OffsetDateTime.now(clock)))
+      var now = OffsetDateTime.now(clock);
+      when(repository.deleteAndReturnValidToken(oldToken, now))
           .thenReturn(Optional.of(tokenEntity));
 
       // When
@@ -104,14 +104,15 @@ class RefreshTokenServiceTest {
           .as("Rotate result should be the valid token entity")
           .isSameAs(tokenEntity);
 
-      verify(repository).delete(tokenEntity);
+      verify(repository).deleteAndReturnValidToken(oldToken, now);
     }
 
     @Test
     void should_ThrowException_When_TokenInvalid() {
       // Given
       var invalidToken = "invalid-token";
-      when(repository.findValidToken(invalidToken, OffsetDateTime.now(clock)))
+      var now = OffsetDateTime.now(clock);
+      when(repository.deleteAndReturnValidToken(invalidToken, now))
           .thenReturn(Optional.empty());
 
       // When & Then
@@ -119,6 +120,8 @@ class RefreshTokenServiceTest {
           .as("Should throw BadCredentialsException when an invalid refresh token is rotated")
           .isInstanceOf(BadCredentialsException.class)
           .hasMessage("Refresh token is invalid");
+
+      verify(repository).deleteAndReturnValidToken(invalidToken, now);
     }
   }
 
