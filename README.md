@@ -1,7 +1,8 @@
+# Budget Buddy API
+
+[![CI](https://github.com/glebremniov/budget-buddy-api/actions/workflows/ci.yaml/badge.svg)](https://github.com/glebremniov/budget-buddy-api/actions/workflows/ci.yaml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=glebremniov_budget-buddy-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=glebremniov_budget-buddy-api)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=glebremniov_budget-buddy-api&metric=coverage)](https://sonarcloud.io/summary/new_code?id=glebremniov_budget-buddy-api)
-
-# Budget Buddy API
 
 REST API for personal budget management. Built with Spring Boot 4 and PostgreSQL.
 
