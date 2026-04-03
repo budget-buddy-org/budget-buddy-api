@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 class TransactionMapperTest {
 
@@ -139,7 +140,7 @@ class TransactionMapperTest {
 
       var update = new TransactionUpdate();
       update.setAmount(500);
-      update.setDescription("New Desc");
+      update.setDescription(JsonNullable.of("New Desc"));
 
       // When
       transactionMapper.patchEntity(update, entity);
@@ -184,7 +185,7 @@ class TransactionMapperTest {
           "EUR", LocalDate.now(), "Old Description", UUID.randomUUID());
 
       var update = new TransactionUpdate();
-      update.setDescription(null); // explicit null — user intends to clear the field
+      update.setDescription(JsonNullable.undefined()); // explicit null — user intends to clear the field
 
       // When
       transactionMapper.patchEntity(update, entity);
