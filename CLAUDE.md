@@ -55,6 +55,10 @@ transaction/    # transaction CRUDL
 
 **Error handling**: `GlobalExceptionHandler` in `base/` handles all exceptions centrally. Throw specific exceptions (e.g. `EntityNotFoundException`) from services — don't handle them locally in controllers.
 
+## Versioning
+
+Increment `version` in `gradle.properties` for every change to code or configuration before merging to `main`. Use [semantic versioning](https://semver.org): `MAJOR.MINOR.PATCH`.
+
 ## Adding a New Feature
 
 1. Update `openapi.yaml`
