@@ -175,5 +175,24 @@ class TransactionMapperTest {
           .returns(originalAmount, TransactionEntity::getAmount)
           .returns(originalDesc, TransactionEntity::getDescription);
     }
+
+    @Test
+    void should_ClearDescription_When_ExplicitNullSentInPatch() {
+      // Given
+      var entity = new TransactionEntity(
+          UUID.randomUUID(), UUID.randomUUID(), 100, TransactionType.EXPENSE,
+          "EUR", LocalDate.now(), "Old Description", UUID.randomUUID());
+
+      var update = new TransactionUpdate();
+      update.setDescription(null); // explicit null — user intends to clear the field
+
+      // When
+      transactionMapper.patchEntity(update, entity);
+
+      // Then
+      assertThat(entity.getDescription())
+          .as("Description should be cleared when explicitly set to null in PATCH")
+          .isNull();
+    }
   }
 }
