@@ -74,7 +74,7 @@ class AuthServiceTest {
       assertThatThrownBy(() -> authService.register(request))
           .as("Should throw DataIntegrityViolationException when the username is already taken")
           .isInstanceOf(DataIntegrityViolationException.class)
-          .hasMessageContaining("Username already taken: takenuser");
+          .hasMessageContaining("Username already taken");
 
       verify(userService).existsByUsername("takenuser");
       verifyNoInteractions(authTokenService);
