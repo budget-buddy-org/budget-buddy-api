@@ -7,8 +7,8 @@ import com.budget.buddy.budget_buddy_api.generated.model.Category;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
+import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -216,10 +216,11 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var replaced = parseBody(result, Transaction.class);
-      assertThat(replaced.getId()).isEqualTo(created.getId());
-      assertThat(replaced.getAmount()).isEqualTo(5000);
-      assertThat(replaced.getCurrency()).isEqualTo("USD");
-      assertThat(replaced.getType()).isEqualTo(Transaction.TypeEnum.INCOME);
+      assertThat(replaced)
+          .returns(created.getId(), Transaction::getId)
+          .returns(5000L, Transaction::getAmount)
+          .returns("USD", Transaction::getCurrency)
+          .returns(Transaction.TypeEnum.INCOME, Transaction::getType);
       assertThat(replaced.getDescription())
           .as("Description should be cleared when not provided in PUT body")
           .isNull();
@@ -441,8 +442,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems()).hasSize(1);
-      assertThat(page.getItems().getFirst().getCategoryId()).isEqualTo(userCategoryId);
+      assertThat(page.getItems())
+          .hasSize(1)
+          .first()
+          .returns(userCategoryId, Transaction::getCategoryId);
     }
 
     @Test
@@ -452,8 +455,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
-              .amount(100L).type(TransactionWrite.TypeEnum.EXPENSE)
-              .currency("EUR").date(LocalDate.of(2026, 1, 1))))
+              .amount(100L)
+              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .currency("EUR")
+              .date(LocalDate.of(2026, 1, 1))))
           .exchange();
 
       mvc.post().uri("/v1/transactions")
@@ -461,8 +466,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
-              .amount(200L).type(TransactionWrite.TypeEnum.EXPENSE)
-              .currency("EUR").date(LocalDate.of(2026, 6, 1))))
+              .amount(200L)
+              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .currency("EUR")
+              .date(LocalDate.of(2026, 6, 1))))
           .exchange();
 
       var result = mvc.get().uri("/v1/transactions?start=2026-01-01&end=2026-03-31")
@@ -471,8 +478,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems()).hasSize(1);
-      assertThat(page.getItems().getFirst().getAmount()).isEqualTo(100);
+      assertThat(page.getItems())
+          .hasSize(1)
+          .first()
+          .returns(100L, Transaction::getAmount);
     }
 
     @Test

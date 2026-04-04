@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
 import com.budget.buddy.budget_buddy_api.generated.model.Category;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.CategoryUpdate;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginatedCategories;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -129,17 +129,20 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_ReplaceCategory_When_Owner() throws Exception {
       var created = createCategory(userToken, "Food");
+      var newCategoryName = "Groceries";
 
       var result = mvc.put().uri("/v1/categories/{id}", created.getId())
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new CategoryWrite().name("Groceries")))
+          .content(json(new CategoryWrite().name(newCategoryName)))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var replaced = parseBody(result, Category.class);
-      assertThat(replaced.getId()).isEqualTo(created.getId());
-      assertThat(replaced.getName()).isEqualTo("Groceries");
+
+      assertThat(replaced)
+          .returns(created.getId(), Category::getId)
+          .returns(newCategoryName, Category::getName);
     }
 
     @Test
