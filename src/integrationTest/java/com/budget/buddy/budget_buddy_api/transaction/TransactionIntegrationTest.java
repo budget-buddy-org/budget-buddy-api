@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
 import com.budget.buddy.budget_buddy_api.generated.model.Category;
-import com.budget.buddy.budget_buddy_api.generated.model.CategoryCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_api.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_api.generated.model.TransactionCreate;
+import com.budget.buddy.budget_buddy_api.generated.model.TransactionWrite;
 import com.budget.buddy.budget_buddy_api.generated.model.TransactionUpdate;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -29,7 +29,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     var result = mvc.post().uri("/v1/categories")
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
         .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new CategoryCreate().name(name)))
+        .content(json(new CategoryWrite().name(name)))
         .exchange();
 
     return parseBody(result, Category.class).getId();
@@ -40,10 +40,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   private Transaction createTransaction(String token, UUID categoryId, String description) throws Exception {
-    var body = new TransactionCreate()
+    var body = new TransactionWrite()
         .categoryId(categoryId)
         .amount(1000L)
-        .type(TransactionCreate.TypeEnum.EXPENSE)
+        .type(TransactionWrite.TypeEnum.EXPENSE)
         .currency("EUR")
         .date(LocalDate.of(2026, 3, 1))
         .description(description);
@@ -85,10 +85,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var result = mvc.post().uri("/v1/transactions")
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionCreate()
+          .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
               .amount(500L)
-              .type(TransactionCreate.TypeEnum.INCOME)
+              .type(TransactionWrite.TypeEnum.INCOME)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
           .exchange();
@@ -103,10 +103,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var result = mvc.post().uri("/v1/transactions")
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionCreate()
+          .content(json(new TransactionWrite()
               .categoryId(otherUserCategoryId)
               .amount(1000L)
-              .type(TransactionCreate.TypeEnum.EXPENSE)
+              .type(TransactionWrite.TypeEnum.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
           .exchange();
@@ -119,10 +119,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var result = mvc.post().uri("/v1/transactions")
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionCreate()
+          .content(json(new TransactionWrite()
               .categoryId(UUID.randomUUID())
               .amount(1000L)
-              .type(TransactionCreate.TypeEnum.EXPENSE)
+              .type(TransactionWrite.TypeEnum.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
           .exchange();
@@ -134,10 +134,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return401_When_NotAuthenticated() {
       var result = mvc.post().uri("/v1/transactions")
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionCreate()
+          .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
               .amount(1000L)
-              .type(TransactionCreate.TypeEnum.EXPENSE)
+              .type(TransactionWrite.TypeEnum.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
           .exchange();
@@ -188,6 +188,91 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var created = createTransaction(userToken, userCategoryId);
 
       var result = mvc.get().uri("/v1/transactions/{id}", created.getId())
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
+    }
+  }
+
+  @Nested
+  class Replace {
+
+    @Test
+    void should_ReplaceTransaction_When_Owner() throws Exception {
+      var created = createTransaction(userToken, userCategoryId, "original");
+
+      var replaceBody = new TransactionWrite()
+          .categoryId(userCategoryId)
+          .amount(5000L)
+          .type(TransactionWrite.TypeEnum.INCOME)
+          .currency("USD")
+          .date(LocalDate.of(2026, 6, 1));
+
+      var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(json(replaceBody))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.OK);
+      var replaced = parseBody(result, Transaction.class);
+      assertThat(replaced.getId()).isEqualTo(created.getId());
+      assertThat(replaced.getAmount()).isEqualTo(5000);
+      assertThat(replaced.getCurrency()).isEqualTo("USD");
+      assertThat(replaced.getType()).isEqualTo(Transaction.TypeEnum.INCOME);
+      assertThat(replaced.getDescription())
+          .as("Description should be cleared when not provided in PUT body")
+          .isNull();
+    }
+
+    @Test
+    void should_Return400_When_ReplaceWithOtherUserCategory() throws Exception {
+      var created = createTransaction(userToken, userCategoryId);
+
+      var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(json(new TransactionWrite()
+              .categoryId(otherUserCategoryId)
+              .amount(1000L)
+              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .currency("EUR")
+              .date(LocalDate.of(2026, 3, 1))))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void should_Return404_When_TransactionBelongsToOtherUser() throws Exception {
+      var created = createTransaction(otherUserToken, otherUserCategoryId);
+
+      var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(json(new TransactionWrite()
+              .categoryId(userCategoryId)
+              .amount(1000L)
+              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .currency("EUR")
+              .date(LocalDate.of(2026, 3, 1))))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void should_Return401_When_NotAuthenticated() throws Exception {
+      var created = createTransaction(userToken, userCategoryId);
+
+      var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(json(new TransactionWrite()
+              .categoryId(userCategoryId)
+              .amount(1000L)
+              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .currency("EUR")
+              .date(LocalDate.of(2026, 3, 1))))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
@@ -365,18 +450,18 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       mvc.post().uri("/v1/transactions")
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionCreate()
+          .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
-              .amount(100L).type(TransactionCreate.TypeEnum.EXPENSE)
+              .amount(100L).type(TransactionWrite.TypeEnum.EXPENSE)
               .currency("EUR").date(LocalDate.of(2026, 1, 1))))
           .exchange();
 
       mvc.post().uri("/v1/transactions")
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionCreate()
+          .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
-              .amount(200L).type(TransactionCreate.TypeEnum.EXPENSE)
+              .amount(200L).type(TransactionWrite.TypeEnum.EXPENSE)
               .currency("EUR").date(LocalDate.of(2026, 6, 1))))
           .exchange();
 
