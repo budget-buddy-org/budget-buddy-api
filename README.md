@@ -9,11 +9,11 @@ REST API for personal budget management. Built with Spring Boot 4 and PostgreSQL
 
 ## Tech Stack
 
-- **Java 25** / Spring Boot 4.0.4
+- **Java 25** / Spring Boot 4.0.5
 - **Spring Data JDBC** + PostgreSQL
 - **Spring Security** — JWT (access) + opaque refresh tokens
 - **Liquibase** — database migrations
-- **OpenAPI Generator** — API-first development
+- **Budget Buddy Contracts** — external OpenAPI-based contracts
 - **Testcontainers** — integration tests
 - **Docker** — containerized deployment
 
@@ -21,6 +21,7 @@ REST API for personal budget management. Built with Spring Boot 4 and PostgreSQL
 
 - Java 25
 - Docker & Docker Compose
+- GitHub Packages authentication (see [Building](#building))
 
 ## Running Locally
 
@@ -98,9 +99,12 @@ All endpoints except auth require `Authorization: Bearer <access_token>`.
 
 ## Building
 
+To build the project, you need to provide GitHub credentials to access the `budget-buddy-contracts` package. You can set `GITHUB_ACTOR` and `GITHUB_TOKEN` environment variables, or provide them via `gradle.properties`:
+
 ```bash
 # Build and run tests
-./gradlew build
+./gradlew build -Pgpr.user=YOUR_USERNAME -Pgpr.key=YOUR_TOKEN
+```
 
 # Build Docker image
 ./gradlew bootBuildImage --imageName=ghcr.io/your-username/budget-buddy-api:latest
