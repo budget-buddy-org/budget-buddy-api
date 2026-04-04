@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v6
 
@@ -23,6 +24,8 @@ jobs:
         uses: gradle/actions/setup-gradle@39e147cb9de83bb9910b8ef8bd7fff0ee20fcd6f
 
       - name: Build and test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build
 
   docker:
@@ -80,6 +83,8 @@ jobs:
 
       - name: Build Docker Image arm64
         if: steps.check_tag.outputs.exists == 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./gradlew bootBuildImage -x test \
             --imagePlatform=linux/arm64 \
@@ -87,6 +92,8 @@ jobs:
 
       - name: Build Docker Image amd64
         if: steps.check_tag.outputs.exists == 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./gradlew bootBuildImage -x test \
             --imagePlatform=linux/amd64 \

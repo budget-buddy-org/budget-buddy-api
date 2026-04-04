@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
 
     steps:
       - uses: actions/checkout@v6
@@ -42,6 +43,7 @@ jobs:
       - name: Build and test
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build sonar
 
       - name: Upload build artifact
