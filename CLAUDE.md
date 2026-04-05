@@ -2,77 +2,86 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Stack
+**For comprehensive documentation on architecture, testing, versioning, and code conventions, see [.github/SHARED.md](.github/SHARED.md).**
 
-Java 25, Spring Boot 4.0.5, Spring Data JDBC, PostgreSQL, Liquibase, MapStruct, Lombok.
+---
 
-## Commands
+## Quick Start
 
+**Stack:** Java 25, Spring Boot 4.0.5, Spring Data JDBC, PostgreSQL, Liquibase, MapStruct, Lombok
+
+**Prerequisites:** The `budget-buddy-contracts` dependency is fetched from GitHub Packages. Set these before building:
 ```bash
-# Run locally (auto-starts PostgreSQL via Docker Compose)
+export GITHUB_ACTOR=your-github-username
+export GITHUB_TOKEN=your-personal-access-token   # needs read:packages scope
+```
+Or add `gpr.user` / `gpr.key` to `~/.gradle/gradle.properties`.
+
+**Run locally:**
+```bash
+# Automatically starts PostgreSQL via Docker Compose (dev profile)
 ./gradlew bootRun --args='--spring.profiles.active=dev'
+```
 
-./gradlew build
+**Test:**
+```bash
 ./gradlew test                  # unit tests only
-./gradlew integrationTest       # Testcontainers + real PostgreSQL
-./gradlew check                 # all tests
-
-# Run a single test class
-./gradlew test --tests "com.budget.buddy.budget_buddy_api.SomeTest"
-./gradlew integrationTest --tests "com.budget.buddy.budget_buddy_api.SomeIT"
+./gradlew integrationTest       # integration tests (requires Docker)
+./gradlew check                 # all tests + quality checks
 ```
 
-## Architecture
-
-**API-First**: The OpenAPI spec lives in the external [budget-buddy-contracts](https://github.com/glebremniov/budget-buddy-contracts) repository. Models and interfaces are consumed as the `com.budgetbuddy:budget-buddy-contracts` dependency (version in `build.gradle.kts`). To change the API contract, update the contracts repo and bump `budgetBuddyContractsVersion` in `build.gradle.kts`.
-
-**Generic CRUDL framework** lives in `base/crudl/` and is the backbone of all domain features:
-
-- `BaseEntity` — common entity interface; extended by:
-  - `AuditableEntity` — auto-managed `createdAt`/`updatedAt` via `BaseEntityListener`
-  - `OwnableEntity` — adds `ownerId` for multi-tenant isolation
-- `BaseEntityRepository` — extends Spring Data JDBC interfaces
-- `AbstractBaseEntityService` → `OwnableEntityService` (auto-filters all queries by `ownerId`) → domain services (e.g. `CategoryService`)
-- `BaseEntityController` — domain controllers implement the generated OpenAPI interface and extend this; delegate to `createInternal()`, `readInternal()`, `updateInternal()`, `deleteInternal()`, `listInternal()`; always override `createdURI()`
-- `BaseEntityMapper` (MapStruct) — entity ↔ DTO conversion
-- `BaseEntityValidator` — custom validators autowired as a `Set` into services
-
-**Package layout**:
-```
-base/           # infrastructure: config, exception handling, crudl framework
-user/           # user management
-security/       # auth endpoints, JWT generation/parsing, refresh token management
-category/       # category CRUDL
-transaction/    # transaction CRUDL
+**Build:**
+```bash
+./gradlew build
 ```
 
-**Security**: Stateless JWT access tokens + opaque refresh tokens stored in DB. Public endpoints: `POST /v1/auth/**` and `GET /actuator/health`. Everything else requires a `Bearer` token.
+---
 
-**Database**: Spring Data JDBC (not JPA). Schema managed by Liquibase at `src/main/resources/db/changelog/`. Add new migrations as numbered SQL files.
+## Claude-Specific Notes
 
-**Error handling**: `GlobalExceptionHandler` in `base/` handles all exceptions centrally. Throw specific exceptions (e.g. `EntityNotFoundException`) from services — don't handle them locally in controllers.
+### Dev Seed Credentials
 
-## Versioning
+For testing with the dev profile:
+- **Username:** `admin`
+- **Password:** `8a98232f-76f4-4819-b868-91682b52ad3b`
 
-Increment `version` in `gradle.properties` for every change to code or configuration before merging to `main`. Use [semantic versioning](https://semver.org): `MAJOR.MINOR.PATCH`.
+Use these to test auth flows in local development.
 
-## Adding a New Feature
+### Testing Locally
 
-1. If the API contract changes, update the `budget-buddy-contracts` repo and bump `budgetBuddyContractsVersion` in `build.gradle.kts`
-2. Add a Liquibase migration if schema changes are needed
-3. Implement: Entity → Repository → Mapper → Service → Controller
-4. Add integration tests in `src/integrationTest/`
+When working with Claude Code:
+1. Run `./gradlew test` for quick unit test feedback
+2. Use `./gradlew integrationTest --tests "..."` to debug specific integration tests
+3. Leverage `./gradlew bootRun --args='--spring.profiles.active=dev'` to test full app locally
 
-## Testing
+### Common Tasks
 
-- Unit tests: `src/test/java/` — plain Mockito, no base class required
-- Integration tests: `src/integrationTest/java/` — extend `BaseMvcIntegrationTest` (HTTP layer) or `BaseIntegrationTest` (repository/service layer)
-- Dev seed credentials: username `admin`, password `8a98232f-76f4-4819-b868-91682b52ad3b`
+- **Run a single test:** `./gradlew test --tests "com.budget.buddy.budget_buddy_api.CategoryServiceTest"`
+- **Run integration test:** `./gradlew integrationTest --tests "com.budget.buddy.budget_buddy_api.CategoryControllerIT"`
+- **Full verification:** `./gradlew check` (runs all tests, linters, SonarQube analysis)
 
-**Required conventions**:
-- `var` for all local variable declarations
-- Given/When/Then comment sections in every test method
-- `ArgumentCaptor` instead of vague `any()` matchers
-- `assertThat(result).returns(value, Type::accessor)` for multi-field assertions
-- Test methods named `should_<action>_When_<condition>()`
-- `@Nested` classes to group tests by method or scenario
+### Available Skills
+
+Use these slash commands for common workflows:
+
+| Command | What it does |
+|---|---|
+| `/new-feature <domain>` | Scaffold a full CRUDL domain feature end-to-end |
+| `/add-migration <description>` | Create a numbered Liquibase migration and register it |
+| `/run-tests [scope]` | Run tests and surface failures |
+| `/ship` | Commit all changes and open a PR against `main` |
+| `/review-pr <number>` | Post a structured GitHub review on a PR |
+| `/javadoc` | Add Javadoc to public/protected API in recently changed files |
+| `/sync-postman` | Sync `openapi.yaml` to the Postman "Budget Buddy API" spec |
+
+---
+
+## Reference
+
+For details on:
+- **Architecture & CRUDL framework** → see [.github/SHARED.md#architecture](.github/SHARED.md#architecture)
+- **Testing conventions** → see [.github/SHARED.md#testing-conventions](.github/SHARED.md#testing-conventions)
+- **Adding new features** → see [.github/SHARED.md#adding-a-new-feature](.github/SHARED.md#adding-a-new-feature)
+- **Code conventions** → see [.github/SHARED.md#code-conventions](.github/SHARED.md#code-conventions)
+
+For Copilot CLI (GitHub Copilot in terminal), see [.github/copilot-instructions.md](.github/copilot-instructions.md) for expanded documentation on environment setup, CI/CD, and Docker deployment.
