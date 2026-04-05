@@ -11,6 +11,7 @@ on:
       - 'gradlew'
       - 'gradlew.bat'
       - '.github/workflows/dependency-submission.yaml'
+      - 'gradle.properties'
 
 jobs:
   dependency-submission:
