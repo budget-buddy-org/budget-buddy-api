@@ -107,6 +107,8 @@ To build the project, you need to provide GitHub credentials to access the `budg
 ```
 
 # Build Docker image
+
+```bash
 ./gradlew bootBuildImage --imageName=ghcr.io/your-username/budget-buddy-api:latest
 ```
 
