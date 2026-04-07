@@ -1,13 +1,13 @@
 package com.budget.buddy.budget_buddy_api.security.auth;
 
-import com.budget.buddy.budget_buddy_contracts.generated.model.AuthToken;
-import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import com.budget.buddy.budget_buddy_api.security.auth.token.AuthTokenService;
+import com.budget.buddy.budget_buddy_api.security.exception.UsernameAlreadyTakenException;
 import com.budget.buddy.budget_buddy_api.security.refresh.token.RefreshTokenService;
 import com.budget.buddy.budget_buddy_api.user.UserService;
+import com.budget.buddy.budget_buddy_contracts.generated.model.AuthToken;
+import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,19 +25,17 @@ public class AuthService {
   private final UserService userService;
   private final RefreshTokenService refreshTokenService;
   private final AuthTokenService authTokenService;
+  private final RegisterRequestValidator registerRequestValidator;
 
   /**
    * Register a new user with default role
    *
    * @param request registration request containing username and password
-   * @throws DataIntegrityViolationException if username is already taken
+   * @throws UsernameAlreadyTakenException if username is already taken
    */
   @Transactional
   public void register(RegisterRequest request) {
-    if (userService.existsByUsername(request.getUsername())) {
-      throw new DataIntegrityViolationException("Username already taken");
-    }
-
+    registerRequestValidator.validate(request);
     userService.create(request);
   }
 

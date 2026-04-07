@@ -1,5 +1,7 @@
 package com.budget.buddy.budget_buddy_api.base;
 
+import com.budget.buddy.budget_buddy_api.security.exception.InvalidPasswordException;
+import com.budget.buddy.budget_buddy_api.security.exception.UsernameAlreadyTakenException;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Problem;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
@@ -150,6 +152,32 @@ public class GlobalExceptionHandler {
   }
 
   /**
+   * Handles username already taken exceptions.
+   *
+   * @param ex the exception
+   * @param request the current web request
+   * @return a {@link ResponseEntity} containing a {@link Problem} detail
+   */
+  @ExceptionHandler(UsernameAlreadyTakenException.class)
+  public ResponseEntity<Problem> handleUsernameAlreadyTakenException(UsernameAlreadyTakenException ex, WebRequest request) {
+    log.debug("Username already taken: {}", ex.getMessage());
+    return problemResponse(HttpStatus.CONFLICT, "Username conflict", ex.getMessage(), request);
+  }
+
+  /**
+   * Handles invalid password exceptions.
+   *
+   * @param ex the exception
+   * @param request the current web request
+   * @return a {@link ResponseEntity} containing a {@link Problem} detail
+   */
+  @ExceptionHandler(InvalidPasswordException.class)
+  public ResponseEntity<Problem> handleInvalidPasswordException(InvalidPasswordException ex, WebRequest request) {
+    log.debug("Invalid password: {}", ex.getMessage());
+    return problemResponse(HttpStatus.BAD_REQUEST, "Invalid password", ex.getMessage(), request);
+  }
+
+  /**
    * Handles illegal argument exceptions.
    *
    * @param ex the exception
@@ -159,7 +187,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<Problem> handleIllegalArgument(IllegalArgumentException ex, WebRequest request) {
     log.debug("Illegal argument: {}", ex.getMessage());
-    return problemResponse(HttpStatus.BAD_REQUEST, "Invalid argument", "Invalid request", request);
+    return problemResponse(HttpStatus.BAD_REQUEST, "Invalid argument", ex.getMessage(), request);
   }
 
   /**

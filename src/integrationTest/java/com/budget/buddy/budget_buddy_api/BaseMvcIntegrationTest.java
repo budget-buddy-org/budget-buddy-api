@@ -1,7 +1,5 @@
 package com.budget.buddy.budget_buddy_api;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.budget.buddy.budget_buddy_contracts.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_contracts.generated.model.LoginRequest;
 import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
@@ -12,8 +10,16 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @AutoConfigureMockMvc
 public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
+
+  /**
+   * Strong password that satisfies all complexity rules;
+   * use this in tests that don't care about the password value.
+   */
+  protected static final String STRONG_TEST_PASSWORD = "Str0ng!Pass#42";
 
   @Autowired
   protected ObjectMapper objectMapper;
@@ -29,9 +35,9 @@ public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
     return objectMapper.readValue(result.getResponse().getContentAsString(), type);
   }
 
-  protected String registerAndLogin(String username, String password) throws Exception {
-    register(username, password);
-    return login(username, password).getAccessToken();
+  protected String registerAndLogin(String username) throws Exception {
+    register(username, STRONG_TEST_PASSWORD);
+    return login(username, STRONG_TEST_PASSWORD).getAccessToken();
   }
 
   protected void register(String username, String password) {

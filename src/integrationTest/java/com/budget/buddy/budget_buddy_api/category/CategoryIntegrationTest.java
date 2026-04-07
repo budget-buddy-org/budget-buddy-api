@@ -35,8 +35,8 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
 
   @BeforeEach
   void setUp() throws Exception {
-    userToken = registerAndLogin("categoryuser", "password123");
-    otherUserToken = registerAndLogin("otheruser", "password123");
+    userToken = registerAndLogin("categoryuser");
+    otherUserToken = registerAndLogin("otheruser");
   }
 
   // ── tests ──────────────────────────────────────────────────────────────────

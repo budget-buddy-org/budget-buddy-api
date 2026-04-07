@@ -1,29 +1,31 @@
 package com.budget.buddy.budget_buddy_api.security.auth;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
 import com.budget.buddy.budget_buddy_api.security.refresh.token.TestRefreshTokenRepository;
 import com.budget.buddy.budget_buddy_contracts.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_contracts.generated.model.LoginRequest;
 import com.budget.buddy.budget_buddy_contracts.generated.model.RefreshTokenRequest;
 import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.OffsetDateTime;
-import java.util.HexFormat;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.OffsetDateTime;
+import java.util.HexFormat;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 class AuthIntegrationTest extends BaseMvcIntegrationTest {
 
   static final String USERNAME = "testuser";
-  static final String PASSWORD = "testpassword123";
 
   @Autowired
   TestRefreshTokenRepository refreshTokenRepository;
@@ -74,7 +76,9 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_RegisterUser_When_ValidRequest() {
       // Given
-      var request = new RegisterRequest().username("newuser").password("password123");
+      var request = new RegisterRequest()
+          .username(USERNAME)
+          .password(STRONG_TEST_PASSWORD);
 
       // When
       var exchange = mvc.post().uri("/v1/auth/register")
@@ -91,8 +95,10 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_Return409_When_UsernameAlreadyTaken() {
       // Given
-      register(USERNAME, PASSWORD);
-      var request = new RegisterRequest().username(USERNAME).password(PASSWORD);
+      register(USERNAME, STRONG_TEST_PASSWORD);
+      var request = new RegisterRequest()
+          .username(USERNAME)
+          .password(STRONG_TEST_PASSWORD);
 
       // When
       var exchange = mvc.post().uri("/v1/auth/register")
@@ -106,37 +112,26 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
           .hasStatus(HttpStatus.CONFLICT);
     }
 
-    @Test
-    void should_Return400_When_PasswordTooShort() {
-      // Given
-      var request = new RegisterRequest().username("newuser").password("short");
+    @ParameterizedTest
+    @CsvSource({
+        "Short1!, too short (< 8 chars)",
+        "str0ng!pass#42, missing uppercase",
+        "STR0NG!PASS#42, missing lowercase",
+        "Strong!Pass#AB, missing digit",
+        "Str0ngPassAB42, missing special character"
+    })
+    void should_Return400_When_PasswordViolatesComplexityRule(String password, String reason) {
+      var request = new RegisterRequest()
+          .username(USERNAME)
+          .password(password);
 
-      // When
       var exchange = mvc.post().uri("/v1/auth/register")
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(request))
           .exchange();
 
-      // Then
       assertThat(exchange)
-          .as("Registration with short password should return 400 Bad Request")
-          .hasStatus(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void should_Return400_When_UsernameTooShort() {
-      // Given
-      var request = new RegisterRequest().username("ab").password("password123");
-
-      // When
-      var exchange = mvc.post().uri("/v1/auth/register")
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(request))
-          .exchange();
-
-      // Then
-      assertThat(exchange)
-          .as("Registration with short username should return 400 Bad Request")
+          .as("Password '%s' should be rejected with 400 Bad Request, reason: %s", password, reason)
           .hasStatus(HttpStatus.BAD_REQUEST);
     }
   }
@@ -147,10 +142,10 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_ReturnTokens_When_ValidCredentials() throws Exception {
       // Given
-      register(USERNAME, PASSWORD);
+      register(USERNAME, STRONG_TEST_PASSWORD);
 
       // When
-      var token = login(USERNAME, PASSWORD);
+      var token = login(USERNAME, STRONG_TEST_PASSWORD);
 
       // Then
       assertThat(token)
@@ -170,7 +165,7 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_Return401_When_InvalidPassword() {
       // Given
-      register(USERNAME, PASSWORD);
+      register(USERNAME, STRONG_TEST_PASSWORD);
       var request = new LoginRequest()
           .username(USERNAME)
           .password("wrongpassword");
@@ -192,7 +187,7 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
       // Given
       var request = new LoginRequest()
           .username("nonexistent")
-          .password(PASSWORD);
+          .password(STRONG_TEST_PASSWORD);
 
       // When
       var exchange = mvc.post().uri("/v1/auth/login")
@@ -209,10 +204,10 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_PersistRefreshToken_When_LoginSuccessful() throws Exception {
       // Given
-      register(USERNAME, PASSWORD);
+      register(USERNAME, STRONG_TEST_PASSWORD);
 
       // When
-      var token = login(USERNAME, PASSWORD);
+      var token = login(USERNAME, STRONG_TEST_PASSWORD);
       var rawToken = token.getRefreshToken();
 
       // Then
@@ -233,8 +228,8 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_ReturnNewTokens_When_ValidRefreshToken() throws Exception {
       // Given
-      register(USERNAME, PASSWORD);
-      var token = login(USERNAME, PASSWORD);
+      register(USERNAME, STRONG_TEST_PASSWORD);
+      var token = login(USERNAME, STRONG_TEST_PASSWORD);
 
       // When
       var newToken = refresh(token.getRefreshToken());
@@ -251,8 +246,8 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_RotateRefreshToken_When_Refreshed() throws Exception {
       // Given
-      register(USERNAME, PASSWORD);
-      var token = login(USERNAME, PASSWORD);
+      register(USERNAME, STRONG_TEST_PASSWORD);
+      var token = login(USERNAME, STRONG_TEST_PASSWORD);
       var oldRefreshToken = token.getRefreshToken();
 
       // When
@@ -289,8 +284,8 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_Return401_When_RefreshTokenUsedTwice() throws Exception {
       // Given
-      register(USERNAME, PASSWORD);
-      var token = login(USERNAME, PASSWORD);
+      register(USERNAME, STRONG_TEST_PASSWORD);
+      var token = login(USERNAME, STRONG_TEST_PASSWORD);
       var refreshToken = token.getRefreshToken();
       refresh(refreshToken);
 
@@ -313,8 +308,8 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_Return204_When_LoggedOut() throws Exception {
       // Given
-      register(USERNAME, PASSWORD);
-      var token = login(USERNAME, PASSWORD);
+      register(USERNAME, STRONG_TEST_PASSWORD);
+      var token = login(USERNAME, STRONG_TEST_PASSWORD);
 
       // When
       var exchange = mvc.post().uri("/v1/auth/logout")
@@ -330,8 +325,8 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_InvalidateRefreshToken_When_LoggedOut() throws Exception {
       // Given
-      register(USERNAME, PASSWORD);
-      var token = login(USERNAME, PASSWORD);
+      register(USERNAME, STRONG_TEST_PASSWORD);
+      var token = login(USERNAME, STRONG_TEST_PASSWORD);
       mvc.post().uri("/v1/auth/logout")
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + token.getAccessToken())
           .exchange();
