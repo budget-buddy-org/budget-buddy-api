@@ -279,17 +279,20 @@ transaction/           # Transaction CRUDL (extends OwnableEntityService)
 All workflows are in `.github/workflows/`:
 
 **`ci.yaml`** — Runs on every push to `main` and pull request:
-- Sets up JDK 25 and Gradle build cache
-- Runs `./gradlew build sonar` (unit tests, integration tests via Testcontainers, SonarQube analysis)
-- Caches SonarQube packages and Gradle dependencies
+- Sets up JDK 25 and Gradle build cache (via `gradle/actions/setup-gradle`)
+- Runs `./gradlew build sonar` (unit tests + SonarQube analysis)
+- Caches SonarQube packages
 - Uploads JAR artifact to GitHub (1-day retention)
 - **Triggers on:** Code changes (`src/`, `build.gradle*`, `gradle/`, `docker-compose*.yaml`)
 - **Requires:** `SONAR_TOKEN` secret, `GITHUB_TOKEN` (auto-provided)
 
-**`release.yaml`** — Triggered manually from Actions tab:
-- Builds and publishes Docker image to GitHub Container Registry (GHCR)
-- Creates GitHub release with changelog
-- Requires `GITHUB_TOKEN` (auto-provided)
+**`release.yaml`** — Triggered automatically when CI passes on `main` (`workflow_run`):
+- `setup` job: reads version from `gradle.properties`, checks if the tag already exists
+- `docker-build` job: builds arm64 and amd64 Docker images in parallel (matrix, `fail-fast: false`), pushes each to GHCR
+- `docker-manifest` job: assembles and pushes a multi-arch manifest + `latest` tag via `docker buildx imagetools`
+- `release` job: creates a git tag and GitHub release with auto-generated notes
+- All jobs after `setup` are skipped if the tag already exists (idempotent)
+- **Requires:** `GITHUB_TOKEN` (auto-provided)
 
 **`dependency-submission.yaml`** — Automatically generates dependency graph for GitHub's supply chain security features
 
