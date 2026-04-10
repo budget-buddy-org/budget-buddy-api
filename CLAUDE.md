@@ -58,7 +58,7 @@ When working with Claude Code:
 
 - **Run a single test:** `./gradlew test --tests "com.budget.buddy.budget_buddy_api.CategoryServiceTest"`
 - **Run integration test:** `./gradlew integrationTest --tests "com.budget.buddy.budget_buddy_api.CategoryControllerIT"`
-- **Full verification:** `./gradlew check` (runs all tests, linters, SonarQube analysis)
+- **Full verification:** `./gradlew check` (runs all tests and linters)
 
 ### Available Skills
 

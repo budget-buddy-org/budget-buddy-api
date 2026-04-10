@@ -11,7 +11,7 @@ This guide helps Copilot sessions work effectively in this Java/Spring Boot REST
 # Testing
 ./gradlew test                     # Unit tests only
 ./gradlew integrationTest          # Integration tests (Testcontainers + PostgreSQL)
-./gradlew check                    # All tests + quality checks + SonarQube analysis
+./gradlew check                    # All tests + quality checks
 
 # Running specific tests
 ./gradlew test --tests "com.budget.buddy.budget_buddy_api.CategoryServiceTest"
@@ -177,7 +177,6 @@ transaction/           # Transaction CRUDL (extends OwnableEntityService)
 
 - GitHub Actions workflows in `.github/workflows/`
 - GitHub Packages authentication required (`GITHUB_ACTOR`, `GITHUB_TOKEN`)
-- **SonarQube integration** — coverage reports auto-uploaded; excludes `generated/` sources
 
 ## Key Patterns & Conventions
 
@@ -280,11 +279,10 @@ All workflows are in `.github/workflows/`:
 
 **`ci.yaml`** — Runs on every push to `main` and pull request:
 - Sets up JDK 25 and Gradle build cache (via `gradle/actions/setup-gradle`)
-- Runs `./gradlew build sonar` (unit tests + SonarQube analysis)
-- Caches SonarQube packages
+- Runs `./gradlew build` (unit tests + quality checks)
 - Uploads JAR artifact to GitHub (1-day retention)
 - **Triggers on:** Code changes (`src/`, `build.gradle*`, `gradle/`, `docker-compose*.yaml`)
-- **Requires:** `SONAR_TOKEN` secret, `GITHUB_TOKEN` (auto-provided)
+- **Requires:** `GITHUB_TOKEN` (auto-provided)
 
 **`release.yaml`** — Triggered automatically when CI passes on `main` (`workflow_run`):
 - `setup` job: reads version from `gradle.properties`, checks if the tag already exists
@@ -295,15 +293,6 @@ All workflows are in `.github/workflows/`:
 - **Requires:** `GITHUB_TOKEN` (auto-provided)
 
 **`dependency-submission.yaml`** — Automatically generates dependency graph for GitHub's supply chain security features
-
-### SonarQube Integration
-
-- Configuration in `build.gradle.kts` (sonar task and properties block)
-- Automatic Jacoco code coverage XML report generation
-- Excludes `**/generated/**` from coverage calculations
-- Requires `SONAR_TOKEN` secret in repository settings
-- Project key: `glebremniov_budget-buddy-api` (organization: `budget-buddy-org`)
-- [View dashboard](https://sonarcloud.io/summary/new_code?id=glebremniov_budget-buddy-api)
 
 ### Docker Deployment
 

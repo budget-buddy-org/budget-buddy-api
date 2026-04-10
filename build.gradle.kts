@@ -4,7 +4,6 @@ plugins {
   jacoco
   id("org.springframework.boot") version "4.0.5"
   id("io.spring.dependency-management") version "1.1.7"
-  id("org.sonarqube") version "7.2.3.7755"
 }
 
 group = "com.budget.buddy"
@@ -138,24 +137,4 @@ tasks.jacocoTestReport {
       exclude("**/generated/**")
     }
   }))
-}
-
-tasks.named("sonar") {
-  dependsOn(tasks.jacocoTestReport)
-}
-
-sonar {
-  properties {
-    property("sonar.projectKey", "budget-buddy-org_budget-buddy-api")
-    property("sonar.organization", "glebremniov")
-    property(
-      "sonar.coverage.jacoco.xmlReportPaths",
-      layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.absolutePath
-    )
-    property("sonar.tests", "src/test/java,src/integrationTest/java")
-    property("sonar.coverage.exclusions", "**/generated/**")
-    property("sonar.issue.ignore.multicriteria", "S119")
-    property("sonar.issue.ignore.multicriteria.S119.ruleKey", "java:S119")
-    property("sonar.issue.ignore.multicriteria.S119.resourceKey", "**/*.java")
-  }
 }
