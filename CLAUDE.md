@@ -58,7 +58,7 @@ When working with Claude Code:
 
 - **Run a single test:** `./gradlew test --tests "com.budget.buddy.budget_buddy_api.CategoryServiceTest"`
 - **Run integration test:** `./gradlew integrationTest --tests "com.budget.buddy.budget_buddy_api.CategoryControllerIT"`
-- **Full verification:** `./gradlew check` (runs all tests, linters, SonarQube analysis)
+- **Full verification:** `./gradlew check` (runs all tests and linters)
 
 ### Available Skills
 
@@ -70,7 +70,6 @@ Use these slash commands for common workflows:
 | `/add-migration <description>` | Create a numbered Liquibase migration and register it |
 | `/run-tests [scope]` | Run tests and surface failures |
 | `/ship` | Commit all changes and open a PR against `main` |
-| `/review-pr <number>` | Post a structured GitHub review on a PR |
 | `/javadoc` | Add Javadoc to public/protected API in recently changed files |
 | `/sync-postman` | Sync `openapi.yaml` to the Postman "Budget Buddy API" spec |
 

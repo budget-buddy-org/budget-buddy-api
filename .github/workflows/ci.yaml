@@ -48,18 +48,10 @@ jobs:
         with:
           cache-provider: basic
 
-      - name: Cache SonarQube packages
-        uses: actions/cache@v5
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
       - name: Build and test
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build sonar
+        run: ./gradlew build
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v7

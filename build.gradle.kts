@@ -4,7 +4,6 @@ plugins {
   jacoco
   id("org.springframework.boot") version "4.0.5"
   id("io.spring.dependency-management") version "1.1.7"
-  id("org.sonarqube") version "7.2.3.7755"
 }
 
 group = "com.budget.buddy"
@@ -20,7 +19,7 @@ repositories {
   mavenCentral()
   maven {
     name = "GitHubPackages"
-    url = uri("https://maven.pkg.github.com/glebremniov/budget-buddy-contracts")
+    url = uri("https://maven.pkg.github.com/budget-buddy-org/budget-buddy-contracts")
     credentials {
       username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
       password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
@@ -32,7 +31,7 @@ dependencies {
   val mapstructVersion = "1.6.3"
   val lombokMapstructBindingVersion = "0.2.0"
   val jacksonDatabindNullableVersion = "0.2.10"
-  val budgetBuddyContractsVersion = "1.0.1"
+  val budgetBuddyContractsVersion = "1.2.2"
 
   implementation("com.budgetbuddy:budget-buddy-contracts:${budgetBuddyContractsVersion}")
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -138,24 +137,4 @@ tasks.jacocoTestReport {
       exclude("**/generated/**")
     }
   }))
-}
-
-tasks.named("sonar") {
-  dependsOn(tasks.jacocoTestReport)
-}
-
-sonar {
-  properties {
-    property("sonar.projectKey", "glebremniov_budget-buddy-api")
-    property("sonar.organization", "glebremniov")
-    property(
-      "sonar.coverage.jacoco.xmlReportPaths",
-      layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.absolutePath
-    )
-    property("sonar.tests", "src/test/java,src/integrationTest/java")
-    property("sonar.coverage.exclusions", "**/generated/**")
-    property("sonar.issue.ignore.multicriteria", "S119")
-    property("sonar.issue.ignore.multicriteria.S119.ruleKey", "java:S119")
-    property("sonar.issue.ignore.multicriteria.S119.resourceKey", "**/*.java")
-  }
 }
