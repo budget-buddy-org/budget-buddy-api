@@ -3,6 +3,7 @@ package com.budget.buddy.budget_buddy_api.base.crudl.base;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
 import java.util.List;
 import org.mapstruct.BeanMapping;
+import org.mapstruct.Condition;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
@@ -59,9 +60,10 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
   L toPageResponse(List<R> items, PaginationMeta meta);
 
   /**
-   * Patches an existing entity with values from an update request. Null values in the update request are ignored.
+   * Patches an existing entity with values from an update request.
+   * Null values or undefined JsonNullable values in the update request are ignored.
    *
-   * @param patchRequest the update request
+   * @param patchRequest   the update request
    * @param existingEntity the entity to patch
    */
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -96,5 +98,18 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    */
   default <T> T fromNullable(JsonNullable<T> nullable) {
     return nullable.orElse(null);
+  }
+
+  /**
+   * Condition to check if a {@link JsonNullable} value is present.
+   * This is used by MapStruct for PATCH operations.
+   *
+   * @param <T>      the type of the value
+   * @param nullable the JsonNullable container
+   * @return true if the value is present (even if it's null), false otherwise
+   */
+  @Condition
+  default <T> boolean isPresent(JsonNullable<T> nullable) {
+    return nullable != null && nullable.isPresent();
   }
 }

@@ -158,43 +158,38 @@ class TransactionMapperTest {
     }
 
     @Test
-    void should_NotUpdateIfNull() {
-      // Given
-      var originalAmount = 100L;
-      var originalDesc = "Keep Me";
-      var entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), originalAmount, TransactionType.EXPENSE, Currency.getInstance("EUR"), LocalDate.now(), originalDesc, UUID.randomUUID());
+    void should_NotUpdate_When_Undefined() {
+        // Given
+        var originalDesc = "Keep Me";
+        var entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 100L, TransactionType.EXPENSE, Currency.getInstance("EUR"), LocalDate.now(), originalDesc, UUID.randomUUID());
 
-      var update = new TransactionUpdate();
-      update.setAmount(null);
-      update.setDescription(null);
+        var update = new TransactionUpdate();
+        update.setDescription(JsonNullable.undefined());
 
-      // When
-      transactionMapper.patchEntity(update, entity);
+        // When
+        transactionMapper.patchEntity(update, entity);
 
-      // Then
-      assertThat(entity)
-          .as("Entity should remain unchanged when the update request contains nulls")
-          .returns(originalAmount, TransactionEntity::getAmount)
-          .returns(originalDesc, TransactionEntity::getDescription);
+        // Then
+        assertThat(entity.getDescription())
+            .as("Description should remain unchanged when undefined is passed")
+            .isEqualTo(originalDesc);
     }
 
     @Test
-    void should_ClearDescription_When_ExplicitJsonNullableInPatch() {
-      // Given
-      var entity = new TransactionEntity(
-          UUID.randomUUID(), UUID.randomUUID(), 100L, TransactionType.EXPENSE,
-          Currency.getInstance("EUR"), LocalDate.now(), "Old Description", UUID.randomUUID());
+    void should_ClearField_When_ExplicitlySetToNull() {
+        // Given
+        var entity = new TransactionEntity(UUID.randomUUID(), UUID.randomUUID(), 100L, TransactionType.EXPENSE, Currency.getInstance("EUR"), LocalDate.now(), "Old Description", UUID.randomUUID());
 
-      var update = new TransactionUpdate();
-      update.setDescription(JsonNullable.undefined());
+        var update = new TransactionUpdate();
+        update.setDescription(JsonNullable.of(null));
 
-      // When
-      transactionMapper.patchEntity(update, entity);
+        // When
+        transactionMapper.patchEntity(update, entity);
 
-      // Then
-      assertThat(entity.getDescription())
-          .as("Description should be cleared when explicitly set to null in PATCH")
-          .isNull();
+        // Then
+        assertThat(entity.getDescription())
+            .as("Description should be cleared when explicitly set to null in PATCH")
+            .isNull();
     }
   }
 }

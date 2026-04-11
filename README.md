@@ -122,3 +122,11 @@ To build the project, you need to provide GitHub credentials to access the `budg
 ```
 GET /actuator/health
 ```
+### PATCH Behavior
+
+The API supports JSON Merge Patch semantics for fields that can be cleared:
+- **Provided value**: Updates the field to the new value.
+- **Explicit `null`**: Sets the field to `null` in the database.
+- **Omitted field**: Leaves the existing value unchanged.
+
+This is implemented using MapStruct with `JsonNullable` support in the `BaseEntityMapper`.
