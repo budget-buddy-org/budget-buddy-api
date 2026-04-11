@@ -72,7 +72,7 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
       // Then
       assertThat(exchange)
           .as("Registration should return 201 Created")
-          .hasStatus(HttpStatus.CREATED);
+          .hasStatus(HttpStatus.NO_CONTENT);
     }
 
     @Test
