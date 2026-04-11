@@ -169,3 +169,4 @@ Temporary Items
 
 # Node / semantic-release tooling
 node_modules/
+.junie/
