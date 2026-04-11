@@ -3,6 +3,7 @@ package com.budget.buddy.budget_buddy_api.base.crudl.base;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
 import java.net.URI;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -87,28 +88,28 @@ public abstract class BaseEntityController<ID, R, C, U, L> {
   }
 
   /**
-   * Internal method to list entities with limit and offset.
+   * Internal method to list entities with page and size.
    *
-   * @param limit the maximum number of items to return
-   * @param offset the page number (0-indexed)
+   * @param page zero-based page number
+   * @param size the number of items per page
    * @return {@link ResponseEntity} with the paginated response
    */
-  public ResponseEntity<L> listInternal(Integer limit, Integer offset) {
-    return listInternal(PageRequest.of(offset, limit));
+  public ResponseEntity<L> listInternal(Integer page, Integer size) {
+    return listInternal(PageRequest.of(page, size));
   }
 
   /**
-   * Internal method to list entities with a {@link PageRequest}.
+   * Internal method to list entities with a {@link Pageable}.
    *
-   * @param pageRequest the page request
+   * @param pageable the pageable request
    * @return {@link ResponseEntity} with the paginated response
    */
-  public ResponseEntity<L> listInternal(PageRequest pageRequest) {
-    var items = service.list(pageRequest);
+  public ResponseEntity<L> listInternal(Pageable pageable) {
+    var items = service.list(pageable);
 
     var meta = new PaginationMeta();
-    meta.setLimit(items.getSize());
-    meta.setOffset(items.getNumber());
+    meta.setPage(items.getNumber());
+    meta.setSize(items.getSize());
     meta.setTotal(items.getTotalElements());
 
     var response = mapper.toPageResponse(items.getContent(), meta);

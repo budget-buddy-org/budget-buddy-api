@@ -11,6 +11,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
@@ -37,25 +38,24 @@ public class TransactionController
 
   @Override
   public ResponseEntity<PaginatedTransactions> listTransactions(
-      Integer limit,
-      Integer offset,
+      Integer page,
+      Integer size,
       UUID categoryId,
       LocalDate start,
       LocalDate end,
       String sort
   ) {
-    var pageable = PageRequest.of(offset, limit, buildSort(sort));
+    var pageable = PageRequest.of(page, size, buildSort(sort));
     var filter = TransactionFilter.of(categoryId, start, end);
     var items = service.list(filter, pageable);
     var total = service.count(filter);
 
     var meta = new PaginationMeta()
-        .limit(limit)
-        .offset(offset)
+        .page(page)
+        .size(size)
         .total(total);
 
-    var response = mapper.toPageResponse(items, meta);
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(mapper.toPageResponse(items, meta));
   }
 
   @Override
