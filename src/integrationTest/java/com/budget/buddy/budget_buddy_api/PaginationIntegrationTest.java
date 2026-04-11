@@ -38,18 +38,18 @@ class PaginationIntegrationTest extends BaseMvcIntegrationTest {
     // Create 5 transactions: T1 (100, Jan 1), T2 (200, Jan 2), T3 (300, Jan 3), T4 (400, Jan 4), T5 (500, Jan 5)
     // Sorted DESC: T5, T4, T3, T2, T1
     for (int i = 1; i <= 5; i++) {
-        var result = mvc.post().uri("/v1/transactions")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(json(new TransactionWrite()
-                .categoryId(categoryId)
-                .amount(i * 100L)
-                .type(TransactionWrite.TypeEnum.EXPENSE)
-                .currency("USD")
-                .date(LocalDate.of(2026, 1, i))
-                .description("Transaction " + i)))
-            .exchange();
-        assertThat(result).hasStatus2xxSuccessful();
+      var result = mvc.post().uri("/v1/transactions")
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(json(new TransactionWrite()
+              .categoryId(categoryId)
+              .amount(i * 100L)
+              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .currency("USD")
+              .date(LocalDate.of(2026, 1, i))
+              .description("Transaction " + i)))
+          .exchange();
+      assertThat(result).hasStatus2xxSuccessful();
     }
   }
 
@@ -79,6 +79,31 @@ class PaginationIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   @Test
+  void should_ReturnCorrectPage_When_OffsetIsNotPageAligned() throws Exception {
+    // Given: 5 transactions, sorted by date DESC: T5, T4, T3, T2, T1
+    // We want to skip 1 (T5) and take 2 (T4, T3)
+    int limit = 2;
+    int offset = 1;
+
+    // When
+    var result = mvc.get().uri("/v1/transactions?limit={limit}&offset={offset}", limit, offset)
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+        .exchange();
+
+    // Then
+    assertThat(result).hasStatusOk();
+    var page = parseBody(result, PaginatedTransactions.class);
+
+    assertThat(page.getItems()).hasSize(2);
+    assertThat(page.getItems().get(0).getAmount()).isEqualTo(400L); // T4
+    assertThat(page.getItems().get(1).getAmount()).isEqualTo(300L); // T3
+
+    assertThat(page.getMeta().getOffset()).isEqualTo(1);
+    assertThat(page.getMeta().getLimit()).isEqualTo(2);
+    assertThat(page.getMeta().getTotal()).isEqualTo(5L);
+  }
+
+  @Test
   void should_ReturnCorrectPage_When_OffsetIsSkipCount_ForCategories() throws Exception {
     // Create additional 4 categories (total 5)
     createCategory("Category 2");
@@ -97,8 +122,12 @@ class PaginationIntegrationTest extends BaseMvcIntegrationTest {
     // Then
     assertThat(result).hasStatusOk();
     var page = parseBody(result, PaginatedCategories.class);
-    
+
     assertThat(page.getItems()).hasSize(2);
+    // Assuming default sort is by creation order (id)
+    assertThat(page.getItems().get(0).getName()).isEqualTo("Category 3");
+    assertThat(page.getItems().get(1).getName()).isEqualTo("Category 4");
+
     assertThat(page.getMeta().getOffset()).isEqualTo(2);
     assertThat(page.getMeta().getLimit()).isEqualTo(2);
     assertThat(page.getMeta().getTotal()).isEqualTo(5L);

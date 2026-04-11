@@ -2,7 +2,7 @@ package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
 import java.net.URI;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -94,18 +94,17 @@ public abstract class BaseEntityController<ID, R, C, U, L> {
    * @return {@link ResponseEntity} with the paginated response
    */
   public ResponseEntity<L> listInternal(Integer limit, Integer offset) {
-    int pageNumber = offset / limit;
-    return listInternal(PageRequest.of(pageNumber, limit));
+    return listInternal(new OffsetPageRequest(offset, limit));
   }
 
   /**
-   * Internal method to list entities with a {@link PageRequest}.
+   * Internal method to list entities with a {@link Pageable}.
    *
-   * @param pageRequest the page request
+   * @param pageable the pageable request
    * @return {@link ResponseEntity} with the paginated response
    */
-  public ResponseEntity<L> listInternal(PageRequest pageRequest) {
-    var items = service.list(pageRequest);
+  public ResponseEntity<L> listInternal(Pageable pageable) {
+    var items = service.list(pageable);
 
     var meta = new PaginationMeta();
     meta.setLimit(items.getSize());

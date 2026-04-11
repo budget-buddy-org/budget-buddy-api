@@ -1,6 +1,7 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityController;
+import com.budget.buddy.budget_buddy_api.base.crudl.base.OffsetPageRequest;
 import com.budget.buddy.budget_buddy_contracts.generated.api.TransactionsApi;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
@@ -10,7 +11,7 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.UUID;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
@@ -44,8 +45,7 @@ public class TransactionController
       LocalDate end,
       String sort
   ) {
-    int pageNumber = offset / limit;
-    var pageable = PageRequest.of(pageNumber, limit, buildSort(sort));
+    var pageable = new OffsetPageRequest(offset, limit, buildSort(sort));
     var filter = TransactionFilter.of(categoryId, start, end);
     var items = service.list(filter, pageable);
     var total = service.count(filter);
@@ -55,8 +55,7 @@ public class TransactionController
         .offset(offset)
         .total(total);
 
-    var response = mapper.toPageResponse(items, meta);
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(mapper.toPageResponse(items, meta));
   }
 
   @Override
