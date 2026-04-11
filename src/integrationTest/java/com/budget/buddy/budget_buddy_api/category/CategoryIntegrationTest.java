@@ -7,6 +7,7 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryUpdate;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedCategories;
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -288,6 +289,26 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
       var page = parseBody(result, PaginatedCategories.class);
       assertThat(page.getItems()).isEmpty();
       assertThat(page.getMeta().getTotal()).isZero();
+    }
+
+    @Test
+    void should_ReturnPagedResults_When_MultiplePages() throws Exception {
+      createCategory(userToken, "A");
+      createCategory(userToken, "B");
+      createCategory(userToken, "C");
+      createCategory(userToken, "D");
+
+      var result = mvc.get().uri("/v1/categories?page=1&size=2")
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.OK);
+      var page = parseBody(result, PaginatedCategories.class);
+      assertThat(page.getItems()).hasSize(2);
+      assertThat(page.getMeta())
+          .returns(1, PaginationMeta::getPage)
+          .returns(2, PaginationMeta::getSize)
+          .returns(4L, PaginationMeta::getTotal);
     }
 
     @Test
