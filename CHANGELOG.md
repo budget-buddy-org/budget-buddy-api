@@ -1,3 +1,9 @@
+## [0.2.2](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.2.1...v0.2.2) (2026-04-11)
+
+### Bug Fixes
+
+* fix gradle/actions SHA typo in docker-publish.yaml ([#108](https://github.com/budget-buddy-org/budget-buddy-api/issues/108)) ([4695895](https://github.com/budget-buddy-org/budget-buddy-api/commit/4695895b83aed7d37a0301336a7358aba807e5ed))
+
 ## [0.2.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.2.0...v0.2.1) (2026-04-11)
 
 ### Bug Fixes
