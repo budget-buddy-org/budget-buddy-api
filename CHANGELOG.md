@@ -1,3 +1,9 @@
+## [0.2.3](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.2.2...v0.2.3) (2026-04-12)
+
+### Bug Fixes
+
+* **ci:** approve esbuild build scripts for pnpm v10 ([#110](https://github.com/budget-buddy-org/budget-buddy-api/issues/110)) ([dfe4ddd](https://github.com/budget-buddy-org/budget-buddy-api/commit/dfe4dddddee7c19b82ad0b6bc9e2d99b54ab593a))
+
 ## [0.2.2](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.2.1...v0.2.2) (2026-04-11)
 
 ### Bug Fixes
