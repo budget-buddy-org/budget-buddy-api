@@ -79,9 +79,10 @@ docker compose logs -f app
 |---|---|---|
 | `GET` | `/v1/categories` | List categories |
 | `POST` | `/v1/categories` | Create category |
-| `GET` | `/v1/categories/{id}` | Get category |
-| `PATCH` | `/v1/categories/{id}` | Update category |
-| `DELETE` | `/v1/categories/{id}` | Delete category |
+| `GET` | `/v1/categories/{categoryId}` | Get category |
+| `PUT` | `/v1/categories/{categoryId}` | Replace category (full update) |
+| `PATCH` | `/v1/categories/{categoryId}` | Update category (partial update) |
+| `DELETE` | `/v1/categories/{categoryId}` | Delete category |
 
 ### Transactions
 
@@ -89,9 +90,10 @@ docker compose logs -f app
 |---|---|---|
 | `GET` | `/v1/transactions` | List transactions (with filters) |
 | `POST` | `/v1/transactions` | Create transaction |
-| `GET` | `/v1/transactions/{id}` | Get transaction |
-| `PATCH` | `/v1/transactions/{id}` | Update transaction |
-| `DELETE` | `/v1/transactions/{id}` | Delete transaction |
+| `GET` | `/v1/transactions/{transactionId}` | Get transaction |
+| `PUT` | `/v1/transactions/{transactionId}` | Replace transaction (full update) |
+| `PATCH` | `/v1/transactions/{transactionId}` | Update transaction (partial update) |
+| `DELETE` | `/v1/transactions/{transactionId}` | Delete transaction |
 
 All endpoints except auth require `Authorization: Bearer <access_token>`.
 
@@ -128,8 +130,9 @@ To build the project, you need to provide GitHub credentials to access the `budg
 ## Tests
 
 ```bash
-# Run all tests (requires Docker for Testcontainers)
-./gradlew test
+./gradlew test                  # Run all tests (unit + integration)
+./gradlew integrationTest       # Run integration tests (requires Docker)
+./gradlew check                 # Run all tests + quality checks
 ```
 
 ## Health Check
