@@ -1,3 +1,9 @@
+## [0.4.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.3.0...v0.4.0) (2026-04-12)
+
+### Features
+
+* align GlobalExceptionHandler with RFC 9457 recommendations ([#112](https://github.com/budget-buddy-org/budget-buddy-api/issues/112)) ([101b582](https://github.com/budget-buddy-org/budget-buddy-api/commit/101b58268b76ff9fb104a8983035cab432e19751)), closes [#95](https://github.com/budget-buddy-org/budget-buddy-api/issues/95)
+
 ## [0.3.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.2.3...v0.3.0) (2026-04-12)
 
 ### Features
