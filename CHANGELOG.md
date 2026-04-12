@@ -1,3 +1,9 @@
+## [0.5.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.4.0...v0.5.0) (2026-04-12)
+
+### Features
+
+* standardize service read methods with @Transactional(readOnly = true) ([#114](https://github.com/budget-buddy-org/budget-buddy-api/issues/114)) ([0263f1d](https://github.com/budget-buddy-org/budget-buddy-api/commit/0263f1d7dba296e2a9e3ba4f9d60fba1c18c449e)), closes [#84](https://github.com/budget-buddy-org/budget-buddy-api/issues/84)
+
 ## [0.4.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.3.0...v0.4.0) (2026-04-12)
 
 ### Features
