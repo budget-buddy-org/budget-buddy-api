@@ -45,7 +45,9 @@ For testing with the dev profile:
 - **Username:** `admin`
 - **Password:** `8a98232f-76f4-4819-b868-91682b52ad3b`
 
-Use these to test auth flows in local development.
+Use these to test auth flows in local development. The seed user is inserted directly into the DB (bypassing registration), so its password is not subject to complexity validation.
+
+When testing the `/v1/auth/register` endpoint manually, use a password that satisfies all complexity rules: 8+ characters, uppercase, lowercase, digit, special character, no whitespace. Example: `Test1ng!Pass`.
 
 ### Testing Locally
 

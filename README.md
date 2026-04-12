@@ -95,6 +95,21 @@ docker compose logs -f app
 
 All endpoints except auth require `Authorization: Bearer <access_token>`.
 
+### Password Requirements
+
+Passwords submitted to `/v1/auth/register` must satisfy all of the following rules:
+
+| Rule | Requirement |
+|---|---|
+| Length | 8–128 characters |
+| Uppercase | At least 1 uppercase letter (A–Z) |
+| Lowercase | At least 1 lowercase letter (a–z) |
+| Digit | At least 1 digit (0–9) |
+| Special character | At least 1 special character (e.g. `!`, `#`, `@`) |
+| Whitespace | Not allowed |
+
+Passwords that violate any rule are rejected with `400 Bad Request`.
+
 ## Building
 
 To build the project, you need to provide GitHub credentials to access the `budget-buddy-contracts` package. You can set `GITHUB_ACTOR` and `GITHUB_TOKEN` environment variables, or provide them via `gradle.properties`:

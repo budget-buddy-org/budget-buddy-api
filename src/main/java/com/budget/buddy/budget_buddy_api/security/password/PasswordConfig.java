@@ -1,6 +1,5 @@
 package com.budget.buddy.budget_buddy_api.security.password;
 
-import java.util.List;
 import org.passay.DefaultPasswordValidator;
 import org.passay.PasswordValidator;
 import org.passay.data.EnglishCharacterData;
@@ -10,6 +9,8 @@ import org.passay.rule.LengthRule;
 import org.passay.rule.WhitespaceRule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 /**
  * Configures the Passay {@link PasswordValidator} bean with complexity rules applied at registration.

@@ -9,7 +9,8 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,8 +21,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.HexFormat;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class AuthIntegrationTest extends BaseMvcIntegrationTest {
 
@@ -112,14 +115,19 @@ class AuthIntegrationTest extends BaseMvcIntegrationTest {
           .hasStatus(HttpStatus.CONFLICT);
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "Short1!, too short (< 8 chars)",
-        "str0ng!pass#42, missing uppercase",
-        "STR0NG!PASS#42, missing lowercase",
-        "Strong!Pass#AB, missing digit",
-        "Str0ngPassAB42, missing special character"
-    })
+    static Stream<Arguments> invalidPasswords() {
+      return Stream.of(
+          arguments("Short1!",        "too short (< 8 chars)"),
+          arguments("str0ng!pass#42", "missing uppercase"),
+          arguments("STR0NG!PASS#42", "missing lowercase"),
+          arguments("Strong!Pass#AB", "missing digit"),
+          arguments("Str0ngPassAB42", "missing special character"),
+          arguments("Str0ng Pass#42", "contains whitespace")
+      );
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("invalidPasswords")
     void should_Return400_When_PasswordViolatesComplexityRule(String password, String reason) {
       var request = new RegisterRequest()
           .username(USERNAME)
