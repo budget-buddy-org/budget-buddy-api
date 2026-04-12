@@ -2,6 +2,7 @@ package com.budget.buddy.budget_buddy_api.security.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -10,10 +11,13 @@ import static org.mockito.Mockito.when;
 import com.budget.buddy.budget_buddy_contracts.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import com.budget.buddy.budget_buddy_api.security.auth.token.AuthTokenService;
+import com.budget.buddy.budget_buddy_api.security.exception.InvalidPasswordException;
+import com.budget.buddy.budget_buddy_api.security.exception.UsernameAlreadyTakenException;
 import com.budget.buddy.budget_buddy_api.security.refresh.token.RefreshTokenEntity;
 import com.budget.buddy.budget_buddy_api.security.refresh.token.RefreshTokenService;
 import com.budget.buddy.budget_buddy_api.user.UserDto;
 import com.budget.buddy.budget_buddy_api.user.UserService;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +28,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -44,6 +47,8 @@ class AuthServiceTest {
   private RefreshTokenService refreshTokenService;
   @Mock
   private AuthTokenService authTokenService;
+  @Mock
+  private RegisterRequestValidator registerRequestValidator;
 
   @InjectMocks
   private AuthService authService;
@@ -52,32 +57,48 @@ class AuthServiceTest {
   class RegisterTests {
 
     @Test
-    void should_Register_When_UsernameIsAvailable() {
+    void should_Register_When_RequestIsValid() {
       // Given
-      var request = new RegisterRequest("newuser", "password123");
-      when(userService.existsByUsername(request.getUsername())).thenReturn(false);
+      var request = new RegisterRequest("newuser", "Str0ng!Pass#42");
 
       // When
       authService.register(request);
 
       // Then
+      verify(registerRequestValidator).validate(request);
       verify(userService).create(request);
     }
 
     @Test
     void should_ThrowException_When_UsernameAlreadyTaken() {
       // Given
-      var request = new RegisterRequest("takenuser", "password123");
-      when(userService.existsByUsername(request.getUsername())).thenReturn(true);
+      var request = new RegisterRequest("takenuser", "Str0ng!Pass#42");
+      doThrow(new UsernameAlreadyTakenException("takenuser"))
+          .when(registerRequestValidator).validate(request);
 
       // When & Then
       assertThatThrownBy(() -> authService.register(request))
-          .as("Should throw DataIntegrityViolationException when the username is already taken")
-          .isInstanceOf(DataIntegrityViolationException.class)
-          .hasMessageContaining("Username already taken");
+          .as("Should propagate UsernameAlreadyTakenException from the validator")
+          .isInstanceOf(UsernameAlreadyTakenException.class)
+          .hasMessageContaining("takenuser");
 
-      verify(userService).existsByUsername("takenuser");
-      verifyNoInteractions(authTokenService);
+      verifyNoInteractions(userService, authTokenService);
+    }
+
+    @Test
+    void should_ThrowException_When_PasswordIsInvalid() {
+      // Given
+      var request = new RegisterRequest("newuser", "weak");
+      doThrow(new InvalidPasswordException(List.of("Password must be at least 8 characters")))
+          .when(registerRequestValidator).validate(request);
+
+      // When & Then
+      assertThatThrownBy(() -> authService.register(request))
+          .as("Should propagate InvalidPasswordException from the validator")
+          .isInstanceOf(InvalidPasswordException.class)
+          .hasMessageContaining("at least 8 characters");
+
+      verifyNoInteractions(userService, authTokenService);
     }
   }
 

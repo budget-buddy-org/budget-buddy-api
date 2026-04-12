@@ -2,95 +2,86 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
+**For comprehensive documentation on architecture, testing, versioning, and code conventions, see [.github/SHARED.md](.github/SHARED.md).**
 
+---
+
+## Quick Start
+
+**Stack:** Java 25, Spring Boot 4.0.5, Spring Data JDBC, PostgreSQL, Liquibase, MapStruct, Lombok
+
+**Prerequisites:** The `budget-buddy-contracts` dependency is fetched from GitHub Packages. Set these before building:
 ```bash
-# Run the app (starts PostgreSQL via Docker Compose automatically)
-./gradlew bootRun --args='--spring.profiles.active=dev'
-
-# Unit tests
-./gradlew test
-
-# Integration tests (requires Docker — uses Testcontainers + PostgreSQL)
-./gradlew integrationTest
-
-# Run a single test class
-./gradlew test --tests "com.budget.buddy.budget_buddy_api.SomeTest"
-./gradlew integrationTest --tests "com.budget.buddy.budget_buddy_api.category.CategoryIntegrationTest"
-
-# All tests + checks
-./gradlew check
-
-# Build
-./gradlew build
-
-# GitHub Packages credentials are required to resolve the contracts dependency:
 export GITHUB_ACTOR=your-github-username
 export GITHUB_TOKEN=your-personal-access-token   # needs read:packages scope
 ```
+Or add `gpr.user` / `gpr.key` to `~/.gradle/gradle.properties`.
 
-## Architecture
+**Run locally:**
+```bash
+# Automatically starts PostgreSQL via Docker Compose (dev profile)
+./gradlew bootRun --args='--spring.profiles.active=dev'
+```
 
-### CRUDL framework (`base/crudl/`)
+**Test:**
+```bash
+./gradlew test                  # unit tests only
+./gradlew integrationTest       # integration tests (requires Docker)
+./gradlew check                 # all tests + quality checks
+```
 
-All domain features extend a shared generic hierarchy:
+**Build:**
+```bash
+./gradlew build
+```
 
-- **Entity:** `BaseEntity` → `AuditableEntity` (auto `createdAt`/`updatedAt`) → `OwnableEntity` (adds `ownerId`)
-- **Repository:** `BaseEntityRepository` → `OwnableEntityRepository` (adds owner-scoped finders)
-- **Service:** `AbstractBaseEntityService` → `OwnableEntityService` (auto-scopes all queries to `ownerId` from JWT) → domain service
-- **Controller:** `BaseEntityController` — provides `createInternal`, `readInternal`, `updateInternal`, `replaceInternal`, `deleteInternal`, `listInternal`. Always override `createdURI()`.
-- **Mapper:** `BaseEntityMapper` (MapStruct interface) — provides `toEntity`, `toModel`, `patchEntity` (PATCH, skips nulls/absent JsonNullable), `replaceEntity` (PUT, overwrites all writable fields)
-- **Validator:** `BaseEntityValidator<E>` — functional interface; implement and register as a Spring bean to run validation before every save
+---
 
-Controllers implement generated interfaces from `budget-buddy-contracts` (e.g., `TransactionsApi`) and delegate to the `*Internal` methods.
+## Claude-Specific Notes
 
-### PATCH / JsonNullable semantics
+### Dev Seed Credentials
 
-PATCH operations use `JsonNullable<T>` for fields that can be explicitly nulled:
-- **Field omitted** → unchanged (MapStruct `@Condition isPresent` returns false)
-- **Field set to `null`** → cleared to null in DB
-- **Field set to a value** → updated
+For testing with the dev profile:
+- **Username:** `admin`
+- **Password:** `8a98232f-76f4-4819-b868-91682b52ad3b`
 
-The `@Condition isPresent(JsonNullable<?> value)` method in `BaseEntityMapper` gates MapStruct's property-level null strategy.
+Use these to test auth flows in local development. The seed user is inserted directly into the DB (bypassing registration), so its password is not subject to complexity validation.
 
-### Contracts dependency
+When testing the `/v1/auth/register` endpoint manually, use a password that satisfies all complexity rules: 8+ characters, uppercase, lowercase, digit, special character, no whitespace. Example: `Test1ng!Pass`.
 
-Controllers implement interfaces generated from the OpenAPI spec in `budget-buddy-contracts`. DTOs (e.g., `Transaction`, `TransactionWrite`, `TransactionUpdate`) come from that package — never define them locally.
+### Testing Locally
 
-### Database
+When working with Claude Code:
+1. Run `./gradlew test` for quick unit test feedback
+2. Use `./gradlew integrationTest --tests "..."` to debug specific integration tests
+3. Leverage `./gradlew bootRun --args='--spring.profiles.active=dev'` to test full app locally
 
-Spring Data JDBC (not JPA). Migrations live in `src/main/resources/db/changelog/migrations/` as numbered SQL files (e.g. `007-...sql`). Register each new file in the master changelog.
+### Common Tasks
 
-### Security
+- **Run a single test:** `./gradlew test --tests "com.budget.buddy.budget_buddy_api.CategoryServiceTest"`
+- **Run integration test:** `./gradlew integrationTest --tests "com.budget.buddy.budget_buddy_api.CategoryControllerIT"`
+- **Full verification:** `./gradlew check` (runs all tests, linters, SonarQube analysis)
 
-- **Access tokens:** Stateless JWT with `ownerId` claim. `OwnerIdProvider<UUID>` extracts it from `SecurityContext` and is injected into `OwnableEntityService`.
-- **Refresh tokens:** Opaque, stored hashed in DB, support revocation via `RefreshTokenService`.
-- Public endpoints: `/v1/auth/**`, `/actuator/health`.
-- Error responses: RFC 7807 Problem Details (`application/problem+json`) via `GlobalExceptionHandler`. Controllers never catch exceptions.
+### Available Skills
 
-### Integration tests
+Use these slash commands for common workflows:
 
-- Extend `BaseIntegrationTest` (Testcontainers PostgreSQL, `@Transactional` rollback, `@ActiveProfiles("test")`)
-- Extend `BaseMvcIntegrationTest` for HTTP-layer tests (`MockMvcTester`) — provides `registerAndLogin()`, `json()`, `parseBody()` helpers
-- Both user isolation and ownership enforcement must be tested (see `CategoryIntegrationTest` for the pattern)
+| Command | What it does |
+|---|---|
+| `/new-feature <domain>` | Scaffold a full CRUDL domain feature end-to-end |
+| `/add-migration <description>` | Create a numbered Liquibase migration and register it |
+| `/run-tests [scope]` | Run tests and surface failures |
+| `/ship` | Commit all changes and open a PR against `main` |
+| `/javadoc` | Add Javadoc to public/protected API in recently changed files |
 
-### Adding a domain feature
+---
 
-Create: Entity (extends `OwnableEntity`), Repository (extends `OwnableEntityRepository`), Service (extends `OwnableEntityService`), Controller (extends `BaseEntityController`, implements generated API interface), Mapper (implements `BaseEntityMapper`). Add a Liquibase migration for the new table.
+## Reference
 
-## Commits and Releases
+For details on:
+- **Architecture & CRUDL framework** → see [.github/SHARED.md#architecture](.github/SHARED.md#architecture)
+- **Testing conventions** → see [.github/SHARED.md#testing-conventions](.github/SHARED.md#testing-conventions)
+- **Adding new features** → see [.github/SHARED.md#adding-a-new-feature](.github/SHARED.md#adding-a-new-feature)
+- **Code conventions** → see [.github/SHARED.md#code-conventions](.github/SHARED.md#code-conventions)
 
-Commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/). A `commit-msg` husky hook enforces this locally via commitlint.
-
-Required format: `type(scope): subject` — scope is optional.
-
-| Type | When to use | Release bump |
-|---|---|---|
-| `feat` | new user-facing feature | minor |
-| `fix` | bug fix | patch |
-| `perf` | performance improvement | patch |
-| `revert` | reverts a previous commit | patch |
-| `feat!` / `BREAKING CHANGE:` footer | breaking API change | major |
-| `chore`, `docs`, `test`, `refactor`, `style`, `build`, `ci`, `ops` | everything else | none |
-
-**Releases are fully automated.** Merging to `main` triggers semantic-release in CI, which analyzes commits, bumps the version in `gradle.properties`, writes `CHANGELOG.md`, and publishes a GitHub Release. That release event then triggers the Docker image build and push to GHCR with semver tags and Cosign signing.
+For Copilot CLI (GitHub Copilot in terminal), see [.github/copilot-instructions.md](.github/copilot-instructions.md) for expanded documentation on environment setup, CI/CD, and Docker deployment.

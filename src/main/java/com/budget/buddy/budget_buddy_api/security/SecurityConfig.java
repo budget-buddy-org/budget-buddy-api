@@ -1,6 +1,5 @@
 package com.budget.buddy.budget_buddy_api.security;
 
-import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -19,6 +18,8 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
 import org.springframework.web.cors.CorsConfigurationSource;
+
+import javax.sql.DataSource;
 
 /**
  * Security configuration for the application. Configures HTTP security, authentication manager, password encoder, and user details manager.
@@ -64,7 +65,7 @@ public class SecurityConfig {
     return PasswordEncoderFactories.createDelegatingPasswordEncoder();
   }
 
-  @Profile("prod")
+  @Profile("!dev")
   @Bean
   CompromisedPasswordChecker compromisedPasswordChecker() {
     return new HaveIBeenPwnedRestApiPasswordChecker();

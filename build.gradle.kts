@@ -32,6 +32,7 @@ dependencies {
   val lombokMapstructBindingVersion = "0.2.0"
   val jacksonDatabindNullableVersion = "0.2.10"
   val budgetBuddyContractsVersion = "2.0.0"
+  val passayVersion = "2.0.0"
 
   implementation("com.budgetbuddy:budget-buddy-contracts:${budgetBuddyContractsVersion}")
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -42,6 +43,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-liquibase")
   implementation("org.openapitools:jackson-databind-nullable:${jacksonDatabindNullableVersion}")
   implementation("org.mapstruct:mapstruct:${mapstructVersion}")
+  implementation("org.passay:passay:${passayVersion}")
 
   compileOnly("org.projectlombok:lombok")
 

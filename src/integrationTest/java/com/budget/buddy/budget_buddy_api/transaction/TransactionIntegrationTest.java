@@ -59,8 +59,8 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
   @BeforeEach
   void setUp() throws Exception {
-    userToken = registerAndLogin("txuser", "password123");
-    otherUserToken = registerAndLogin("othertxuser", "password123");
+    userToken = registerAndLogin("txuser");
+    otherUserToken = registerAndLogin("othertxuser");
     userCategoryId = createCategory(userToken, "Food");
     otherUserCategoryId = createCategory(otherUserToken, "Other Food");
   }
