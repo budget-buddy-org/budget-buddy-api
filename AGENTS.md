@@ -1,6 +1,6 @@
-# CLAUDE.md
+# Agent Conventions & Guidance
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance for AI agents (Claude Code, Junie, etc.) when working with this repository.
 
 **For comprehensive documentation on architecture, testing, versioning, and code conventions, see [.github/SHARED.md](.github/SHARED.md).**
 
@@ -25,7 +25,7 @@ Or add `gpr.user` / `gpr.key` to `~/.gradle/gradle.properties`.
 
 **Test:**
 ```bash
-./gradlew test                  # unit tests only
+./gradlew test                  # all tests (unit + integration)
 ./gradlew integrationTest       # integration tests (requires Docker)
 ./gradlew check                 # all tests + quality checks
 ```
@@ -37,22 +37,29 @@ Or add `gpr.user` / `gpr.key` to `~/.gradle/gradle.properties`.
 
 ---
 
-## Claude-Specific Notes
+## Agent Conventions
 
-### Dev Seed Credentials
+### Error Handling
 
-For testing with the dev profile:
-- **Username:** `admin`
-- **Password:** `8a98232f-76f4-4819-b868-91682b52ad3b`
+- **RFC 9457 (Problem Details)**: All error responses must follow the Problem Details for HTTP APIs specification.
+- **Standardized Titles**: When `type` is `about:blank`, the `title` SHOULD be the same as the HTTP status phrase (e.g., "Bad Request" for 400).
+- **Field-Level Errors**: Validation exceptions (`MethodArgumentNotValidException`, `ConstraintViolationException`) must return a `Problem` containing an `errors` array with `field` and `message` properties.
+- **Request URI**: The `instance` field should contain the current request URI, retrieved using `ServletWebRequest` in `GlobalExceptionHandler`.
 
-Use these to test auth flows in local development. The seed user is inserted directly into the DB (bypassing registration), so its password is not subject to complexity validation.
+### Code Patterns
 
-When testing the `/v1/auth/register` endpoint manually, use a password that satisfies all complexity rules: 8+ characters, uppercase, lowercase, digit, special character, no whitespace. Example: `Test1ng!Pass`.
+- **Problem Details Extension**: The base `Problem` class from `budget-buddy-contracts` now includes an `errors` field for field-level validation errors. Use it directly instead of extending it for common validation cases.
+- **Validation Handling**:
+  - Prefer using `ex.getBindingResult().getFieldErrors()` for `MethodArgumentNotValidException`.
+  - Prefer using `ex.getConstraintViolations()` for `ConstraintViolationException`.
+
+---
+
+## Development Notes
 
 ### Testing Locally
 
-When working with Claude Code:
-1. Run `./gradlew test` for quick unit test feedback
+1. Run `./gradlew test` for quick all-tests feedback
 2. Use `./gradlew integrationTest --tests "..."` to debug specific integration tests
 3. Leverage `./gradlew bootRun --args='--spring.profiles.active=dev'` to test full app locally
 
@@ -62,7 +69,7 @@ When working with Claude Code:
 - **Run integration test:** `./gradlew integrationTest --tests "com.budget.buddy.budget_buddy_api.CategoryControllerIT"`
 - **Full verification:** `./gradlew check` (runs all tests, linters, SonarQube analysis)
 
-### Available Skills
+### Available Skills (Claude-specific)
 
 Use these slash commands for common workflows:
 
