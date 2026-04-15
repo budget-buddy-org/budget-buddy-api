@@ -1,3 +1,9 @@
+## [0.6.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.5.0...v0.6.0) (2026-04-15)
+
+### Features
+
+* add category sorting by name and update dev token validity ([#120](https://github.com/budget-buddy-org/budget-buddy-api/issues/120)) ([35fea9b](https://github.com/budget-buddy-org/budget-buddy-api/commit/35fea9b1ff41cec60ac010b298117ffe1c0609a5))
+
 ## [0.5.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.4.0...v0.5.0) (2026-04-12)
 
 ### Features
