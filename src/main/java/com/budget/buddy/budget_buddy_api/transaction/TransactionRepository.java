@@ -1,15 +1,16 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntityRepository;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository for Transaction entity operations using Spring Data JDBC.
@@ -25,10 +26,16 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
       """;
 
   String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_DESC_QUERY =
-      FIND_ALL_BY_FILTERS_WHERE_CLAUSE + "ORDER BY date DESC LIMIT :limit OFFSET :offset";
+      FIND_ALL_BY_FILTERS_WHERE_CLAUSE + """
+          ORDER BY date DESC, created_at DESC
+          LIMIT :limit OFFSET :offset
+          """;
 
   String FIND_ALL_BY_FILTERS_ORDER_BY_DATE_ASC_QUERY =
-      FIND_ALL_BY_FILTERS_WHERE_CLAUSE + "ORDER BY date ASC LIMIT :limit OFFSET :offset";
+      FIND_ALL_BY_FILTERS_WHERE_CLAUSE + """
+          ORDER BY date, created_at
+          LIMIT :limit OFFSET :offset
+          """;
 
   String COUNT_BY_FILTERS_QUERY = """
       SELECT COUNT(*) FROM transactions
@@ -47,9 +54,23 @@ public interface TransactionRepository extends OwnableEntityRepository<Transacti
         .map(Order::getDirection)
         .orElse(Direction.DESC);
 
-    return order.isAscending()
-        ? findAllByFilterOrderByDateAsc(filter.ownerId(), filter.start(), filter.end(), filter.categoryId(), pageable.getPageSize(), pageable.getOffset())
-        : findAllByFilterOrderByDateDesc(filter.ownerId(), filter.start(), filter.end(), filter.categoryId(), pageable.getPageSize(), pageable.getOffset());
+    if (order.isAscending()) {
+      return findAllByFilterOrderByDateAsc(
+          filter.ownerId(),
+          filter.start(),
+          filter.end(),
+          filter.categoryId(),
+          pageable.getPageSize(),
+          pageable.getOffset());
+    }
+
+    return findAllByFilterOrderByDateDesc(
+        filter.ownerId(),
+        filter.start(),
+        filter.end(),
+        filter.categoryId(),
+        pageable.getPageSize(),
+        pageable.getOffset());
   }
 
   @Query(FIND_ALL_BY_FILTERS_ORDER_BY_DATE_DESC_QUERY)

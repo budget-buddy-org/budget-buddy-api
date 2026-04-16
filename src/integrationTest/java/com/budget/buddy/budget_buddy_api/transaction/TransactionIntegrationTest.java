@@ -1,22 +1,18 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
-import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
-import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
-import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
-import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionUpdate;
-import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
-import java.time.LocalDate;
-import java.util.UUID;
+import com.budget.buddy.budget_buddy_contracts.generated.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
@@ -419,9 +415,9 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
   class List {
 
     @Test
-    void should_ReturnOnlyOwnTransactions() throws Exception {
-      createTransaction(userToken, userCategoryId);
-      createTransaction(userToken, userCategoryId);
+    void should_ReturnOnlyOwnTransactionsOrderedByDateDesc() throws Exception {
+      var txn1 = createTransaction(userToken, userCategoryId);
+      var txn2 = createTransaction(userToken, userCategoryId);
       createTransaction(otherUserToken, otherUserCategoryId);
 
       var result = mvc.get().uri("/v1/transactions")
@@ -430,7 +426,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems()).hasSize(2);
+      assertThat(page.getItems())
+          .hasSize(2)
+          .extracting(Transaction::getId)
+          .containsExactly(txn2.getId(), txn1.getId());
     }
 
     @Test
