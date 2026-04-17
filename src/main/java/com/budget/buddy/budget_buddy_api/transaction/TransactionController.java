@@ -48,8 +48,7 @@ public class TransactionController
       String sort
   ) {
     var pageable = PageRequest.of(page, size, buildSort(sort));
-    var localType = type != null ? com.budget.buddy.budget_buddy_api.transaction.TransactionType.valueOf(type.name()) : null;
-    var filter = TransactionFilter.of(categoryId, start, end, localType);
+    var filter = TransactionFilter.of(categoryId, start, end, mapper.toModel(type));
     var items = service.list(filter, pageable);
     var total = service.count(filter);
 
