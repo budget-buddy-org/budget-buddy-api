@@ -2,6 +2,7 @@ package com.budget.buddy.budget_buddy_api.transaction;
 
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
 import com.budget.buddy.budget_buddy_contracts.generated.model.*;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     var body = new TransactionWrite()
         .categoryId(categoryId)
         .amount(1000L)
-        .type(TransactionWrite.TypeEnum.EXPENSE)
+        .type(TransactionType.EXPENSE)
         .currency("EUR")
         .date(LocalDate.of(2026, 3, 1))
         .description(description);
@@ -73,7 +74,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       assertThat(transaction.getId()).isNotNull();
       assertThat(transaction.getAmount()).isEqualTo(1000);
       assertThat(transaction.getCurrency()).isEqualTo("EUR");
-      assertThat(transaction.getType()).isEqualTo(Transaction.TypeEnum.EXPENSE);
+      assertThat(transaction.getType()).isEqualTo(TransactionType.EXPENSE);
     }
 
     @Test
@@ -84,7 +85,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
               .amount(500L)
-              .type(TransactionWrite.TypeEnum.INCOME)
+              .type(TransactionType.INCOME)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
           .exchange();
@@ -102,7 +103,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .content(json(new TransactionWrite()
               .categoryId(otherUserCategoryId)
               .amount(1000L)
-              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .type(TransactionType.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
           .exchange();
@@ -118,7 +119,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .content(json(new TransactionWrite()
               .categoryId(UUID.randomUUID())
               .amount(1000L)
-              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .type(TransactionType.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
           .exchange();
@@ -133,7 +134,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
               .amount(1000L)
-              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .type(TransactionType.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
           .exchange();
@@ -200,7 +201,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var replaceBody = new TransactionWrite()
           .categoryId(userCategoryId)
           .amount(5000L)
-          .type(TransactionWrite.TypeEnum.INCOME)
+          .type(TransactionType.INCOME)
           .currency("USD")
           .date(LocalDate.of(2026, 6, 1));
 
@@ -216,7 +217,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .returns(created.getId(), Transaction::getId)
           .returns(5000L, Transaction::getAmount)
           .returns("USD", Transaction::getCurrency)
-          .returns(Transaction.TypeEnum.INCOME, Transaction::getType);
+          .returns(TransactionType.INCOME, Transaction::getType);
       assertThat(replaced.getDescription())
           .as("Description should be cleared when not provided in PUT body")
           .isNull();
@@ -232,7 +233,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .content(json(new TransactionWrite()
               .categoryId(otherUserCategoryId)
               .amount(1000L)
-              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .type(TransactionType.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
           .exchange();
@@ -250,7 +251,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
               .amount(1000L)
-              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .type(TransactionType.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
           .exchange();
@@ -267,7 +268,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
               .amount(1000L)
-              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .type(TransactionType.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 3, 1))))
           .exchange();
@@ -458,7 +459,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
               .amount(100L)
-              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .type(TransactionType.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 1, 1))))
           .exchange();
@@ -469,7 +470,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .content(json(new TransactionWrite()
               .categoryId(userCategoryId)
               .amount(200L)
-              .type(TransactionWrite.TypeEnum.EXPENSE)
+              .type(TransactionType.EXPENSE)
               .currency("EUR")
               .date(LocalDate.of(2026, 6, 1))))
           .exchange();

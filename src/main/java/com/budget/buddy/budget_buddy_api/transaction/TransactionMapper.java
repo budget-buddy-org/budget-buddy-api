@@ -3,11 +3,12 @@ package com.budget.buddy.budget_buddy_api.transaction;
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityMapper;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionUpdate;
-import java.util.Currency;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
+
+import java.util.Currency;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface TransactionMapper
@@ -20,4 +21,6 @@ public interface TransactionMapper
   default String toCurrencyCode(Currency currency) {
     return currency != null ? currency.getCurrencyCode() : null;
   }
+
+  TransactionType toModel(com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType source);
 }

@@ -1,15 +1,10 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.budget.buddy.budget_buddy_api.BaseIntegrationTest;
 import com.budget.buddy.budget_buddy_api.category.CategoryEntity;
 import com.budget.buddy.budget_buddy_api.category.CategoryRepository;
 import com.budget.buddy.budget_buddy_api.user.UserEntity;
 import com.budget.buddy.budget_buddy_api.user.UserRepository;
-import java.time.LocalDate;
-import java.util.Currency;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +13,12 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+
+import java.time.LocalDate;
+import java.util.Currency;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("TransactionRepository Integration Tests")
 class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
@@ -72,8 +73,17 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
     t2.setCategoryId(categoryId);
     var expectedId = transactionRepository.save(t2).getId();
 
+    var t3 = new TransactionEntity();
+    t3.setAmount(200L);
+    t3.setCurrency(Currency.getInstance("USD"));
+    t3.setType(TransactionType.INCOME);
+    t3.setDate(LocalDate.now());
+    t3.setOwnerId(ownerId);
+    t3.setCategoryId(categoryId);
+    t3.setType(TransactionType.INCOME);
+
     // When
-    var filter = new TransactionFilter(ownerId, categoryId, LocalDate.now(), null);
+    var filter = new TransactionFilter(ownerId, categoryId, LocalDate.now(), null, TransactionType.EXPENSE);
     var filtered = transactionRepository.findAllByFilter(filter, PageRequest.of(0, 10, direction, "date"));
 
     // Then
@@ -94,10 +104,21 @@ class TransactionRepositoryIntegrationTest extends BaseIntegrationTest {
     t1.setDate(LocalDate.now());
     t1.setOwnerId(ownerId);
     t1.setCategoryId(categoryId);
+    t1.setType(TransactionType.EXPENSE);
     transactionRepository.save(t1);
 
+    var t2 = new TransactionEntity();
+    t2.setAmount(100L);
+    t2.setCurrency(Currency.getInstance("USD"));
+    t2.setType(TransactionType.EXPENSE);
+    t2.setDate(LocalDate.now());
+    t2.setOwnerId(ownerId);
+    t2.setCategoryId(categoryId);
+    t2.setType(TransactionType.INCOME);
+    transactionRepository.save(t2);
+
     // When
-    var filter = new TransactionFilter(ownerId, categoryId, null, null);
+    var filter = new TransactionFilter(ownerId, categoryId, null, null, TransactionType.EXPENSE);
     long count = transactionRepository.countByFilter(filter);
 
     // Then
