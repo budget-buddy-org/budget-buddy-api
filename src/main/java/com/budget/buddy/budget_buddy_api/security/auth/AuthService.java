@@ -1,6 +1,5 @@
 package com.budget.buddy.budget_buddy_api.security.auth;
 
-import com.budget.buddy.budget_buddy_api.security.auth.token.AuthTokenService;
 import com.budget.buddy.budget_buddy_api.security.exception.UsernameAlreadyTakenException;
 import com.budget.buddy.budget_buddy_api.security.refresh.token.RefreshTokenService;
 import com.budget.buddy.budget_buddy_api.user.UserService;
@@ -8,23 +7,20 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.AuthToken;
 import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service for authentication operations. Handles user registration, login, token refresh and logout.
+ * Service for authentication operations. Handles user registration and logout.
+ * Token issuance (login/refresh) is no longer handled locally — Zitadel issues JWTs.
+ * These methods will be fully removed in issue #117.
  */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
-  private final AuthenticationManager authenticationManager;
   private final UserService userService;
   private final RefreshTokenService refreshTokenService;
-  private final AuthTokenService authTokenService;
   private final RegisterRequestValidator registerRequestValidator;
 
   /**
@@ -40,35 +36,21 @@ public class AuthService {
   }
 
   /**
-   * Authenticate user and issue access + opaque refresh token
-   *
-   * @param username user name
-   * @param password user password
-   * @return AuthToken containing access and refresh tokens
+   * @deprecated Token issuance moved to Zitadel. Will be removed in #117.
    */
+  @Deprecated(forRemoval = true)
   @Transactional
   public AuthToken login(String username, String password) {
-    authenticationManager.authenticate(
-        UsernamePasswordAuthenticationToken.unauthenticated(username, password));
-
-    var user = userService.findByUsername(username)
-        .orElseThrow(() -> UsernameNotFoundException.fromUsername(username));
-
-    return authTokenService.createToken(user);
+    throw new UnsupportedOperationException("Token issuance moved to Zitadel (see #117)");
   }
 
   /**
-   * Refresh access token using opaque refresh token with rotation
-   *
-   * @param refreshToken opaque refresh token
-   * @return AuthToken with new access and refresh tokens
+   * @deprecated Token issuance moved to Zitadel. Will be removed in #117.
    */
+  @Deprecated(forRemoval = true)
   @Transactional
   public AuthToken refresh(String refreshToken) {
-    var tokenEntity = refreshTokenService.rotate(refreshToken);
-    var user = userService.requireEnabledUser(tokenEntity.getUserId());
-
-    return authTokenService.createToken(user);
+    throw new UnsupportedOperationException("Token issuance moved to Zitadel (see #117)");
   }
 
   /**

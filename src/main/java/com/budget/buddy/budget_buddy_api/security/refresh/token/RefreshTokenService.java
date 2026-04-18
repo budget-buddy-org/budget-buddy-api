@@ -1,6 +1,5 @@
 package com.budget.buddy.budget_buddy_api.security.refresh.token;
 
-import com.budget.buddy.budget_buddy_api.security.TokenService;
 import com.budget.buddy.budget_buddy_api.user.UserDto;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -19,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
-public class RefreshTokenService implements TokenService<String> {
+public class RefreshTokenService {
 
   private final Clock clock;
   private final RefreshTokenProvider tokenProvider;
@@ -34,7 +33,6 @@ public class RefreshTokenService implements TokenService<String> {
    * @return raw opaque refresh token string
    */
   @Transactional
-  @Override
   public String createToken(UserDto user) {
     var rawToken = tokenProvider.get();
     var now = OffsetDateTime.now(clock);

@@ -58,8 +58,7 @@ docker compose logs -f app
 | `DB_NAME` | PostgreSQL database name |
 | `DB_USER` | PostgreSQL username |
 | `DB_PASSWORD` | PostgreSQL password |
-| `BUDGET_BUDDY_API_ACCESS_TOKEN_SECRET` | JWT signing secret (min 32 characters) |
-| `BUDGET_BUDDY_API_ACCESS_TOKEN_VALIDITY_SECONDS` | Access token validity in seconds |
+| `OIDC_ISSUER_URI` | OIDC issuer URI for JWT validation (e.g. `https://<zitadel-host>`) |
 | `BUDGET_BUDDY_API_REFRESH_TOKEN_VALIDITY_SECONDS` | Refresh token validity in seconds |
 
 ## API

@@ -1,31 +1,29 @@
 package com.budget.buddy.budget_buddy_api;
 
-import com.budget.buddy.budget_buddy_contracts.generated.model.AuthToken;
-import com.budget.buddy.budget_buddy_contracts.generated.model.LoginRequest;
-import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
+import com.budget.buddy.budget_buddy_api.user.UserEntity;
+import com.budget.buddy.budget_buddy_api.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import tools.jackson.databind.ObjectMapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.UUID;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 @AutoConfigureMockMvc
 public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
-
-  /**
-   * Strong password that satisfies all complexity rules;
-   * use this in tests that don't care about the password value.
-   */
-  protected static final String STRONG_TEST_PASSWORD = "Str0ng!Pass#42";
 
   @Autowired
   protected ObjectMapper objectMapper;
 
   @Autowired
   protected MockMvcTester mvc;
+
+  @Autowired
+  private UserRepository userRepository;
 
   protected String json(Object obj) {
     return objectMapper.writeValueAsString(obj);
@@ -35,30 +33,25 @@ public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
     return objectMapper.readValue(result.getResponse().getContentAsString(), type);
   }
 
-  protected String registerAndLogin(String username) throws Exception {
-    register(username, STRONG_TEST_PASSWORD);
-    return login(username, STRONG_TEST_PASSWORD).getAccessToken();
+  /**
+   * Creates a test user in the database and returns their ID.
+   * The user is created with a random username and a dummy password.
+   */
+  protected String createTestUser() {
+    var user = UserEntity.builder()
+        .username("testuser-" + UUID.randomUUID())
+        .password("{noop}unused")
+        .enabled(true)
+        .build();
+    var saved = userRepository.save(user);
+    return saved.getId().toString();
   }
 
-  protected void register(String username, String password) {
-    var exchange = mvc.post().uri("/v1/auth/register")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new RegisterRequest().username(username).password(password)))
-        .exchange();
-
-    assertThat(exchange).hasStatus2xxSuccessful();
-  }
-
-  protected AuthToken login(String username, String password) throws Exception {
-    var exchange = mvc.post().uri("/v1/auth/login")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new LoginRequest().username(username).password(password)))
-        .exchange();
-
-    assertThat(exchange).hasStatus2xxSuccessful();
-
-    return objectMapper.readValue(
-        exchange.getResponse().getContentAsString(), AuthToken.class);
+  /**
+   * Returns a JWT request post-processor for the given user ID.
+   */
+  protected static RequestPostProcessor jwtForUser(String userId) {
+    return jwt().jwt(j -> j.subject(userId));
   }
 
 }
