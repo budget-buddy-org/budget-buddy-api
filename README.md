@@ -9,7 +9,7 @@ REST API for personal budget management. Built with Spring Boot 4 and PostgreSQL
 
 - **Java 25** / Spring Boot 4.0.5
 - **Spring Data JDBC** + PostgreSQL
-- **Spring Security** — JWT (access) + opaque refresh tokens
+- **Spring Security** — OIDC resource server (Zitadel) + opaque refresh tokens
 - **Liquibase** — database migrations
 - **Budget Buddy Contracts** — external OpenAPI-based contracts
 - **Testcontainers** — integration tests
@@ -29,6 +29,9 @@ The project uses Spring Docker Compose — PostgreSQL starts automatically when 
 # Clone the repository
 git clone https://github.com/your-username/budget-buddy-api.git
 cd budget-buddy-api
+
+# Set OIDC issuer URI (required for JWT validation)
+export OIDC_ISSUER_URI=https://<your-zitadel-host>
 
 # Run with dev profile
 ./gradlew bootRun --args='--spring.profiles.active=dev'
@@ -65,12 +68,7 @@ docker compose logs -f app
 
 ### Authentication
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/v1/auth/register` | — | Register new user |
-| `POST` | `/v1/auth/login` | — | Login, returns token pair |
-| `POST` | `/v1/auth/refresh` | — | Refresh access token |
-| `POST` | `/v1/auth/logout` | ✓ | Invalidate all refresh tokens |
+Authentication is handled by an external OIDC provider (Zitadel). The API validates JWTs issued by the provider using the JWKS endpoint discovered from `OIDC_ISSUER_URI`.
 
 ### Categories
 
@@ -94,22 +92,7 @@ docker compose logs -f app
 | `PATCH` | `/v1/transactions/{transactionId}` | Update transaction (partial update) |
 | `DELETE` | `/v1/transactions/{transactionId}` | Delete transaction |
 
-All endpoints except auth require `Authorization: Bearer <access_token>`.
-
-### Password Requirements
-
-Passwords submitted to `/v1/auth/register` must satisfy all of the following rules:
-
-| Rule | Requirement |
-|---|---|
-| Length | 8–128 characters |
-| Uppercase | At least 1 uppercase letter (A–Z) |
-| Lowercase | At least 1 lowercase letter (a–z) |
-| Digit | At least 1 digit (0–9) |
-| Special character | At least 1 special character (e.g. `!`, `#`, `@`) |
-| Whitespace | Not allowed |
-
-Passwords that violate any rule are rejected with `400 Bad Request`.
+All endpoints require `Authorization: Bearer <access_token>` (JWT issued by Zitadel).
 
 ## Building
 
