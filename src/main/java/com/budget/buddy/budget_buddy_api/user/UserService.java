@@ -8,15 +8,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for managing users.
  */
+@Slf4j
 @Transactional(readOnly = true)
 @Service
 public class UserService extends AbstractBaseEntityService<UserEntity, UUID, UserDto, RegisterRequest, Object> {
@@ -64,6 +67,41 @@ public class UserService extends AbstractBaseEntityService<UserEntity, UUID, Use
   public Optional<UserDto> findByOidcSubject(String oidcSubject) {
     return repository.findByOidcSubject(oidcSubject)
         .map(mapper::toModel);
+  }
+
+  /**
+   * Finds or creates a local user for the given OIDC subject.
+   * On first login, a new user is provisioned automatically (JIT provisioning).
+   *
+   * @param oidcSubject the OIDC subject identifier (JWT sub claim)
+   * @param jwt the JWT token, used to extract display name for new users
+   * @return the local user's UUID
+   */
+  @Transactional
+  public UUID findOrCreateByOidcSubject(String oidcSubject, Jwt jwt) {
+    return repository.findByOidcSubject(oidcSubject)
+        .map(UserEntity::getId)
+        .orElseGet(() -> {
+          log.info("Provisioning new user for OIDC subject: {}", oidcSubject);
+          var user = UserEntity.builder()
+              .oidcSubject(oidcSubject)
+              .username(resolveUsername(jwt))
+              .enabled(true)
+              .build();
+          return repository.save(user).getId();
+        });
+  }
+
+  private static String resolveUsername(Jwt jwt) {
+    var preferred = jwt.getClaimAsString("preferred_username");
+    if (preferred != null && !preferred.isBlank()) {
+      return preferred;
+    }
+    var email = jwt.getClaimAsString("email");
+    if (email != null && !email.isBlank()) {
+      return email;
+    }
+    return jwt.getSubject();
   }
 
   @Transactional

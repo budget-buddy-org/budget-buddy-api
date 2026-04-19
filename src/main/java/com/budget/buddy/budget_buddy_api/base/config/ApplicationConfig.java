@@ -1,12 +1,16 @@
 package com.budget.buddy.budget_buddy_api.base.config;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnerIdProvider;
-import com.budget.buddy.budget_buddy_api.security.auth.AuthUtils;
+import com.budget.buddy.budget_buddy_api.security.oidc.OidcUserProvisioningFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.util.UUID;
 import java.util.function.Supplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Configuration
 public class ApplicationConfig {
@@ -22,14 +26,24 @@ public class ApplicationConfig {
   }
 
   /**
-   * Provides the ID of the currently authenticated user by reading the JWT subject from the
-   * active security context.
-   *
-   * @return an {@link OwnerIdProvider} backed by the current request's security context
+   * Provides the local user UUID set by {@link OidcUserProvisioningFilter}.
+   * The filter runs after JWT authentication and maps the OIDC subject to a local user,
+   * storing the resulting UUID as a request attribute.
    */
   @Bean
   OwnerIdProvider<UUID> ownerIdProvider() {
-    return () -> AuthUtils.requireCurrentUserId(UUID::fromString);
+    return () -> {
+      var attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+      if (attrs == null) {
+        throw new InvalidBearerTokenException("No request context available.");
+      }
+      HttpServletRequest request = attrs.getRequest();
+      var userId = (UUID) request.getAttribute(OidcUserProvisioningFilter.USER_ID_ATTRIBUTE);
+      if (userId == null) {
+        throw new InvalidBearerTokenException("Current user is not authenticated.");
+      }
+      return userId;
+    };
   }
 
 }
