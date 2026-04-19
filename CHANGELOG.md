@@ -1,3 +1,13 @@
+## [1.0.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.7.0...v1.0.0) (2026-04-19)
+
+### ⚠ BREAKING CHANGES
+
+* migrate authentication to external OIDC provider (#127)
+
+### Features
+
+* migrate authentication to external OIDC provider ([#127](https://github.com/budget-buddy-org/budget-buddy-api/issues/127)) ([2c41bc5](https://github.com/budget-buddy-org/budget-buddy-api/commit/2c41bc52c7ce5621d9fe2d57721a986df6dc2908)), closes [#123](https://github.com/budget-buddy-org/budget-buddy-api/issues/123) [#116](https://github.com/budget-buddy-org/budget-buddy-api/issues/116) [#117](https://github.com/budget-buddy-org/budget-buddy-api/issues/117)
+
 ## [0.7.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v0.6.1...v0.7.0) (2026-04-17)
 
 ### Features
