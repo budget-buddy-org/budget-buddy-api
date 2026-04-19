@@ -30,8 +30,8 @@ public class UserEntity extends AuditableEntity implements BaseEntity<UUID> {
   @Column("username")
   private String username;
 
-  @Column("password")
-  private String password;
+  @Column("oidc_subject")
+  private String oidcSubject;
 
   @Column("enabled")
   private boolean enabled;

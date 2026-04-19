@@ -4,21 +4,15 @@ import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityMapper;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
 import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class UserMapper implements BaseEntityMapper<UserEntity, UserDto, RegisterRequest, Object, Object> {
-
-  private final PasswordEncoder passwordEncoder;
 
   @Override
   public UserEntity toEntity(RegisterRequest request) {
     return UserEntity.builder()
         .username(request.getUsername())
-        .password(passwordEncoder.encode(request.getPassword()))
         .enabled(true)
         .build();
   }

@@ -2,26 +2,15 @@ package com.budget.buddy.budget_buddy_api.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
 import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-@ExtendWith(MockitoExtension.class)
 class UserMapperTest {
 
-  @Mock
-  private PasswordEncoder passwordEncoder;
-
-  @InjectMocks
-  private UserMapper userMapper;
+  private final UserMapper userMapper = new UserMapper();
 
   @Nested
   class ToEntity {
@@ -32,9 +21,6 @@ class UserMapperTest {
       var request = new RegisterRequest();
       request.setUsername("testuser");
       request.setPassword("password123");
-      var encodedPassword = "encoded_password";
-
-      when(passwordEncoder.encode(request.getPassword())).thenReturn(encodedPassword);
 
       // When
       var entity = userMapper.toEntity(request);
@@ -44,7 +30,6 @@ class UserMapperTest {
           .as("Mapped user entity should have correct values and be enabled by default")
           .isNotNull()
           .returns(request.getUsername(), UserEntity::getUsername)
-          .returns(encodedPassword, UserEntity::getPassword)
           .returns(true, UserEntity::isEnabled);
     }
   }
@@ -59,8 +44,8 @@ class UserMapperTest {
       var entity = UserEntity.builder()
           .id(userId)
           .username("testuser")
+          .oidcSubject("12345")
           .enabled(true)
-          .password("some-password")
           .build();
 
       // When
@@ -81,7 +66,6 @@ class UserMapperTest {
 
     @Test
     void should_ThrowException_On_ToModelList() {
-      // When & Then
       assertThatThrownBy(() -> userMapper.toModelList(null))
           .as("toModelList operation should be unsupported for users")
           .isInstanceOf(UnsupportedOperationException.class);
@@ -89,7 +73,6 @@ class UserMapperTest {
 
     @Test
     void should_ThrowException_On_ToPageResponse() {
-      // When & Then
       assertThatThrownBy(() -> userMapper.toPageResponse(null, null))
           .as("toPageResponse operation should be unsupported for users")
           .isInstanceOf(UnsupportedOperationException.class);
@@ -97,7 +80,6 @@ class UserMapperTest {
 
     @Test
     void should_ThrowException_On_PatchEntity() {
-      // When & Then
       assertThatThrownBy(() -> userMapper.patchEntity(null, null))
           .as("patchEntity operation should be unsupported for users")
           .isInstanceOf(UnsupportedOperationException.class);
@@ -105,7 +87,6 @@ class UserMapperTest {
 
     @Test
     void should_ThrowException_On_ReplaceEntity() {
-      // When & Then
       assertThatThrownBy(() -> userMapper.replaceEntity(null, null))
           .as("replaceEntity operation should be unsupported for users")
           .isInstanceOf(UnsupportedOperationException.class);

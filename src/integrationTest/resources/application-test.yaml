@@ -12,7 +12,3 @@ security:
   cors:
     allowed-origin-patterns:
       - "http://localhost:[*]"
-  refresh-token:
-    validity-seconds: 1209600 # 14 days
-    cleanup:
-      enabled: false

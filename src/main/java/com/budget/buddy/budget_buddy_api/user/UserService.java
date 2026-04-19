@@ -23,18 +23,15 @@ public class UserService extends AbstractBaseEntityService<UserEntity, UUID, Use
 
   private final UserRepository repository;
   private final UserMapper mapper;
-  private final AuthorityRepository authorityRepository;
 
   public UserService(
       UserRepository repository,
       UserMapper mapper,
-      AuthorityRepository authorityRepository,
       Set<BaseEntityValidator<UserEntity>> validators
   ) {
     super(repository, mapper, validators);
     this.repository = repository;
     this.mapper = mapper;
-    this.authorityRepository = authorityRepository;
   }
 
   /**
@@ -58,12 +55,15 @@ public class UserService extends AbstractBaseEntityService<UserEntity, UUID, Use
         .map(mapper::toModel);
   }
 
-  @Transactional
-  @Override
-  protected UserEntity createInternal(RegisterRequest createRequest) {
-    var savedUser = super.createInternal(createRequest);
-    authorityRepository.addDefaultAuthorityToUser(savedUser.getUsername());
-    return savedUser;
+  /**
+   * Finds a user by OIDC subject (JWT sub claim).
+   *
+   * @param oidcSubject the OIDC subject identifier
+   * @return an {@link Optional} containing the user, or empty if not found
+   */
+  public Optional<UserDto> findByOidcSubject(String oidcSubject) {
+    return repository.findByOidcSubject(oidcSubject)
+        .map(mapper::toModel);
   }
 
   @Transactional

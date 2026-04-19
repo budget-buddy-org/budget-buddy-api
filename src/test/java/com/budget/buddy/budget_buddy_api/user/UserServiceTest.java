@@ -25,14 +25,12 @@ class UserServiceTest {
   private UserRepository repository;
   @Mock
   private UserMapper mapper;
-  @Mock
-  private AuthorityRepository authorityRepository;
 
   private UserService userService;
 
   @BeforeEach
   void setUp() {
-    userService = new UserService(repository, mapper, authorityRepository, Collections.emptySet());
+    userService = new UserService(repository, mapper, Collections.emptySet());
   }
 
   @Nested
@@ -83,21 +81,58 @@ class UserServiceTest {
   }
 
   @Nested
+  class FindByOidcSubjectTests {
+
+    @Test
+    void should_ReturnUserDto_When_OidcSubjectExists() {
+      // Given
+      var oidcSubject = "123456789";
+      var entity = new UserEntity();
+      var dto = new UserDto(UUID.randomUUID(), "testUser", true);
+
+      when(repository.findByOidcSubject(oidcSubject)).thenReturn(Optional.of(entity));
+      when(mapper.toModel(entity)).thenReturn(dto);
+
+      // When
+      var result = userService.findByOidcSubject(oidcSubject);
+
+      // Then
+      assertThat(result)
+          .as("Result should contain the expected UserDto")
+          .contains(dto);
+    }
+
+    @Test
+    void should_ReturnEmpty_When_OidcSubjectNotFound() {
+      // Given
+      when(repository.findByOidcSubject("nonexistent")).thenReturn(Optional.empty());
+
+      // When
+      var result = userService.findByOidcSubject("nonexistent");
+
+      // Then
+      assertThat(result).isEmpty();
+    }
+  }
+
+  @Nested
   class CreateInternalTests {
 
     @Test
-    void should_CreateUserAndAddAuthority() {
+    void should_CreateUser() {
       // Given
       var username = "newuser";
       var request = new RegisterRequest(username, "password");
       var entity = new UserEntity();
       entity.setUsername(username);
+      var dto = new UserDto(UUID.randomUUID(), username, true);
 
-      when(repository.save(any(UserEntity.class))).thenReturn(entity);
       when(mapper.toEntity(request)).thenReturn(new UserEntity());
+      when(repository.save(any(UserEntity.class))).thenReturn(entity);
+      when(mapper.toModel(entity)).thenReturn(dto);
 
       // When
-      var result = userService.createInternal(request);
+      var result = userService.create(request);
 
       // Then
       assertThat(result)
@@ -105,7 +140,6 @@ class UserServiceTest {
           .isNotNull();
 
       verify(repository).save(any(UserEntity.class));
-      verify(authorityRepository).addDefaultAuthorityToUser(username);
     }
   }
 
@@ -154,24 +188,15 @@ class UserServiceTest {
 
     @Test
     void should_ThrowException_On_Update() {
-      // Given
       var id = UUID.randomUUID();
-      var patch = new Object();
-
-      // When & Then
-      assertThatThrownBy(() -> userService.update(id, patch))
-          .as("Update operation should be unsupported for users")
+      assertThatThrownBy(() -> userService.update(id, new Object()))
           .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test
     void should_ThrowException_On_Delete() {
-      // Given
       var id = UUID.randomUUID();
-
-      // When & Then
       assertThatThrownBy(() -> userService.delete(id))
-          .as("Delete operation should be unsupported for users")
           .isInstanceOf(UnsupportedOperationException.class);
     }
 

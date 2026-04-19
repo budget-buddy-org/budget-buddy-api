@@ -35,12 +35,11 @@ public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
 
   /**
    * Creates a test user in the database and returns their ID.
-   * The user is created with a random username and a dummy password.
    */
   protected String createTestUser() {
     var user = UserEntity.builder()
         .username("testuser-" + UUID.randomUUID())
-        .password("{noop}unused")
+        .oidcSubject("sub-" + UUID.randomUUID())
         .enabled(true)
         .build();
     var saved = userRepository.save(user);
