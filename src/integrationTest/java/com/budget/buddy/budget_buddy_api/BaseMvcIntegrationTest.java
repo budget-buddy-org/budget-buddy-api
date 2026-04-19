@@ -1,7 +1,5 @@
 package com.budget.buddy.budget_buddy_api;
 
-import com.budget.buddy.budget_buddy_api.user.UserEntity;
-import com.budget.buddy.budget_buddy_api.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
@@ -22,9 +20,6 @@ public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
   @Autowired
   protected MockMvcTester mvc;
 
-  @Autowired
-  private UserRepository userRepository;
-
   protected String json(Object obj) {
     return objectMapper.writeValueAsString(obj);
   }
@@ -34,23 +29,18 @@ public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
   }
 
   /**
-   * Creates a test user in the database and returns their ID.
+   * Creates a unique OIDC subject for test isolation.
+   * The provisioning filter will auto-create the local user on first request.
    */
   protected String createTestUser() {
-    var user = UserEntity.builder()
-        .username("testuser-" + UUID.randomUUID())
-        .oidcSubject("sub-" + UUID.randomUUID())
-        .enabled(true)
-        .build();
-    var saved = userRepository.save(user);
-    return saved.getId().toString();
+    return "test-sub-" + UUID.randomUUID();
   }
 
   /**
-   * Returns a JWT request post-processor for the given user ID.
+   * Returns a JWT request post-processor for the given OIDC subject.
    */
-  protected static RequestPostProcessor jwtForUser(String userId) {
-    return jwt().jwt(j -> j.subject(userId));
+  protected static RequestPostProcessor jwtForUser(String oidcSubject) {
+    return jwt().jwt(j -> j.subject(oidcSubject));
   }
 
 }
