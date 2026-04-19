@@ -9,7 +9,7 @@ REST API for personal budget management. Built with Spring Boot 4 and PostgreSQL
 
 - **Java 25** / Spring Boot 4.0.5
 - **Spring Data JDBC** + PostgreSQL
-- **Spring Security** — OIDC resource server (Zitadel) + opaque refresh tokens
+- **Spring Security** — stateless OIDC resource server with JWT validation
 - **Liquibase** — database migrations
 - **Budget Buddy Contracts** — external OpenAPI-based contracts
 - **Testcontainers** — integration tests
@@ -62,13 +62,12 @@ docker compose logs -f app
 | `DB_USER` | PostgreSQL username |
 | `DB_PASSWORD` | PostgreSQL password |
 | `OIDC_ISSUER_URI` | OIDC issuer URI for JWT validation (e.g. `https://<zitadel-host>`) |
-| `BUDGET_BUDDY_API_REFRESH_TOKEN_VALIDITY_SECONDS` | Refresh token validity in seconds |
 
 ## API
 
 ### Authentication
 
-Authentication is handled by an external OIDC provider (Zitadel). The API validates JWTs issued by the provider using the JWKS endpoint discovered from `OIDC_ISSUER_URI`.
+Authentication is handled by an external OIDC provider. The API is a stateless resource server that validates JWTs using the JWKS endpoint discovered from `OIDC_ISSUER_URI`. On first authenticated request, a local user is automatically provisioned (JIT provisioning) by mapping the JWT `sub` claim to a local `oidc_subject` field.
 
 ### Categories
 
@@ -92,7 +91,7 @@ Authentication is handled by an external OIDC provider (Zitadel). The API valida
 | `PATCH` | `/v1/transactions/{transactionId}` | Update transaction (partial update) |
 | `DELETE` | `/v1/transactions/{transactionId}` | Delete transaction |
 
-All endpoints require `Authorization: Bearer <access_token>` (JWT issued by Zitadel).
+All endpoints require `Authorization: Bearer <access_token>` (JWT issued by the OIDC provider).
 
 ## Building
 
