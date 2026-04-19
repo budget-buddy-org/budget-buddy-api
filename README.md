@@ -71,25 +71,25 @@ Authentication is handled by an external OIDC provider. The API is a stateless r
 
 ### Categories
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/v1/categories` | List categories |
-| `POST` | `/v1/categories` | Create category |
-| `GET` | `/v1/categories/{categoryId}` | Get category |
-| `PUT` | `/v1/categories/{categoryId}` | Replace category (full update) |
-| `PATCH` | `/v1/categories/{categoryId}` | Update category (partial update) |
-| `DELETE` | `/v1/categories/{categoryId}` | Delete category |
+| Method   | Endpoint                      | Description                      |
+|----------|-------------------------------|----------------------------------|
+| `GET`    | `/v1/categories`              | List categories                  |
+| `POST`   | `/v1/categories`              | Create category                  |
+| `GET`    | `/v1/categories/{categoryId}` | Get category                     |
+| `PUT`    | `/v1/categories/{categoryId}` | Replace category (full update)   |
+| `PATCH`  | `/v1/categories/{categoryId}` | Update category (partial update) |
+| `DELETE` | `/v1/categories/{categoryId}` | Delete category                  |
 
 ### Transactions
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/v1/transactions` | List transactions (with filters) |
-| `POST` | `/v1/transactions` | Create transaction |
-| `GET` | `/v1/transactions/{transactionId}` | Get transaction |
-| `PUT` | `/v1/transactions/{transactionId}` | Replace transaction (full update) |
-| `PATCH` | `/v1/transactions/{transactionId}` | Update transaction (partial update) |
-| `DELETE` | `/v1/transactions/{transactionId}` | Delete transaction |
+| Method   | Endpoint                           | Description                         |
+|----------|------------------------------------|-------------------------------------|
+| `GET`    | `/v1/transactions`                 | List transactions (with filters)    |
+| `POST`   | `/v1/transactions`                 | Create transaction                  |
+| `GET`    | `/v1/transactions/{transactionId}` | Get transaction                     |
+| `PUT`    | `/v1/transactions/{transactionId}` | Replace transaction (full update)   |
+| `PATCH`  | `/v1/transactions/{transactionId}` | Update transaction (partial update) |
+| `DELETE` | `/v1/transactions/{transactionId}` | Delete transaction                  |
 
 All endpoints require `Authorization: Bearer <access_token>` (JWT issued by the OIDC provider).
 
