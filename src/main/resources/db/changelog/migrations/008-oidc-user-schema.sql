@@ -24,7 +24,7 @@ ALTER TABLE users ADD COLUMN oidc_subject VARCHAR(255) NOT NULL UNIQUE;
 
 --rollback ALTER TABLE users DROP COLUMN oidc_subject;
 --rollback ALTER TABLE users ADD COLUMN enabled BOOLEAN DEFAULT TRUE NOT NULL;
---rollback ALTER TABLE users ADD COLUMN username VARCHAR(255) NOT NULL DEFAULT '';
+--rollback ALTER TABLE users ADD COLUMN username VARCHAR(255) NOT NULL UNIQUE DEFAULT '';
 --rollback ALTER TABLE users ADD COLUMN password VARCHAR(255) NOT NULL DEFAULT '';
 --rollback CREATE TABLE authorities (username VARCHAR(255) NOT NULL, authority VARCHAR(255) NOT NULL, FOREIGN KEY (username) REFERENCES users (username) ON DELETE CASCADE, UNIQUE (username, authority));
 --rollback CREATE TABLE refresh_tokens (id UUID PRIMARY KEY, token_hash CHAR(64) NOT NULL UNIQUE, user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE, expires_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ NOT NULL);

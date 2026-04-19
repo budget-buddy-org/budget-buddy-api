@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -42,6 +43,11 @@ public class OidcUserProvisioningFilter extends OncePerRequestFilter {
 
     if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
       var oidcSubject = jwt.getSubject();
+
+      if (oidcSubject == null) {
+        throw new InsufficientAuthenticationException("JWT subject is missing");
+      }
+
       UUID localUserId = userService.findOrCreateByOidcSubject(oidcSubject);
       request.setAttribute(USER_ID_ATTRIBUTE, localUserId);
     }
