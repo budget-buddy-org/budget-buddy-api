@@ -1,16 +1,10 @@
 package com.budget.buddy.budget_buddy_api.user;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.base.AbstractBaseEntityService;
-import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
-import com.budget.buddy.budget_buddy_contracts.generated.model.RegisterRequest;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -18,45 +12,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for managing users.
+ * Users are provisioned automatically via JIT provisioning on first OIDC login.
  */
 @Slf4j
 @Transactional(readOnly = true)
 @Service
-public class UserService extends AbstractBaseEntityService<UserEntity, UUID, UserDto, RegisterRequest, Object> {
+@RequiredArgsConstructor
+public class UserService {
 
   private final UserRepository repository;
-  private final UserMapper mapper;
-
-  public UserService(
-      UserRepository repository,
-      UserMapper mapper,
-      Set<BaseEntityValidator<UserEntity>> validators
-  ) {
-    super(repository, mapper, validators);
-    this.repository = repository;
-    this.mapper = mapper;
-  }
-
-  /**
-   * Checks if a user exists by username.
-   *
-   * @param username the username to check
-   * @return true if the user exists, false otherwise
-   */
-  public boolean existsByUsername(String username) {
-    return repository.existsByUsername(username);
-  }
-
-  /**
-   * Finds a user by username.
-   *
-   * @param username the username to find
-   * @return an {@link Optional} containing the user, or empty if not found
-   */
-  public Optional<UserDto> findByUsername(String username) {
-    return repository.findByUsername(username)
-        .map(mapper::toModel);
-  }
 
   /**
    * Finds a user by OIDC subject (JWT sub claim).
@@ -66,7 +30,7 @@ public class UserService extends AbstractBaseEntityService<UserEntity, UUID, Use
    */
   public Optional<UserDto> findByOidcSubject(String oidcSubject) {
     return repository.findByOidcSubject(oidcSubject)
-        .map(mapper::toModel);
+        .map(UserService::toDto);
   }
 
   /**
@@ -92,6 +56,27 @@ public class UserService extends AbstractBaseEntityService<UserEntity, UUID, Use
         });
   }
 
+  /**
+   * Find and validate that user exists and is enabled.
+   *
+   * @param userId user ID
+   * @return UserDto if user exists and is enabled
+   * @throws EntityNotFoundException if user does not exist
+   * @throws DisabledException if user is disabled
+   */
+  public UserDto requireEnabledUser(UUID userId) {
+    var user = repository.findById(userId)
+        .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+    if (!user.isEnabled()) {
+      throw new DisabledException("User is disabled");
+    }
+    return toDto(user);
+  }
+
+  private static UserDto toDto(UserEntity entity) {
+    return new UserDto(entity.getId(), entity.getUsername(), entity.isEnabled());
+  }
+
   private static String resolveUsername(Jwt jwt) {
     var preferred = jwt.getClaimAsString("preferred_username");
     if (preferred != null && !preferred.isBlank()) {
@@ -102,47 +87,5 @@ public class UserService extends AbstractBaseEntityService<UserEntity, UUID, Use
       return email;
     }
     return jwt.getSubject();
-  }
-
-  @Transactional
-  @Override
-  public UserDto update(UUID uuid, Object patchRequest) throws EntityNotFoundException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Transactional
-  @Override
-  public void delete(UUID uuid) throws EntityNotFoundException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public List<UserDto> list() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Page<UserDto> list(Pageable pageRequest) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public long count() {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Find and validate that user exists and is enabled
-   *
-   * @param userId user ID
-   * @return UserDto if user exists and is enabled
-   * @throws DisabledException if user is disabled
-   */
-  public UserDto requireEnabledUser(UUID userId) {
-    var user = readInternal(userId);
-    if (!user.isEnabled()) {
-      throw new DisabledException("User is disabled");
-    }
-    return mapper.toModel(user);
   }
 }
