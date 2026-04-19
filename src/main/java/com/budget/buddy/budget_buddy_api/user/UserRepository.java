@@ -27,4 +27,12 @@ public interface UserRepository extends BaseEntityRepository<UserEntity, UUID> {
    */
   boolean existsByUsername(String username);
 
+  /**
+   * Find user by OIDC subject (JWT sub claim)
+   *
+   * @param oidcSubject the OIDC subject identifier
+   * @return Optional containing user if found
+   */
+  Optional<UserEntity> findByOidcSubject(String oidcSubject);
+
 }

@@ -21,7 +21,7 @@ class UserRepositoryIntegrationTest extends BaseIntegrationTest {
     var username = "testuser_" + UUID.randomUUID();
     var user = UserEntity.builder()
         .username(username)
-        .password("password")
+        .oidcSubject("sub_" + UUID.randomUUID())
         .enabled(true)
         .build();
 
@@ -43,7 +43,7 @@ class UserRepositoryIntegrationTest extends BaseIntegrationTest {
     var username = "exists_" + UUID.randomUUID();
     var user = UserEntity.builder()
         .username(username)
-        .password("password")
+        .oidcSubject("sub_" + UUID.randomUUID())
         .enabled(true)
         .build();
     userRepository.save(user);
@@ -63,7 +63,7 @@ class UserRepositoryIntegrationTest extends BaseIntegrationTest {
     // Given
     var user = UserEntity.builder()
         .username("id_user_" + UUID.randomUUID())
-        .password("password")
+        .oidcSubject("sub_" + UUID.randomUUID())
         .enabled(true)
         .build();
     var saved = userRepository.save(user);
@@ -77,5 +77,27 @@ class UserRepositoryIntegrationTest extends BaseIntegrationTest {
         .isPresent()
         .get()
         .returns(saved.getId(), UserEntity::getId);
+  }
+
+  @Test
+  @DisplayName("should find user by OIDC subject")
+  void shouldFindByOidcSubject() {
+    // Given
+    var oidcSubject = "oidc_" + UUID.randomUUID();
+    var user = UserEntity.builder()
+        .username("oidc_user_" + UUID.randomUUID())
+        .oidcSubject(oidcSubject)
+        .enabled(true)
+        .build();
+    userRepository.save(user);
+
+    // When
+    var found = userRepository.findByOidcSubject(oidcSubject);
+    var notFound = userRepository.findByOidcSubject("nonexistent");
+
+    // Then
+    assertThat(found).isPresent();
+    assertThat(found.get().getOidcSubject()).isEqualTo(oidcSubject);
+    assertThat(notFound).isEmpty();
   }
 }

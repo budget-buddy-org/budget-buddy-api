@@ -27,7 +27,7 @@ class CategoryRepositoryIntegrationTest extends BaseIntegrationTest {
   void setUp() {
     var user = UserEntity.builder()
         .username("owner_" + UUID.randomUUID())
-        .password("password")
+        .oidcSubject("sub_" + UUID.randomUUID())
         .enabled(true)
         .build();
     ownerId = userRepository.save(user).getId();
@@ -68,7 +68,7 @@ class CategoryRepositoryIntegrationTest extends BaseIntegrationTest {
 
     var otherOwnerId = userRepository.save(UserEntity.builder()
         .username("other_" + UUID.randomUUID())
-        .password("password")
+        .oidcSubject("sub_" + UUID.randomUUID())
         .enabled(true)
         .build()).getId();
     var c3 = new CategoryEntity();
