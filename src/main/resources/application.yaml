@@ -17,12 +17,14 @@ spring:
       spec: >
         initialCapacity=50,
         maximumSize=200,
-        expireAfterWrite=24h
+        expireAfterWrite=${OIDC_USER_CACHE_TTL:5m}
 
 server:
   port: ${SERVER_PORT:8080}
 
 security:
+  oidc:
+    audience: ${OIDC_API_AUDIENCE}
   cors:
     allowed-origin-patterns: [ ]
     allowed-methods: [ GET, POST, PUT, PATCH, DELETE, OPTIONS ]

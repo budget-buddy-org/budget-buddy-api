@@ -2,6 +2,7 @@ package com.budget.buddy.budget_buddy_api;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
@@ -18,6 +19,7 @@ public class TestSecurityConfig {
   private static final String TEST_SECRET = "integration-test-secret-key-that-is-at-least-32-chars";
 
   @Bean
+  @Primary
   JwtDecoder jwtDecoder() {
     var key = new SecretKeySpec(TEST_SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     return NimbusJwtDecoder.withSecretKey(key).build();

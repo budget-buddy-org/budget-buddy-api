@@ -9,6 +9,8 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 @AutoConfigureMockMvc
@@ -40,7 +42,9 @@ public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
    * Returns a JWT request post-processor for the given OIDC subject.
    */
   protected static RequestPostProcessor jwtForUser(String oidcSubject) {
-    return jwt().jwt(j -> j.subject(oidcSubject));
+    return jwt()
+        .jwt(j -> j.subject(oidcSubject))
+        .authorities(new SimpleGrantedAuthority("SCOPE_openid"));
   }
 
 }
