@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
  */
 public abstract class BaseEntityController<ID, R, C, U, L> {
 
+  private static final int MAX_PAGE_SIZE = 500;
+
   private final BaseEntityService<ID, R, C, U> service;
   private final BaseEntityMapper<?, R, C, U, L> mapper;
 
@@ -95,6 +97,9 @@ public abstract class BaseEntityController<ID, R, C, U, L> {
    * @return {@link ResponseEntity} with the paginated response
    */
   public ResponseEntity<L> listInternal(Integer page, Integer size) {
+    if (size > MAX_PAGE_SIZE) {
+      throw new IllegalArgumentException("Page size must not exceed " + MAX_PAGE_SIZE);
+    }
     return listInternal(PageRequest.of(page, size));
   }
 

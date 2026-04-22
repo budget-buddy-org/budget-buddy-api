@@ -311,6 +311,15 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
     }
 
     @Test
+    void should_Return400_When_PageSizeExceedsMaximum() {
+      var result = mvc.get().uri("/v1/categories?page=0&size=501")
+          .with(jwtForUser(userId))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
     void should_Return401_When_NotAuthenticated() {
       var result = mvc.get().uri("/v1/categories")
           .exchange();
