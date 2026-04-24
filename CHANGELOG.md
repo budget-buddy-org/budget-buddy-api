@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.2.0...v1.2.1) (2026-04-24)
+
+### Bug Fixes
+
+* **security:** harden OIDC auth and improve test coverage ([#139](https://github.com/budget-buddy-org/budget-buddy-api/issues/139)) ([24b0a67](https://github.com/budget-buddy-org/budget-buddy-api/commit/24b0a67c7a6149e0c33abc7a5fee5ba41dd95d3d))
+
 ## [1.2.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.1.0...v1.2.0) (2026-04-24)
 
 ### Features
