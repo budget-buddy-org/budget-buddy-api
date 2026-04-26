@@ -1,3 +1,9 @@
+## [1.3.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.3.0...v1.3.1) (2026-04-26)
+
+### Bug Fixes
+
+* address several performance issues ([#145](https://github.com/budget-buddy-org/budget-buddy-api/issues/145)) ([9fb68c2](https://github.com/budget-buddy-org/budget-buddy-api/commit/9fb68c2059056c690b19f84e6f15184628727a3f))
+
 ## [1.3.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.2.1...v1.3.0) (2026-04-24)
 
 ### Features
