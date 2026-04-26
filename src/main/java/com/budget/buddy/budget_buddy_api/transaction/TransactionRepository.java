@@ -13,6 +13,7 @@ import java.util.UUID;
 public interface TransactionRepository
     extends OwnableEntityRepository<TransactionEntity, UUID>, TransactionPagingRepository {
 
+  @Override
   Page<TransactionEntity> findAllByFilter(TransactionFilter filter, Pageable pageable);
 
 }
