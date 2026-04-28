@@ -1,3 +1,9 @@
+## [1.3.2](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.3.1...v1.3.2) (2026-04-28)
+
+### Bug Fixes
+
+* cors-config ([ca0674a](https://github.com/budget-buddy-org/budget-buddy-api/commit/ca0674acfdc89827ccc2ab39445db958deb8ced7))
+
 ## [1.3.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.3.0...v1.3.1) (2026-04-26)
 
 ### Bug Fixes
