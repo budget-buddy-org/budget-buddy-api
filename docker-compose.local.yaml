@@ -7,4 +7,4 @@ services:
       POSTGRES_USER: budgetbuddy
       POSTGRES_PASSWORD: budgetbuddy
     ports:
-      - "5432:5432"
+      - "5432"

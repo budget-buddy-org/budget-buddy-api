@@ -28,10 +28,6 @@ springdoc:
   api-docs:
     enabled: false
 
-security:
-  cors:
-    allowed-origin-patterns: ${BUDGET_BUDDY_API_CORS_ALLOWED_ORIGIN_PATTERNS}
-
 logging:
   level:
     root: INFO
