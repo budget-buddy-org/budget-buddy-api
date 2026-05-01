@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.3.2...v1.4.0) (2026-05-01)
+
+### Features
+
+* use health checks in API ([#147](https://github.com/budget-buddy-org/budget-buddy-api/issues/147)) ([7252d51](https://github.com/budget-buddy-org/budget-buddy-api/commit/7252d51471bda034eab7cd9cfab43561e74d89d3))
+
 ## [1.3.2](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.3.1...v1.3.2) (2026-04-28)
 
 ### Bug Fixes
