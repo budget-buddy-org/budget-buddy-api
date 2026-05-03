@@ -1,8 +1,10 @@
 package com.budget.buddy.budget_buddy_api.base.config;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import java.time.Duration;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,8 +15,13 @@ public class CacheConfig {
   /** Maps {@code (issuer, subject) → localUserId} for the OIDC JIT-provisioning lookup. */
   public static final String LOCAL_USER_IDS = "localUserIds";
 
+  /** Caches JWKS responses so {@code NimbusJwtDecoder} doesn't refetch them on every cycle. */
+  public static final String JWKS = "jwks";
+
   @Bean
   CacheManager cacheManager() {
-    return new ConcurrentMapCacheManager(LOCAL_USER_IDS);
+    var cacheManager = new CaffeineCacheManager(LOCAL_USER_IDS, JWKS);
+    cacheManager.setCaffeine(Caffeine.newBuilder().expireAfterWrite(Duration.ofHours(1)));
+    return cacheManager;
   }
 }
