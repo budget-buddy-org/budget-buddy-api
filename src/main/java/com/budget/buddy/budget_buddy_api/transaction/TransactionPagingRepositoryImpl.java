@@ -1,119 +1,109 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
+import com.budget.buddy.budget_buddy_api.base.crudl.auditable.AuditableEntity;
+import com.budget.buddy.budget_buddy_api.category.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.jdbc.core.JdbcAggregateOperations;
+import org.springframework.data.relational.core.query.Criteria;
+import org.springframework.data.relational.core.query.Query;
 import org.springframework.data.support.PageableExecutionUtils;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.Currency;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 class TransactionPagingRepositoryImpl implements TransactionPagingRepository {
 
-  private static final String FROM_CLAUSE = """
-      FROM transactions t
-      LEFT JOIN categories c ON c.id = t.category_id
-      """;
+  private static final String AMOUNT = "amount";
+  private static final String DESCRIPTION = "description";
 
-  private static final RowMapper<TransactionEntity> ROW_MAPPER = (rs, rowNum) -> {
-    var entity = new TransactionEntity();
-    entity.setId(rs.getObject("id", UUID.class));
-    entity.setCategoryId(rs.getObject("category_id", UUID.class));
-    entity.setAmount(rs.getLong("amount"));
-    entity.setType(TransactionType.valueOf(rs.getString("type")));
-    entity.setCurrency(Currency.getInstance(rs.getString("currency")));
-    entity.setDate(rs.getObject("date", LocalDate.class));
-    entity.setDescription(rs.getString("description"));
-    entity.setOwnerId(rs.getObject("owner_id", UUID.class));
-    entity.setVersion(rs.getObject("version", Integer.class));
-    entity.setCreatedAt(rs.getObject("created_at", OffsetDateTime.class));
-    entity.setUpdatedAt(rs.getObject("updated_at", OffsetDateTime.class));
-    return entity;
-  };
-
-  private final JdbcClient jdbc;
+  private final JdbcAggregateOperations jdbc;
+  private final CategoryRepository categoryRepository;
 
   @Override
   public Page<TransactionEntity> findAllByFilter(TransactionFilter filter, Pageable pageable) {
-    var dirSql = resolveDirection(pageable) == Direction.ASC ? "ASC" : "DESC";
+    var paging = withSecondarySort(pageable);
+    var criteria = buildCriteria(filter);
 
-    var params = new LinkedHashMap<String, Object>();
-    var where = buildWhere(filter, params);
+    var entities = jdbc.findAll(Query.query(criteria).with(paging), TransactionEntity.class);
 
-    var listSql = "SELECT t.* " + FROM_CLAUSE + "WHERE " + where
-        + " ORDER BY t.\"date\" " + dirSql + ", t.created_at " + dirSql
-        + " LIMIT :limit OFFSET :offset";
-
-    var entities = jdbc.sql(listSql)
-        .params(params)
-        .param("limit", pageable.getPageSize())
-        .param("offset", pageable.getOffset())
-        .query(ROW_MAPPER)
-        .list();
-
-    return PageableExecutionUtils.getPage(entities, pageable, () -> jdbc
-        .sql("SELECT COUNT(*) " + FROM_CLAUSE + "WHERE " + where)
-        .params(params)
-        .query(Long.class)
-        .single());
+    return PageableExecutionUtils.getPage(
+        entities,
+        pageable,
+        () -> jdbc.count(Query.query(criteria), TransactionEntity.class));
   }
 
-  private static Direction resolveDirection(Pageable pageable) {
-    return pageable.getSort()
+  private static Pageable withSecondarySort(Pageable pageable) {
+    var direction = pageable.getSort()
         .stream()
         .filter(o -> TransactionEntity.DATE.equals(o.getProperty()))
         .findFirst()
         .map(Order::getDirection)
         .orElse(Direction.DESC);
+
+    return PageRequest.of(
+        pageable.getPageNumber(),
+        pageable.getPageSize(),
+        Sort.by(direction, TransactionEntity.DATE, AuditableEntity.CREATED_AT));
   }
 
-  private static String buildWhere(TransactionFilter filter, Map<String, Object> params) {
-    var where = new StringBuilder("t.owner_id = :ownerId");
-    params.put("ownerId", filter.ownerId());
+  private Criteria buildCriteria(TransactionFilter filter) {
+    var criteria = Criteria.where(TransactionEntity.OWNER_ID).is(filter.ownerId());
 
     if (filter.start() != null) {
-      where.append(" AND t.\"date\" >= :start");
-      params.put("start", filter.start());
+      criteria = criteria.and(TransactionEntity.DATE).greaterThanOrEquals(filter.start());
     }
     if (filter.end() != null) {
-      where.append(" AND t.\"date\" <= :end");
-      params.put("end", filter.end());
+      criteria = criteria.and(TransactionEntity.DATE).lessThanOrEquals(filter.end());
     }
     if (filter.categoryId() != null) {
-      where.append(" AND t.category_id = :categoryId");
-      params.put("categoryId", filter.categoryId());
+      criteria = criteria.and(TransactionEntity.CATEGORY_ID).is(filter.categoryId());
     }
     if (filter.type() != null) {
-      where.append(" AND t.type = :type");
-      params.put("type", filter.type().name());
+      criteria = criteria.and(TransactionEntity.TYPE).is(filter.type());
     }
     if (filter.amountMin() != null) {
-      where.append(" AND t.amount >= :amountMin");
-      params.put("amountMin", filter.amountMin());
+      criteria = criteria.and(AMOUNT).greaterThanOrEquals(filter.amountMin());
     }
     if (filter.amountMax() != null) {
-      where.append(" AND t.amount <= :amountMax");
-      params.put("amountMax", filter.amountMax());
+      criteria = criteria.and(AMOUNT).lessThanOrEquals(filter.amountMax());
     }
     if (StringUtils.hasText(filter.query())) {
-      where.append(" AND (t.description ILIKE :q ESCAPE '\\' OR c.name ILIKE :q ESCAPE '\\')");
-      params.put("q", "%" + escapeLike(filter.query()) + "%");
+      criteria = criteria.and(searchCriteria(filter.ownerId(), filter.query()));
     }
-    return where.toString();
+    return criteria;
   }
 
+  /**
+   * Builds the {@code (description ILIKE ? OR category_id IN (...))} half of the WHERE clause.
+   * Category matches are pre-fetched via a separate id-only query so we don't have to drop to
+   * raw SQL with a JOIN.
+   */
+  private Criteria searchCriteria(UUID ownerId, String query) {
+    var pattern = "%" + escapeLike(query) + "%";
+    var byDescription = Criteria.where(DESCRIPTION).like(pattern).ignoreCase(true);
+
+    var matchingCategoryIds = categoryRepository.findIdsByOwnerIdAndNameLike(ownerId, pattern);
+    if (matchingCategoryIds.isEmpty()) {
+      return byDescription;
+    }
+    return byDescription.or(Criteria.where(TransactionEntity.CATEGORY_ID).in((List<?>) matchingCategoryIds));
+  }
+
+  /**
+   * Escapes the SQL {@code LIKE} wildcards so user input matches literally.
+   * PostgreSQL treats backslash as the default escape character for {@code LIKE}, so no
+   * explicit {@code ESCAPE} clause is required.
+   */
   private static String escapeLike(String value) {
     return value
         .replace("\\", "\\\\")
