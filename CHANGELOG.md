@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.5.0...v1.6.0) (2026-05-06)
+
+### Features
+
+* **db:** add indices and constrains ([#157](https://github.com/budget-buddy-org/budget-buddy-api/issues/157)) ([9ac7ac0](https://github.com/budget-buddy-org/budget-buddy-api/commit/9ac7ac00578f4b4fc022ad29f706afedb3e44c2e))
+
 ## [1.4.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.4.0...v1.4.1) (2026-05-03)
 
 ### Bug Fixes
