@@ -2,14 +2,16 @@ package com.budget.buddy.budget_buddy_api.category;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.auditable.AuditableEntity;
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntity;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.util.UUID;
 
 /**
  * Category entity representing a budget category for organizing transactions. Uses Spring Data JDBC for data access.
@@ -32,6 +34,6 @@ public class CategoryEntity extends AuditableEntity implements OwnableEntity<UUI
   private UUID ownerId;
 
   @Column("monthly_budget")
-  private Long monthlyBudget;
+  private @Nullable Long monthlyBudget;
 
 }

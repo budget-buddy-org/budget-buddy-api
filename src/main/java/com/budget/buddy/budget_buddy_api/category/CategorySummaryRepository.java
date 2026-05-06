@@ -1,10 +1,11 @@
 package com.budget.buddy.budget_buddy_api.category;
 
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.stereotype.Repository;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.stereotype.Repository;
 
 @Repository
 public class CategorySummaryRepository {
@@ -23,7 +24,7 @@ public class CategorySummaryRepository {
             AND t.type        = 'EXPENSE'
             AND t.date BETWEEN :monthStart AND :monthEnd
       WHERE c.owner_id = :ownerId
-      GROUP BY c.id, c.name, c.monthly_budget
+      GROUP BY c.id
       ORDER BY c.name
       """;
 
@@ -41,18 +42,14 @@ public class CategorySummaryRepository {
         .param("monthStart", monthStart)
         .param("monthEnd", monthEnd)
         .param("currency", currency)
-        .query((rs, _) -> {
-          long budget = rs.getLong("monthly_budget");
-          Long monthlyBudget = rs.wasNull() ? null : budget;
-          return new CategorySummaryRow(
-              (UUID) rs.getObject("category_id"),
-              rs.getString("category_name"),
-              monthlyBudget,
-              rs.getLong("spent"),
-              rs.getInt("transaction_count"),
-              rs.getInt("excluded_transaction_count")
-          );
-        })
+        .query((rs, _) -> new CategorySummaryRow(
+            rs.getObject("category_id", UUID.class),
+            rs.getString("category_name"),
+            rs.getObject("monthly_budget", Long.class),
+            rs.getLong("spent"),
+            rs.getInt("transaction_count"),
+            rs.getInt("excluded_transaction_count")
+        ))
         .list();
   }
 
