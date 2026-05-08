@@ -1,3 +1,9 @@
+## [1.9.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.8.0...v1.9.0) (2026-05-08)
+
+### Features
+
+* implement GET /v1/transactions/summary/trend ([#161](https://github.com/budget-buddy-org/budget-buddy-api/issues/161)) ([ce4d62a](https://github.com/budget-buddy-org/budget-buddy-api/commit/ce4d62a5e4fa0d4425b0867e475197ce2b1e2b3b))
+
 ## [1.8.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.7.0...v1.8.0) (2026-05-07)
 
 ### Features
