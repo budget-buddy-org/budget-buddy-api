@@ -1,20 +1,21 @@
 package com.budget.buddy.budget_buddy_api.category;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
-import com.budget.buddy.budget_buddy_contracts.generated.model.CategorySpendingSummary;
-import com.budget.buddy.budget_buddy_contracts.generated.model.CategorySpendingRow;
-import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
-import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
-import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
-import java.time.LocalDate;
-import java.util.UUID;
+import com.budget.buddy.budget_buddy_contracts.generated.model.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+
+import java.time.LocalDate;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
 
@@ -39,7 +40,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
 
   private void createTransaction(
       String ownerId, UUID categoryId, long amount, TransactionType type, String currency, LocalDate date
-  ) throws Exception {
+  ) {
     var body = new TransactionWrite()
         .categoryId(categoryId)
         .amount(amount)
@@ -53,8 +54,8 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
         .exchange();
   }
 
-  private CategorySpendingSummary getSummary(String ownerId, String month, String currency) throws Exception {
-    var result = mvc.get().uri("/v1/categories/summary?month={m}&currency={c}", month, currency)
+  private CategorySpendingSummary getSummary(String ownerId) throws Exception {
+    var result = mvc.get().uri("/v1/categories/summary?month={m}&currency={c}", "2026-03", "EUR")
         .with(jwtForUser(ownerId))
         .exchange();
     assertThat(result).hasStatus(HttpStatus.OK);
@@ -76,7 +77,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
     void should_ReturnAllCategories_WithZeros_When_NoTransactions() throws Exception {
       var catId = createCategory(userId, "Groceries");
 
-      var summary = getSummary(userId, "2026-03", "EUR");
+      var summary = getSummary(userId);
 
       assertThat(summary.getMonth()).isEqualTo("2026-03");
       assertThat(summary.getCurrency()).isEqualTo("EUR");
@@ -84,9 +85,9 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       var row = summary.getItems().getFirst();
       assertThat(row.getCategoryId()).isEqualTo(catId);
       assertThat(row.getCategoryName()).isEqualTo("Groceries");
-      assertThat(row.getSpent()).isEqualTo(0L);
-      assertThat(row.getTransactionCount()).isEqualTo(0);
-      assertThat(row.getExcludedTransactionCount()).isEqualTo(0);
+      assertThat(row.getSpent()).isZero();
+      assertThat(row.getTransactionCount()).isZero();
+      assertThat(row.getExcludedTransactionCount()).isZero();
     }
   }
 
@@ -99,7 +100,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       createTransaction(userId, catId, 1000L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 3, 15));
       createTransaction(userId, catId, 5000L, TransactionType.INCOME, "EUR", LocalDate.of(2026, 3, 15));
 
-      var summary = getSummary(userId, "2026-03", "EUR");
+      var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
       assertThat(row.getSpent()).isEqualTo(1000L);
@@ -117,7 +118,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       createTransaction(userId, catId, 3000L, TransactionType.EXPENSE, "USD", LocalDate.of(2026, 3, 10));
       createTransaction(userId, catId, 500L, TransactionType.EXPENSE, "USD", LocalDate.of(2026, 3, 11));
 
-      var summary = getSummary(userId, "2026-03", "EUR");
+      var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
       assertThat(row.getSpent()).isEqualTo(2000L);
@@ -133,32 +134,30 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
     void should_ReturnNullBudget_When_NoBudgetSet() throws Exception {
       var catId = createCategory(userId, "NoLimit");
 
-      var summary = getSummary(userId, "2026-03", "EUR");
+      var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
-      assertThat(row.getMonthlyBudget().isPresent()).isTrue();
-      assertThat(row.getMonthlyBudget().get()).isNull();
+      assertThat(row.getMonthlyBudget()).isNull();
     }
 
     @Test
     void should_ReturnZeroBudget_When_BudgetIsZero() throws Exception {
       var catId = createCategory(userId, "ZeroLimit", 0L);
 
-      var summary = getSummary(userId, "2026-03", "EUR");
+      var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
-      assertThat(row.getMonthlyBudget().isPresent()).isTrue();
-      assertThat(row.getMonthlyBudget().get()).isEqualTo(0L);
+      assertThat(row.getMonthlyBudget()).isZero();
     }
 
     @Test
     void should_ReturnBudget_When_BudgetIsSet() throws Exception {
       var catId = createCategory(userId, "Groceries", 50000L);
 
-      var summary = getSummary(userId, "2026-03", "EUR");
+      var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
-      assertThat(row.getMonthlyBudget().get()).isEqualTo(50000L);
+      assertThat(row.getMonthlyBudget()).isEqualTo(50000L);
     }
   }
 
@@ -173,7 +172,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       createTransaction(userId, catId, 999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 2, 28));
       createTransaction(userId, catId, 999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 4, 1));
 
-      var summary = getSummary(userId, "2026-03", "EUR");
+      var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
       assertThat(row.getSpent()).isEqualTo(300L);
@@ -189,7 +188,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       createCategory(otherUserId, "Other's category");
       var myCategory = createCategory(userId, "Mine");
 
-      var summary = getSummary(userId, "2026-03", "EUR");
+      var summary = getSummary(userId);
 
       assertThat(summary.getItems()).hasSize(1);
       assertThat(summary.getItems().getFirst().getCategoryId()).isEqualTo(myCategory);
@@ -202,7 +201,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       createTransaction(userId, catId, 1000L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 3, 10));
       createTransaction(otherUserId, otherCatId, 9999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 3, 10));
 
-      var summary = getSummary(userId, "2026-03", "EUR");
+      var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
       assertThat(row.getSpent()).isEqualTo(1000L);
@@ -219,36 +218,22 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
 
-    @Test
-    void should_Return400_When_MonthFormatInvalid() {
-      var result = mvc.get().uri("/v1/categories/summary?month=2026-13&currency=EUR")
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("validationArguments")
+    void should_Return400_When_InvalidRequest(String uriTemplate) {
+      var result = mvc.get().uri(uriTemplate)
           .with(jwtForUser(userId))
           .exchange();
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }
 
-    @Test
-    void should_Return400_When_CurrencyTooLong() {
-      var result = mvc.get().uri("/v1/categories/summary?month=2026-03&currency=EURO")
-          .with(jwtForUser(userId))
-          .exchange();
-      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void should_Return400_When_MonthMissing() {
-      var result = mvc.get().uri("/v1/categories/summary?currency=EUR")
-          .with(jwtForUser(userId))
-          .exchange();
-      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void should_Return400_When_CurrencyMissing() {
-      var result = mvc.get().uri("/v1/categories/summary?month=2026-03")
-          .with(jwtForUser(userId))
-          .exchange();
-      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
+    static Stream<Named<String>> validationArguments() {
+      return Stream.of(
+          Named.of("Invalid Month format", "/v1/categories/summary?month=2026-13&currency=EUR"),
+          Named.of("Missing Month", "/v1/categories/summary?currency=EUR"),
+          Named.of("Currency too long", "/v1/categories/summary?month=2026-03&currency=EURO"),
+          Named.of("Missing Currency", "/v1/categories/summary?month=2026-03")
+      );
     }
   }
 

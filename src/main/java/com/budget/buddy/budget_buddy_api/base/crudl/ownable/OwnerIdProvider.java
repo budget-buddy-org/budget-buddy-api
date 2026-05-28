@@ -5,24 +5,24 @@ import org.springframework.security.core.AuthenticationException;
 import java.util.function.Supplier;
 
 /**
- * Resolves the ID of the currently authenticated owner.
+ * Resolves the I of the currently authenticated owner.
  *
- * <p>The production binding reads the user ID from the
+ * <p>The production binding reads the user I from the
  * {@link org.springframework.security.core.context.SecurityContextHolder}
  * — see {@code OidcOwnerIdProvider}.
  *
- * @param <ID> the owner identifier type
+ * @param <I> the owner identifier type
  */
 @FunctionalInterface
-public interface OwnerIdProvider<ID> extends Supplier<ID> {
+public interface OwnerIdProvider<I> extends Supplier<I> {
 
   /**
-   * Returns the ID of the currently authenticated owner.
+   * Returns the I of the currently authenticated owner.
    *
-   * @return the current owner's ID; never {@code null}
+   * @return the current owner's I; never {@code null}
    * @throws AuthenticationException if no authenticated principal is present
    */
   @Override
-  ID get() throws AuthenticationException;
+  I get() throws AuthenticationException;
 
 }

@@ -1,6 +1,9 @@
 spring:
   application:
     name: budget-buddy-api
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     enabled: true
@@ -19,7 +22,7 @@ server:
 security:
   cors:
     allowed-origin-patterns: [ ]
-    allowed-methods: [ GET, POST, PUT, PATCH, DELETE, OPTIONS ]
+    allowed-methods: [ GET, POST, PUT, DELETE, OPTIONS ]
     allowed-headers: [ "*" ]
     allow-credentials: true
     max-age: 3600

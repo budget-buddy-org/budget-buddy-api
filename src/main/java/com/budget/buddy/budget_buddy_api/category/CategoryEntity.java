@@ -16,30 +16,24 @@ import java.util.UUID;
 /**
  * Category entity representing a budget category for organizing transactions. Uses Spring Data JDBC for data access.
  */
-@Table(CategoryEntity.TABLE)
+@Table("categories")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryEntity extends AuditableEntity implements OwnableEntity<UUID> {
 
-  public static final String TABLE = "categories";
-  public static final String ID = "id";
-  public static final String NAME = "name";
-  public static final String OWNER_ID = "owner_id";
-  public static final String MONTHLY_BUDGET = "monthly_budget";
-
   @Id
-  @Column(ID)
+  @Column("id")
   private UUID id;
 
-  @Column(NAME)
+  @Column("name")
   private String name;
 
-  @Column(OWNER_ID)
+  @Column("owner_id")
   private UUID ownerId;
 
-  @Column(MONTHLY_BUDGET)
+  @Column("monthly_budget")
   private @Nullable Long monthlyBudget;
 
 }

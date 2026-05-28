@@ -5,16 +5,16 @@ import org.springframework.data.domain.Persistable;
 /**
  * Base interface for all entities in the application. Extends {@link Persistable} to provide standard persistence status.
  *
- * @param <ID> the identifier type
+ * @param <I> the identifier type
  */
-public interface BaseEntity<ID> extends Persistable<ID> {
+public interface BaseEntity<I> extends Persistable<I> {
 
   /**
    * Sets the unique identifier for the entity.
    *
    * @param id the unique identifier
    */
-  void setId(ID id);
+  void setId(I id);
 
   @Override
   default boolean isNew() {

@@ -1,23 +1,23 @@
 package com.budget.buddy.budget_buddy_api.category;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
-import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryUpdate;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
@@ -41,7 +41,7 @@ class CategoryServiceTest {
     @Test
     void should_CreateCategory_WithOwnerId() {
       // Given
-      var createRequest = new CategoryWrite("Groceries");
+      var createRequest = new CategoryWrite().name("Groceries");
       var entity = new CategoryEntity();
       var model = new Category();
 
@@ -98,7 +98,7 @@ class CategoryServiceTest {
     void should_UpdateCategory_When_OwnedByUser() {
       // Given
       var categoryId = UUID.randomUUID();
-      var updateRequest = new CategoryUpdate().name("New Name");
+      var updateRequest = new CategoryWrite().name("New Name");
       var entity = new CategoryEntity();
       var model = new Category();
 
@@ -114,7 +114,7 @@ class CategoryServiceTest {
           .as("Update result should match the mapped model")
           .isEqualTo(model);
 
-      verify(mapper).patchEntity(updateRequest, entity);
+      verify(mapper).updateEntity(updateRequest, entity);
       verify(repository).save(entity);
     }
 

@@ -1,16 +1,6 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,6 +9,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractBaseEntityServiceTest {
@@ -96,12 +92,11 @@ class AbstractBaseEntityServiceTest {
   class UpdateTests {
 
     @Test
-    void should_SaveEntity() {
+    void should_UpdateEntity() {
       // Given
       var id = "testId";
       var existingEntity = new DummyEntity();
-      existingEntity.setId(existingEntity.getId());
-
+      existingEntity.setId(id);
       var updateRequest = new Object();
       var expected = new Object();
       when(repository.findById(id)).thenReturn(Optional.of(existingEntity));
@@ -115,9 +110,8 @@ class AbstractBaseEntityServiceTest {
       assertThat(actual).isEqualTo(expected);
       assertThat(existingEntity)
           .returns(existingEntity.getId(), BaseEntity::getId);
-
       verify(repository).findById(id);
-      verify(mapper).patchEntity(updateRequest, existingEntity);
+      verify(mapper).updateEntity(updateRequest, existingEntity);
       verify(repository).save(existingEntity);
       verify(mapper).toModel(existingEntity);
     }
@@ -131,50 +125,6 @@ class AbstractBaseEntityServiceTest {
 
       // When / Then
       assertThatThrownBy(() -> service.update(id, updateRequest))
-          .isInstanceOf(EntityNotFoundException.class)
-          .hasMessageContaining("Entity not found with id: " + id);
-      verify(repository).findById(id);
-      verifyNoInteractions(mapper);
-    }
-  }
-
-  @Nested
-  class ReplaceTests {
-
-    @Test
-    void should_ReplaceEntity() {
-      // Given
-      var id = "testId";
-      var existingEntity = new DummyEntity();
-      existingEntity.setId(id);
-      var replaceRequest = new Object();
-      var expected = new Object();
-      when(repository.findById(id)).thenReturn(Optional.of(existingEntity));
-      when(repository.save(existingEntity)).thenReturn(existingEntity);
-      when(mapper.toModel(existingEntity)).thenReturn(expected);
-
-      // When
-      var actual = service.replace(id, replaceRequest);
-
-      // Then
-      assertThat(actual).isEqualTo(expected);
-      assertThat(existingEntity)
-          .returns(existingEntity.getId(), BaseEntity::getId);
-      verify(repository).findById(id);
-      verify(mapper).replaceEntity(replaceRequest, existingEntity);
-      verify(repository).save(existingEntity);
-      verify(mapper).toModel(existingEntity);
-    }
-
-    @Test
-    void should_ThrowException_When_EntityNotFound() {
-      // Given
-      var id = "nonExistentId";
-      var replaceRequest = new Object();
-      when(repository.findById(id)).thenReturn(Optional.empty());
-
-      // When / Then
-      assertThatThrownBy(() -> service.replace(id, replaceRequest))
           .isInstanceOf(EntityNotFoundException.class)
           .hasMessageContaining("Entity not found with id: " + id);
       verify(repository).findById(id);

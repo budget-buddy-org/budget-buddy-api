@@ -1,27 +1,28 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
-import java.net.URI;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
+import java.net.URI;
+
 /**
  * Base controller class providing common internal methods for CRUD operations. Designed to be extended by controllers that implement generated API interfaces.
  *
- * @param <ID> the identifier type
+ * @param <I> the identifier type
  * @param <R> the read model type (DTO)
  * @param <C> the create request type (DTO)
- * @param <U> the update request type (DTO)
+ * @param <U> the update request type (DTO) used for PUT updates
  * @param <L> the list response type (DTO)
  */
-public abstract class BaseEntityController<ID, R, C, U, L> {
+public abstract class BaseEntityController<I, R, C, U, L> {
 
-  private final BaseEntityService<ID, R, C, U> service;
+  private final BaseEntityService<I, R, C, U> service;
   private final BaseEntityMapper<?, R, C, U, L> mapper;
 
   protected BaseEntityController(
-      BaseEntityService<ID, R, C, U> service,
+      BaseEntityService<I, R, C, U> service,
       BaseEntityMapper<?, R, C, U, L> mapper
   ) {
     this.service = service;
@@ -42,47 +43,35 @@ public abstract class BaseEntityController<ID, R, C, U, L> {
   }
 
   /**
-   * Internal method to read an entity by ID.
+   * Internal method to read an entity by I.
    *
    * @param id the entity identifier
    * @return {@link ResponseEntity} with the entity
    */
-  public ResponseEntity<R> readInternal(ID id) {
+  public ResponseEntity<R> readInternal(I id) {
     var item = service.read(id);
     return ResponseEntity.ok(item);
   }
 
   /**
-   * Internal method to update an entity by ID.
+   * Internal method to fully update an entity by I.
    *
    * @param id the entity identifier
-   * @param updateRequest the update request
+   * @param updateRequest the update request (all fields required)
    * @return {@link ResponseEntity} with the updated entity
    */
-  public ResponseEntity<R> updateInternal(ID id, U updateRequest) {
+  public ResponseEntity<R> updateInternal(I id, U updateRequest) {
     var updated = service.update(id, updateRequest);
     return ResponseEntity.ok(updated);
   }
 
   /**
-   * Internal method to fully replace an entity by ID.
-   *
-   * @param id the entity identifier
-   * @param replaceRequest the replace request (all fields required)
-   * @return {@link ResponseEntity} with the replaced entity
-   */
-  public ResponseEntity<R> replaceInternal(ID id, C replaceRequest) {
-    var replaced = service.replace(id, replaceRequest);
-    return ResponseEntity.ok(replaced);
-  }
-
-  /**
-   * Internal method to delete an entity by ID.
+   * Internal method to delete an entity by I.
    *
    * @param id the entity identifier
    * @return {@link ResponseEntity} with no content
    */
-  public ResponseEntity<Void> deleteInternal(ID id) {
+  public ResponseEntity<Void> deleteInternal(I id) {
     service.delete(id);
     return ResponseEntity.noContent().build();
   }

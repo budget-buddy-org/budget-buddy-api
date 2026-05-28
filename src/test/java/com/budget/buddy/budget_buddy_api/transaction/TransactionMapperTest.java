@@ -1,12 +1,10 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
+import com.budget.buddy.budget_buddy_api.base.mapper.CurrencyMapperImpl;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionUpdate;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
-import org.openapitools.jackson.nullable.JsonNullable;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -18,7 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class TransactionMapperTest {
 
-  private final TransactionMapper transactionMapper = Mappers.getMapper(TransactionMapper.class);
+  private final TransactionMapper transactionMapper = new TransactionMapperImpl(
+      new CurrencyMapperImpl()
+  );
 
   @Nested
   class ToEntity {
@@ -34,8 +34,7 @@ class TransactionMapperTest {
           com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.EXPENSE,
           "EUR",
           date
-      );
-      create.setDescription("Test transaction");
+      ).description("Test transaction");
 
       // When
       var entity = transactionMapper.toEntity(create);
@@ -51,6 +50,25 @@ class TransactionMapperTest {
           .returns(date, TransactionEntity::getDate)
           .returns("Test transaction", TransactionEntity::getDescription);
     }
+
+    @Test
+    void should_MapNullDescription_When_Cleared() {
+      // Given
+      var create = new TransactionWrite()
+          .categoryId(UUID.randomUUID())
+          .amount(1000L)
+          .type(com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.EXPENSE)
+          .currency("EUR")
+          .date(LocalDate.now());
+
+      // When
+      var entity = transactionMapper.toEntity(create);
+
+      // Then
+      assertThat(entity.getDescription())
+          .as("Null description in the write model should map to null on the entity")
+          .isNull();
+    }
   }
 
   @Nested
@@ -63,7 +81,6 @@ class TransactionMapperTest {
       var categoryId = UUID.randomUUID();
       var ownerId = UUID.randomUUID();
       var date = LocalDate.now();
-      var now = OffsetDateTime.now();
 
       var entity = new TransactionEntity(
           id,
@@ -75,8 +92,6 @@ class TransactionMapperTest {
           "Income description",
           ownerId
       );
-      entity.setCreatedAt(now);
-      entity.setUpdatedAt(now);
 
       // When
       var model = transactionMapper.toModel(entity);
@@ -91,9 +106,7 @@ class TransactionMapperTest {
           .returns("INCOME", m -> m.getType().getValue())
           .returns("USD", Transaction::getCurrency)
           .returns(date, Transaction::getDate)
-          .returns("Income description", Transaction::getDescription)
-          .returns(now, Transaction::getCreatedAt)
-          .returns(now, Transaction::getUpdatedAt);
+          .returns("Income description", Transaction::getDescription);
     }
   }
 
@@ -129,94 +142,10 @@ class TransactionMapperTest {
   }
 
   @Nested
-  class PatchEntity {
+  class UpdateEntity {
 
     @Test
-    void should_UpdateOnlyProvidedFields() {
-      // Given
-      var originalId = UUID.randomUUID();
-      var categoryId = UUID.randomUUID();
-      var ownerId = UUID.randomUUID();
-      var date = LocalDate.now();
-      var entity = new TransactionEntity(originalId, categoryId, 100L, TransactionType.EXPENSE, Currency.getInstance("EUR"), date, "Old Desc", ownerId);
-
-      var update = new TransactionUpdate();
-      update.setAmount(500L);
-      update.setDescription(JsonNullable.of("New Desc"));
-
-      // When
-      transactionMapper.patchEntity(update, entity);
-
-      // Then
-      assertThat(entity)
-          .as("Updated entity should have correct updated and original values")
-          .returns(500L, TransactionEntity::getAmount)
-          .returns("New Desc", TransactionEntity::getDescription)
-          .returns(Currency.getInstance("EUR"), TransactionEntity::getCurrency)
-          .returns(originalId, TransactionEntity::getId)
-          .returns(categoryId, TransactionEntity::getCategoryId)
-          .returns(date, TransactionEntity::getDate);
-    }
-
-    @Test
-    void should_NotUpdate_When_Undefined() {
-      // Given
-      var originalDesc = "Keep Me";
-      var entity = new TransactionEntity(
-          UUID.randomUUID(),
-          UUID.randomUUID(),
-          100L,
-          TransactionType.EXPENSE,
-          Currency.getInstance("EUR"),
-          LocalDate.now(),
-          originalDesc,
-          UUID.randomUUID()
-      );
-
-      var update = new TransactionUpdate();
-      update.setDescription(JsonNullable.undefined());
-
-      // When
-      transactionMapper.patchEntity(update, entity);
-
-      // Then
-      assertThat(entity.getDescription())
-          .as("Description should remain unchanged when undefined is passed")
-          .isEqualTo(originalDesc);
-    }
-
-    @Test
-    void should_ClearField_When_ExplicitlySetToNull() {
-      // Given
-      var entity = new TransactionEntity(
-          UUID.randomUUID(),
-          UUID.randomUUID(),
-          100L,
-          TransactionType.EXPENSE,
-          Currency.getInstance("EUR"),
-          LocalDate.now(),
-          "Old Description",
-          UUID.randomUUID()
-      );
-
-      var update = new TransactionUpdate();
-      update.setDescription(JsonNullable.of(null));
-
-      // When
-      transactionMapper.patchEntity(update, entity);
-
-      // Then
-      assertThat(entity.getDescription())
-          .as("Description should be cleared when explicitly set to null in PATCH")
-          .isNull();
-    }
-  }
-
-  @Nested
-  class ReplaceEntity {
-
-    @Test
-    void should_OverwriteWithNull_When_ProvidedInReplaceRequest_But_PreserveMetadata() {
+    void should_OverwriteWithNull_When_ProvidedInUpdateRequest_But_PreserveMetadata() {
       // Given
       var originalId = UUID.randomUUID();
       var originalOwnerId = UUID.randomUUID();
@@ -238,30 +167,28 @@ class TransactionMapperTest {
       entity.setUpdatedAt(originalUpdatedAt);
       entity.setVersion(originalVersion);
 
-      var replace = new TransactionWrite(
-          UUID.randomUUID(), // New category
-          200L,
-          com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.INCOME,
-          "USD",
-          LocalDate.now()
-      );
-      replace.setDescription(null); // Explicitly null
+      var update = new TransactionWrite()
+          .categoryId(UUID.randomUUID())
+          .amount(200L)
+          .type(com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.INCOME)
+          .currency("USD")
+          .date(LocalDate.now());
 
       // When
-      transactionMapper.replaceEntity(replace, entity);
+      transactionMapper.updateEntity(update, entity);
 
       // Then
       assertThat(entity)
           .as("CategoryId and amount should be updated")
-          .returns(replace.getCategoryId(), TransactionEntity::getCategoryId)
+          .returns(update.getCategoryId(), TransactionEntity::getCategoryId)
           .returns(200L, TransactionEntity::getAmount)
           .extracting(TransactionEntity::getDescription)
-          .as("Description should be overwritten with null in replace (PUT) operation")
+          .as("Description should be overwritten with null in update (PUT) operation")
           .isNull();
 
       // Verify metadata is preserved
       assertThat(entity)
-          .as("Metadata and identity fields should not be changed by replaceEntity")
+          .as("Metadata and identity fields should not be changed by updateEntity")
           .returns(originalId, TransactionEntity::getId)
           .returns(originalOwnerId, TransactionEntity::getOwnerId)
           .returns(originalVersion, TransactionEntity::getVersion)

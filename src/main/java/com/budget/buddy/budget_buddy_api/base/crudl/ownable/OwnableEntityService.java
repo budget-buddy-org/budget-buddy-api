@@ -14,32 +14,32 @@ import org.springframework.data.domain.Pageable;
  *
  * <p>All CRUDL operations are automatically scoped to the owner returned by the
  * injected {@link OwnerIdProvider}. Subclasses inherit this scoping without any
- * additional wiring — the parent's {@code update/replace/delete} flow is reused
+ * additional wiring — the parent's {@code update/delete} flow is reused
  * verbatim because it dispatches through the overridden {@link #readInternal(Object)}.
  *
  * @param <E> the entity type
- * @param <ID> the identifier type
+ * @param <I> the identifier type
  * @param <R> the read model type (DTO)
- * @param <C> the create/replace request type (DTO)
- * @param <U> the partial-update request type (DTO)
+ * @param <C> the create request type (DTO)
+ * @param <U> the update request type (DTO) used for PUT updates
  */
-public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
-    extends AbstractBaseEntityService<E, ID, R, C, U> {
+public class OwnableEntityService<E extends OwnableEntity<I>, I, R, C, U>
+    extends AbstractBaseEntityService<E, I, R, C, U> {
 
   private static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
 
   @Getter(AccessLevel.PROTECTED)
-  private final OwnableEntityRepository<E, ID> repository;
+  private final OwnableEntityRepository<E, I> repository;
   @Getter(AccessLevel.PROTECTED)
   private final BaseEntityMapper<E, R, C, U, ?> mapper;
   @Getter(AccessLevel.PROTECTED)
-  private final OwnerIdProvider<ID> ownerIdProvider;
+  private final OwnerIdProvider<I> ownerIdProvider;
 
   protected OwnableEntityService(
-      OwnableEntityRepository<E, ID> repository,
+      OwnableEntityRepository<E, I> repository,
       BaseEntityMapper<E, R, C, U, ?> mapper,
       Iterable<BaseEntityValidator<E>> entityValidators,
-      OwnerIdProvider<ID> ownerIdProvider
+      OwnerIdProvider<I> ownerIdProvider
   ) {
     super(repository, mapper, entityValidators);
     this.repository = repository;
@@ -53,13 +53,13 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
   }
 
   @Override
-  protected E readInternal(ID id) {
+  protected E readInternal(I id) {
     return repository.findByIdAndOwnerId(id, ownerIdProvider.get())
         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));
   }
 
   @Override
-  protected boolean existsByIdInternal(ID id) {
+  protected boolean existsByIdInternal(I id) {
     return repository.existsByIdAndOwnerId(id, ownerIdProvider.get());
   }
 
