@@ -2,7 +2,7 @@ package com.budget.buddy.budget_buddy_api.category;
 
 import java.util.UUID;
 
-record CategorySummaryRow(
+public record CategorySummaryRow(
     UUID categoryId,
     String categoryName,
     Long monthlyBudget,

@@ -36,16 +36,20 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   private Transaction createTransaction(String ownerId, UUID categoryId, String description) throws Exception {
-    return createTransaction(ownerId, categoryId, description, 1000L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+    return createTransaction(ownerId, categoryId, description, 1000L, LocalDate.of(2026, 3, 1));
   }
 
   private Transaction createTransaction(
-      String ownerId, UUID categoryId, String description, long amount, TransactionType type, LocalDate date
+      String ownerId,
+      UUID categoryId,
+      String description,
+      long amount,
+      LocalDate date
   ) throws Exception {
     var body = new TransactionWrite()
         .categoryId(categoryId)
         .amount(amount)
-        .type(type)
+        .type(TransactionType.EXPENSE)
         .currency("EUR")
         .date(date)
         .description(description);
@@ -197,13 +201,13 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   @Nested
-  class Replace {
+  class Update {
 
     @Test
-    void should_ReplaceTransaction_When_Owner() throws Exception {
+    void should_UpdateTransaction_When_Owner() throws Exception {
       var created = createTransaction(userId, userCategoryId, "original");
 
-      var replaceBody = new TransactionWrite()
+      var updateBody = new TransactionWrite()
           .categoryId(userCategoryId)
           .amount(5000L)
           .type(TransactionType.INCOME)
@@ -213,23 +217,23 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
           .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(replaceBody))
+          .content(json(updateBody))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
-      var replaced = parseBody(result, Transaction.class);
-      assertThat(replaced)
+      var updated = parseBody(result, Transaction.class);
+      assertThat(updated)
           .returns(created.getId(), Transaction::getId)
           .returns(5000L, Transaction::getAmount)
           .returns("USD", Transaction::getCurrency)
           .returns(TransactionType.INCOME, Transaction::getType);
-      assertThat(replaced.getDescription())
+      assertThat(updated.getDescription())
           .as("Description should be cleared when not provided in PUT body")
           .isNull();
     }
 
     @Test
-    void should_Return400_When_ReplaceWithOtherUserCategory() throws Exception {
+    void should_Return400_When_UpdateWithOtherUserCategory() throws Exception {
       var created = createTransaction(userId, userCategoryId);
 
       var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
@@ -279,99 +283,6 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
-    }
-  }
-
-  @Nested
-  class Update {
-
-    public static final Long AMOUNT = 2000L;
-
-    @Test
-    void should_UpdateTransaction_When_Owner() throws Exception {
-      var created = createTransaction(userId, userCategoryId);
-
-      var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionUpdate().amount(AMOUNT)))
-          .exchange();
-
-      assertThat(result).hasStatus(HttpStatus.OK);
-      var updated = parseBody(result, Transaction.class);
-      assertThat(updated)
-          .returns(AMOUNT, Transaction::getAmount);
-    }
-
-    @Test
-    void should_Return400_When_UpdateWithOtherUserCategory() throws Exception {
-      var created = createTransaction(userId, userCategoryId);
-
-      var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionUpdate().categoryId(otherUserCategoryId)))
-          .exchange();
-
-      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void should_Return400_When_UpdateWithNonExistentCategory() throws Exception {
-      var created = createTransaction(userId, userCategoryId);
-
-      var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionUpdate().categoryId(UUID.randomUUID())))
-          .exchange();
-
-      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void should_Return404_When_TransactionBelongsToOtherUser() throws Exception {
-      var created = createTransaction(otherUserId, otherUserCategoryId);
-
-      var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionUpdate().amount(AMOUNT)))
-          .exchange();
-
-      assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
-    }
-
-    @Test
-    void should_Return401_When_NotAuthenticated() throws Exception {
-      var created = createTransaction(userId, userCategoryId);
-
-      var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionUpdate().amount(AMOUNT)))
-          .exchange();
-
-      assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
-    }
-
-    @Test
-    void should_ClearDescription_When_ExplicitNullInPatch() throws Exception {
-      // Given
-      var created = createTransaction(userId, userCategoryId, "A description");
-
-      // When — raw JSON to explicitly send null (distinct from omitting the field)
-      var result = mvc.patch().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content("{\"description\": null}")
-          .exchange();
-
-      // Then
-      assertThat(result).hasStatus(HttpStatus.OK);
-      var updated = parseBody(result, Transaction.class);
-      assertThat(updated.getDescription())
-          .as("Description should be cleared when PATCH sends explicit null")
-          .isNull();
     }
   }
 
@@ -547,11 +458,11 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_FilterByAmountRange_Inclusive() throws Exception {
-      var low = createTransaction(userId, userCategoryId, "low", 100L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
-      var mid = createTransaction(userId, userCategoryId, "mid", 500L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
-      var high = createTransaction(userId, userCategoryId, "high", 1000L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, userCategoryId, "tooLow", 99L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, userCategoryId, "tooHigh", 1001L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+      var low = createTransaction(userId, userCategoryId, "low", 100L, LocalDate.of(2026, 3, 1));
+      var mid = createTransaction(userId, userCategoryId, "mid", 500L, LocalDate.of(2026, 3, 1));
+      var high = createTransaction(userId, userCategoryId, "high", 1000L, LocalDate.of(2026, 3, 1));
+      createTransaction(userId, userCategoryId, "tooLow", 99L, LocalDate.of(2026, 3, 1));
+      createTransaction(userId, userCategoryId, "tooHigh", 1001L, LocalDate.of(2026, 3, 1));
 
       var result = mvc.get().uri("/v1/transactions?amountMin=100&amountMax=1000")
           .with(jwtForUser(userId))
@@ -566,8 +477,8 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_FilterByAmount_Exact_When_MinEqualsMax() throws Exception {
-      var exact = createTransaction(userId, userCategoryId, "exact", 250L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, userCategoryId, "off-by-one", 251L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+      var exact = createTransaction(userId, userCategoryId, "exact", 250L, LocalDate.of(2026, 3, 1));
+      createTransaction(userId, userCategoryId, "off-by-one", 251L, LocalDate.of(2026, 3, 1));
 
       var result = mvc.get().uri("/v1/transactions?amountMin=250&amountMax=250")
           .with(jwtForUser(userId))
@@ -583,10 +494,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_CombineQueryAndAmount_AndCategory() throws Exception {
       var travelCategoryId = createCategory(userId, "Travel");
-      var match = createTransaction(userId, travelCategoryId, "Hotel in Paris", 500L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, travelCategoryId, "Hotel in Paris", 50L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, userCategoryId, "Hotel in Paris", 500L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, travelCategoryId, "Souvenir", 500L, TransactionType.EXPENSE, LocalDate.of(2026, 3, 1));
+      var match = createTransaction(userId, travelCategoryId, "Hotel in Paris", 500L, LocalDate.of(2026, 3, 1));
+      createTransaction(userId, travelCategoryId, "Hotel in Paris", 50L, LocalDate.of(2026, 3, 1));
+      createTransaction(userId, userCategoryId, "Hotel in Paris", 500L, LocalDate.of(2026, 3, 1));
+      createTransaction(userId, travelCategoryId, "Souvenir", 500L, LocalDate.of(2026, 3, 1));
 
       var result = mvc.get().uri(
               "/v1/transactions?query={q}&amountMin=100&amountMax=1000&categoryId={c}",

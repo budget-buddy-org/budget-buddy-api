@@ -1,6 +1,7 @@
 package com.budget.buddy.budget_buddy_api.base;
 
 import com.budget.buddy.budget_buddy_api.base.validation.FieldErrorFactory;
+import com.budget.buddy.budget_buddy_contracts.generated.model.FieldError;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Problem;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -20,8 +21,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import tools.jackson.databind.exc.MismatchedInputException;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
 
 import java.net.URI;
+import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -169,7 +174,9 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * Handles cases where the HTTP message is not readable (e.g., malformed JSON).
+   * Handles cases where the HTTP message is not readable (e.g., malformed JSON, unknown or
+   * mistyped fields). Per-field Jackson failures populate {@code errors[]} with a {@link FieldError}
+   * so clients see exactly which field is at fault; other failures fall back to a plain summary.
    *
    * @param ex the exception
    * @param request the current web request
@@ -178,7 +185,27 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<Problem> handleNotReadable(HttpMessageNotReadableException ex, WebRequest request) {
     log.debug("Malformed request: {}", ex.getMessage());
-    return problemResponse(HttpStatus.BAD_REQUEST, "The request body could not be read", request);
+
+    return switch (ex.getCause()) {
+      case UnrecognizedPropertyException upe -> fieldErrorResponse(upe.getPropertyName(), "unknown field", request);
+      case MismatchedInputException mie -> fieldErrorResponse(jsonPath(mie), "invalid value", request);
+      case null, default -> problemResponse(HttpStatus.BAD_REQUEST, "The request body could not be read", request);
+    };
+  }
+
+  private static ResponseEntity<Problem> fieldErrorResponse(String field, String message, WebRequest request) {
+    var problem = new Problem().errors(List.of(new FieldError().field(field).message(message)));
+    return buildProblemResponse(problem, HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "One or more fields are invalid", request);
+  }
+
+  private static String jsonPath(MismatchedInputException ex) {
+    if (ex.getPath() == null || ex.getPath().isEmpty()) {
+      return "null";
+    }
+    return ex.getPath().stream()
+        .map(ref -> ref.getPropertyName() != null ? ref.getPropertyName() : "[" + ref.getIndex() + "]")
+        .reduce((a, b) -> a + "." + b)
+        .orElse("null");
   }
 
   @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -191,6 +218,20 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Problem> handleIllegalArgument(IllegalArgumentException ex, WebRequest request) {
     log.debug("Illegal argument: {}", ex.getMessage());
     return problemResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+  }
+
+  /**
+   * Handles malformed date/time query or path parameters (e.g. {@code month=invalid}).
+   * These are user-input errors and must surface as 400, not 500.
+   *
+   * @param ex      the exception
+   * @param request the current web request
+   * @return a {@link ResponseEntity} containing a {@link Problem} detail
+   */
+  @ExceptionHandler(DateTimeParseException.class)
+  public ResponseEntity<Problem> handleDateTimeParse(DateTimeParseException ex, WebRequest request) {
+    log.debug("Date/time parse failed: {}", ex.getMessage());
+    return problemResponse(HttpStatus.BAD_REQUEST, "Invalid date or time value: " + ex.getParsedString(), request);
   }
 
   /**

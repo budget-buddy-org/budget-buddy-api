@@ -1,7 +1,5 @@
 package com.budget.buddy.budget_buddy_api.security.cors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -10,12 +8,14 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class CorsConfigTest {
 
   private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
       .withUserConfiguration(CorsConfig.class)
       .withPropertyValues(
-          "security.cors.allowed-methods=GET,POST,PUT,PATCH,DELETE,OPTIONS",
+          "security.cors.allowed-methods=GET,POST,PUT,DELETE,OPTIONS",
           "security.cors.allowed-headers=*",
           "security.cors.allow-credentials=true",
           "security.cors.max-age=3600"
@@ -53,7 +53,7 @@ class CorsConfigTest {
       contextRunner
           .withPropertyValues("security.cors.allowed-origin-patterns=https://app.example.com,https://*.cdn.example.com")
           .run(context -> {
-            var config = corsConfigFor(context, "/api/test");
+            var config = corsConfigFor(context);
             assertThat(config.getAllowedOriginPatterns())
                 .as("allowed origin patterns should match configured values")
                 .containsExactlyInAnyOrder("https://app.example.com", "https://*.cdn.example.com");
@@ -65,10 +65,10 @@ class CorsConfigTest {
       contextRunner
           .withPropertyValues("security.cors.allowed-origin-patterns=https://app.example.com")
           .run(context -> {
-            var config = corsConfigFor(context, "/api/test");
+            var config = corsConfigFor(context);
             assertThat(config.getAllowedMethods())
                 .as("allowed methods should match configured values")
-                .containsExactlyInAnyOrder("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
+                .containsExactlyInAnyOrder("GET", "POST", "PUT", "DELETE", "OPTIONS");
           });
     }
 
@@ -77,7 +77,7 @@ class CorsConfigTest {
       contextRunner
           .withPropertyValues("security.cors.allowed-origin-patterns=https://app.example.com")
           .run(context -> {
-            var config = corsConfigFor(context, "/api/test");
+            var config = corsConfigFor(context);
             assertThat(config.getAllowCredentials())
                 .as("allow-credentials should be true")
                 .isTrue();
@@ -89,7 +89,7 @@ class CorsConfigTest {
       contextRunner
           .withPropertyValues("security.cors.allowed-origin-patterns=https://app.example.com")
           .run(context -> {
-            var config = corsConfigFor(context, "/api/test");
+            var config = corsConfigFor(context);
             assertThat(config.getMaxAge())
                 .as("max-age should match configured value")
                 .isEqualTo(3600L);
@@ -112,8 +112,8 @@ class CorsConfigTest {
     }
   }
 
-  private static CorsConfiguration corsConfigFor(ApplicationContext context, String path) {
+  private static CorsConfiguration corsConfigFor(ApplicationContext context) {
     var source = context.getBean(CorsConfigurationSource.class);
-    return source.getCorsConfiguration(new MockHttpServletRequest("GET", path));
+    return source.getCorsConfiguration(new MockHttpServletRequest("GET", "/api/test"));
   }
 }

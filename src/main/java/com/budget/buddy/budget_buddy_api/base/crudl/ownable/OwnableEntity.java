@@ -5,22 +5,22 @@ import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntity;
 /**
  * Interface for entities that belong to a user.
  *
- * @param <ID> the user identifier type
+ * @param <I> the user identifier type
  */
-public interface OwnableEntity<ID> extends BaseEntity<ID> {
+public interface OwnableEntity<I> extends BaseEntity<I> {
 
   /**
-   * Retrieves the ID of the user who owns this entity.
+   * Retrieves the I of the user who owns this entity.
    *
-   * @return the owner ID
+   * @return the owner I
    */
-  ID getOwnerId();
+  I getOwnerId();
 
   /**
-   * Sets the ID of the user who owns this entity.
+   * Sets the I of the user who owns this entity.
    *
-   * @param id the owner ID
+   * @param id the owner I
    */
-  void setOwnerId(ID id);
+  void setOwnerId(I id);
 
 }

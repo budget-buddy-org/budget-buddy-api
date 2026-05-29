@@ -17,46 +17,36 @@ import java.util.UUID;
 /**
  * Transaction entity representing a financial transaction. Uses Spring Data JDBC for data access.
  */
-@Table(TransactionEntity.TABLE)
+@Table("transactions")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionEntity extends AuditableEntity implements OwnableEntity<UUID> {
 
-  public static final String TABLE = "transactions";
-  public static final String ID = "id";
-  public static final String CATEGORY_ID = "category_id";
-  public static final String AMOUNT = "amount";
-  public static final String TYPE = "type";
-  public static final String CURRENCY = "currency";
-  public static final String DATE = "date";
-  public static final String DESCRIPTION = "description";
-  public static final String OWNER_ID = "owner_id";
-
   @Id
-  @Column(ID)
+  @Column("id")
   private UUID id;
 
-  @Column(CATEGORY_ID)
+  @Column("category_id")
   private UUID categoryId;
 
-  @Column(AMOUNT)
+  @Column("amount")
   private Long amount;
 
-  @Column(TYPE)
+  @Column("type")
   private TransactionType type;
 
-  @Column(CURRENCY)
+  @Column("currency")
   private Currency currency;
 
-  @Column(DATE)
+  @Column("date")
   private LocalDate date;
 
-  @Column(DESCRIPTION)
+  @Column("description")
   private String description;
 
-  @Column(OWNER_ID)
+  @Column("owner_id")
   private UUID ownerId;
 
 }

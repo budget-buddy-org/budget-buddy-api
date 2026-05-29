@@ -4,7 +4,6 @@ import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntityService;
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnerIdProvider;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
-import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionUpdate;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +19,7 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 @Service
 public class TransactionService extends
-    OwnableEntityService<TransactionEntity, UUID, Transaction, TransactionWrite, TransactionUpdate> {
+    OwnableEntityService<TransactionEntity, UUID, Transaction, TransactionWrite, TransactionWrite> {
 
   public TransactionService(
       TransactionRepository repository,

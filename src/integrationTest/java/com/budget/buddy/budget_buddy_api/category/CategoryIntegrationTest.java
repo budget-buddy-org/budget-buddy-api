@@ -1,11 +1,13 @@
 package com.budget.buddy.budget_buddy_api.category;
 
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
-import com.budget.buddy.budget_buddy_contracts.generated.model.*;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedCategories;
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
@@ -126,10 +128,10 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   @Nested
-  class Replace {
+  class Update {
 
     @Test
-    void should_ReplaceCategory_When_Owner() throws Exception {
+    void should_UpdateCategory_When_Owner() throws Exception {
       var created = createCategory(userId, "Food");
       var newCategoryName = "Groceries";
 
@@ -140,9 +142,9 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
-      var replaced = parseBody(result, Category.class);
+      var updated = parseBody(result, Category.class);
 
-      assertThat(replaced)
+      assertThat(updated)
           .returns(created.getId(), Category::getId)
           .returns(newCategoryName, Category::getName);
     }
@@ -167,50 +169,6 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
       var result = mvc.put().uri("/v1/categories/{id}", created.getId())
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(new CategoryWrite().name("Hacked")))
-          .exchange();
-
-      assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
-    }
-  }
-
-  @Nested
-  class Update {
-
-    @Test
-    void should_UpdateCategory_When_Owner() throws Exception {
-      var created = createCategory(userId, "Food");
-
-      var result = mvc.patch().uri("/v1/categories/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new CategoryUpdate().name("Groceries")))
-          .exchange();
-
-      assertThat(result).hasStatus(HttpStatus.OK);
-      var updated = parseBody(result, Category.class);
-      assertThat(updated.getName()).isEqualTo("Groceries");
-    }
-
-    @Test
-    void should_Return404_When_CategoryBelongsToOtherUser() throws Exception {
-      var created = createCategory(otherUserId, "Other's category");
-
-      var result = mvc.patch().uri("/v1/categories/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new CategoryUpdate().name("Hacked")))
-          .exchange();
-
-      assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
-    }
-
-    @Test
-    void should_Return401_When_NotAuthenticated() throws Exception {
-      var created = createCategory(userId, "Food");
-
-      var result = mvc.patch().uri("/v1/categories/{id}", created.getId())
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new CategoryUpdate().name("Hacked")))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
@@ -263,52 +221,33 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
   class MonthlyBudget {
 
     @Test
-    void should_PreserveBudget_When_PatchOmitsMonthlyBudget() throws Exception {
+    void should_ClearBudget_When_PutOmitsMonthlyBudget() throws Exception {
       var created = createCategory(userId, "Groceries", 50000L);
 
-      var result = mvc.patch().uri("/v1/categories/{id}", created.getId())
+      var result = mvc.put().uri("/v1/categories/{id}", created.getId())
           .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new CategoryUpdate().name("Renamed")))
+          .content(json(new CategoryWrite().name("Groceries")))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var updated = parseBody(result, Category.class);
-      assertThat(updated.getName()).isEqualTo("Renamed");
-      assertThat(updated.getMonthlyBudget().get()).isEqualTo(50000L);
+      assertThat(updated.getMonthlyBudget()).isNull();
     }
 
     @Test
-    void should_ClearBudget_When_PatchSendsNullMonthlyBudget() throws Exception {
+    void should_UpdateBudget_When_PutSendsNewMonthlyBudget() throws Exception {
       var created = createCategory(userId, "Groceries", 50000L);
 
-      var update = new CategoryUpdate();
-      update.setMonthlyBudget(JsonNullable.of(null));
-
-      var result = mvc.patch().uri("/v1/categories/{id}", created.getId())
+      var result = mvc.put().uri("/v1/categories/{id}", created.getId())
           .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(update))
+          .content(json(new CategoryWrite().name("Groceries").monthlyBudget(12345L)))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var updated = parseBody(result, Category.class);
-      assertThat(updated.getMonthlyBudget().get()).isNull();
-    }
-
-    @Test
-    void should_UpdateBudget_When_PatchSendsNewMonthlyBudget() throws Exception {
-      var created = createCategory(userId, "Groceries", 50000L);
-
-      var result = mvc.patch().uri("/v1/categories/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new CategoryUpdate().monthlyBudget(12345L)))
-          .exchange();
-
-      assertThat(result).hasStatus(HttpStatus.OK);
-      var updated = parseBody(result, Category.class);
-      assertThat(updated.getMonthlyBudget().get()).isEqualTo(12345L);
+      assertThat(updated.getMonthlyBudget()).isEqualTo(12345L);
     }
   }
 

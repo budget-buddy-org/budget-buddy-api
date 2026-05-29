@@ -1,8 +1,8 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
-import org.mapstruct.*;
-import org.openapitools.jackson.nullable.JsonNullable;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
  * @param <E> the entity type
  * @param <R> the read model type (DTO)
  * @param <C> the create request type (DTO)
- * @param <U> the update request type (DTO)
+ * @param <U> the update request type (DTO) used for PUT updates
  * @param <L> the list response type (DTO)
  */
 public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
@@ -23,7 +23,6 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    * @param createRequest the create request
    * @return the mapped entity
    */
-  @BeanMapping(ignoreByDefault = false)
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "version", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
@@ -57,67 +56,17 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
   L toPageResponse(List<R> items, PaginationMeta meta);
 
   /**
-   * Patches an existing entity with values from an update request.
-   * Null values or undefined JsonNullable values in the update request are ignored.
-   *
-   * @param patchRequest the update request
-   * @param existingEntity the entity to patch
-   */
-  @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "version", ignore = true)
-  @Mapping(target = "createdAt", ignore = true)
-  @Mapping(target = "updatedAt", ignore = true)
-  @Mapping(target = "ownerId", ignore = true)
-  void patchEntity(U patchRequest, @MappingTarget E existingEntity);
-
-  /**
-   * Fully replaces an existing entity with values from a create request. All writable fields are overwritten,
+   * Fully updates an existing entity with values from an update request. All writable fields are overwritten,
    * including nulls. Immutable fields (id, version, createdAt, updatedAt, ownerId) are preserved.
    *
-   * @param replaceRequest the create request
-   * @param existingEntity the entity to replace
+   * @param updateRequest the update request
+   * @param existingEntity the entity to update
    */
-  @BeanMapping(ignoreByDefault = false)
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "version", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "ownerId", ignore = true)
-  void replaceEntity(C replaceRequest, @MappingTarget E existingEntity);
+  void updateEntity(U updateRequest, @MappingTarget E existingEntity);
 
-  /**
-   * Maps a {@link JsonNullable} to its internal value.
-   *
-   * @param <T>      the type of the value
-   * @param nullable the JsonNullable container
-   * @return the value if present, or null otherwise
-   */
-  default <T> T fromNullable(JsonNullable<T> nullable) {
-    return nullable.orElse(null);
-  }
-
-  /**
-   * Condition to check if a {@link JsonNullable} value is present.
-   * This is used by MapStruct for PATCH operations.
-   *
-   * @param value the property value from the source object
-   * @return true if the value is present (even if it's null), false otherwise
-   */
-  @Condition
-  default boolean isPresent(JsonNullable<?> value) {
-    return value != null && value.isPresent();
-  }
-
-  /**
-   * Wraps a value in a {@link JsonNullable} container.
-   *
-   * @param <T>   the type of the value
-   * @param value the value to wrap (may be {@code null})
-   * @return a {@code JsonNullable} carrying {@code value}
-   */
-  @Named("toJsonNullable")
-  default <T> JsonNullable<T> toJsonNullable(T value) {
-    return JsonNullable.of(value);
-  }
 }

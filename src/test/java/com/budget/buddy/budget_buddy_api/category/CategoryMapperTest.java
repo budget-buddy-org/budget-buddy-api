@@ -1,11 +1,9 @@
 package com.budget.buddy.budget_buddy_api.category;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
-import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryUpdate;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -15,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CategoryMapperTest {
 
-  private final CategoryMapper categoryMapper = Mappers.getMapper(CategoryMapper.class);
+  private final CategoryMapper categoryMapper = new CategoryMapperImpl();
 
   @Nested
   class ToEntity {
@@ -23,7 +21,9 @@ class CategoryMapperTest {
     @Test
     void should_MapCategoryWriteToCategoryEntity() {
       // Given
-      var create = new CategoryWrite("Groceries");
+      var create = new CategoryWrite()
+          .name("Groceries")
+          .monthlyBudget(50000L);
 
       // When
       var entity = categoryMapper.toEntity(create);
@@ -33,7 +33,23 @@ class CategoryMapperTest {
           .as("Mapped entity should not be null")
           .isNotNull()
           .returns("Groceries", CategoryEntity::getName)
+          .returns(50000L, CategoryEntity::getMonthlyBudget)
           .returns(null, CategoryEntity::getId);
+    }
+
+    @Test
+    void should_MapNullMonthlyBudget_When_Cleared() {
+      // Given
+      var create = new CategoryWrite()
+          .name("Groceries");
+
+      // When
+      var entity = categoryMapper.toEntity(create);
+
+      // Then
+      assertThat(entity.getMonthlyBudget())
+          .as("Null monthlyBudget in the write model should map to null on the entity")
+          .isNull();
     }
   }
 
@@ -44,10 +60,7 @@ class CategoryMapperTest {
     void should_MapCategoryEntityToCategory() {
       // Given
       var id = UUID.randomUUID();
-      var now = OffsetDateTime.now();
-      var entity = new CategoryEntity(id, "Groceries", UUID.randomUUID(), null);
-      entity.setCreatedAt(now);
-      entity.setUpdatedAt(now);
+      var entity = new CategoryEntity(id, "Groceries", UUID.randomUUID(), 50000L);
 
       // When
       var model = categoryMapper.toModel(entity);
@@ -58,8 +71,7 @@ class CategoryMapperTest {
           .isNotNull()
           .returns(id, Category::getId)
           .returns("Groceries", Category::getName)
-          .returns(now, Category::getCreatedAt)
-          .returns(now, Category::getUpdatedAt);
+          .returns(50000L, Category::getMonthlyBudget);
     }
   }
 
@@ -95,48 +107,7 @@ class CategoryMapperTest {
   }
 
   @Nested
-  class PatchEntity {
-
-    @Test
-    void should_UpdateOnlyProvidedFields() {
-      // Given
-      var originalId = UUID.randomUUID();
-      var ownerId = UUID.randomUUID();
-      var entity = new CategoryEntity(originalId, "Old Name", ownerId, null);
-      var update = new CategoryUpdate();
-      update.setName("New Name");
-
-      // When
-      categoryMapper.patchEntity(update, entity);
-
-      // Then
-      assertThat(entity)
-          .as("Entity name should be updated while other fields remain unchanged")
-          .returns("New Name", CategoryEntity::getName)
-          .returns(originalId, CategoryEntity::getId)
-          .returns(ownerId, CategoryEntity::getOwnerId);
-    }
-
-    @Test
-    void should_NotUpdateIfNull() {
-      // Given
-      var originalName = "Keep Me";
-      var entity = new CategoryEntity(UUID.randomUUID(), originalName, UUID.randomUUID(), null);
-      var update = new CategoryUpdate();
-      update.setName(null);
-
-      // When
-      categoryMapper.patchEntity(update, entity);
-
-      // Then
-      assertThat(entity.getName())
-          .as("Entity name should remain unchanged when the update request contains null")
-          .isEqualTo(originalName);
-    }
-  }
-
-  @Nested
-  class ReplaceEntity {
+  class UpdateEntity {
 
     @Test
     void should_OverwriteExistingEntity_But_PreserveMetadata() {
@@ -152,14 +123,15 @@ class CategoryMapperTest {
       entity.setUpdatedAt(originalUpdatedAt);
       entity.setVersion(originalVersion);
 
-      var replace = new CategoryWrite("New Name");
+      var update = new CategoryWrite()
+          .name("New Name");
 
       // When
-      categoryMapper.replaceEntity(replace, entity);
+      categoryMapper.updateEntity(update, entity);
 
       // Then
       assertThat(entity)
-          .as("Entity name should be replaced, but metadata must be preserved")
+          .as("Entity name should be updated, but metadata must be preserved")
           .returns("New Name", CategoryEntity::getName)
           .returns(originalId, CategoryEntity::getId)
           .returns(originalOwnerId, CategoryEntity::getOwnerId)

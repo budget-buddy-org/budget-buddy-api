@@ -1,19 +1,20 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 /**
  * Generic CRUDL (Create, Read, Update, Delete, List) service interface for managing entities.
  *
- * @param <ID> The type of the unique identifier for the entities managed by the service.
+ * @param <I> The type of the unique identifier for the entities managed by the service.
  * @param <R> The type of the resource/model returned by the service methods.
  * @param <C> The type of the create request object used for creating new entities.
- * @param <U> The type of the update request object used for updating existing entities.
+ * @param <U> The type of the update request object used for fully updating existing entities via PUT.
  */
-public interface BaseEntityService<ID, R, C, U> {
+public interface BaseEntityService<I, R, C, U> {
 
   /**
    * Create a new entity based on the provided createRequest request object.
@@ -27,39 +28,29 @@ public interface BaseEntityService<ID, R, C, U> {
    * Read an existing entity by its unique identifier.
    *
    * @param id The unique identifier of the entity to read.
-   * @return The resource/model representing the entity with the specified ID.
-   * @throws EntityNotFoundException If no entity with the specified ID exists.
+   * @return The resource/model representing the entity with the specified I.
+   * @throws EntityNotFoundException If no entity with the specified I exists.
    */
-  R read(ID id) throws EntityNotFoundException;
+  R read(I id) throws EntityNotFoundException;
 
   /**
-   * Partially update an existing entity identified by its unique identifier.
-   *
-   * @param id The unique identifier of the entity to patch.
-   * @param patchRequest The patch request object containing only the fields to update.
-   * @return The updated resource/model representing the modified entity.
-   * @throws EntityNotFoundException If no entity with the specified ID exists.
-   */
-  R update(ID id, U patchRequest) throws EntityNotFoundException;
-
-  /**
-   * Fully replace an existing entity identified by its unique identifier. All writable fields are overwritten;
+   * Fully update an existing entity identified by its unique identifier. All writable fields are overwritten;
    * omitting optional fields clears them.
    *
-   * @param id The unique identifier of the entity to replace.
-   * @param replaceRequest The create request containing all fields for the replacement.
-   * @return The replaced resource/model.
-   * @throws EntityNotFoundException If no entity with the specified ID exists.
+   * @param id The unique identifier of the entity to update.
+   * @param updateRequest The update request containing all fields for the update.
+   * @return The updated resource/model.
+   * @throws EntityNotFoundException If no entity with the specified I exists.
    */
-  R replace(ID id, C replaceRequest) throws EntityNotFoundException;
+  R update(I id, U updateRequest) throws EntityNotFoundException;
 
   /**
    * Delete an existing entity by its unique identifier.
    *
    * @param id The unique identifier of the entity to delete.
-   * @throws EntityNotFoundException If no entity with the specified ID exists.
+   * @throws EntityNotFoundException If no entity with the specified I exists.
    */
-  void delete(ID id) throws EntityNotFoundException;
+  void delete(I id) throws EntityNotFoundException;
 
   /**
    * List all existing entities.
@@ -89,5 +80,5 @@ public interface BaseEntityService<ID, R, C, U> {
    * @param id the unique identifier
    * @return true if the entity exists, false otherwise
    */
-  boolean existsById(ID id);
+  boolean existsById(I id);
 }

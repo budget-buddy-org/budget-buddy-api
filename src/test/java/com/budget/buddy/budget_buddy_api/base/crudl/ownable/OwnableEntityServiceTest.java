@@ -125,7 +125,7 @@ class OwnableEntityServiceTest {
   class UpdateInternalTests {
 
     @Test
-    void should_PatchAndSave() {
+    void should_UpdateAndSave() {
       // Given
       var id = "123";
       var updateRequest = new Object();
@@ -140,33 +140,7 @@ class OwnableEntityServiceTest {
       assertThat(result)
           .as("Result should be the updated entity")
           .isEqualTo(existingEntity);
-
-      verify(mapper).patchEntity(updateRequest, existingEntity);
-      verify(repository).save(existingEntity);
-    }
-  }
-
-  @Nested
-  @DisplayName("replaceInternal")
-  class ReplaceInternalTests {
-
-    @Test
-    void should_ReplaceAndSave() {
-      // Given
-      var id = "123";
-      var replaceRequest = new Object();
-      var existingEntity = new DummyOwnableEntity();
-      when(repository.findByIdAndOwnerId(id, ownerId)).thenReturn(Optional.of(existingEntity));
-      when(repository.save(existingEntity)).thenReturn(existingEntity);
-
-      // When
-      var result = service.replaceInternal(id, replaceRequest);
-
-      // Then
-      assertThat(result)
-          .as("Result should be the replaced entity")
-          .isEqualTo(existingEntity);
-      verify(mapper).replaceEntity(replaceRequest, existingEntity);
+      verify(mapper).updateEntity(updateRequest, existingEntity);
       verify(repository).save(existingEntity);
     }
 
@@ -174,11 +148,11 @@ class OwnableEntityServiceTest {
     void should_ThrowException_When_NotFound() {
       // Given
       var id = "123";
-      var replaceRequest = new Object();
+      var updateRequest = new Object();
       when(repository.findByIdAndOwnerId(id, ownerId)).thenReturn(Optional.empty());
 
       // When & Then
-      assertThatThrownBy(() -> service.replaceInternal(id, replaceRequest))
+      assertThatThrownBy(() -> service.updateInternal(id, updateRequest))
           .as("Should throw EntityNotFoundException when entity is not found or not owned by the current user")
           .isInstanceOf(EntityNotFoundException.class)
           .hasMessageContaining("Entity not found with id: " + id);
@@ -279,11 +253,6 @@ class OwnableEntityServiceTest {
     @Override
     public DummyOwnableEntity updateInternal(String id, Object updateRequest) {
       return super.updateInternal(id, updateRequest);
-    }
-
-    @Override
-    public DummyOwnableEntity replaceInternal(String id, Object replaceRequest) {
-      return super.replaceInternal(id, replaceRequest);
     }
 
     @Override

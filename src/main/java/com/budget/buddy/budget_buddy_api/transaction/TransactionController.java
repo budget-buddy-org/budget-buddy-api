@@ -21,7 +21,7 @@ import java.util.UUID;
  */
 @RestController
 public class TransactionController
-    extends BaseEntityController<UUID, Transaction, TransactionWrite, TransactionUpdate, PaginatedTransactions>
+    extends BaseEntityController<UUID, Transaction, TransactionWrite, TransactionWrite, PaginatedTransactions>
     implements TransactionsApi {
 
   private static final Sort DEFAULT_SORT = Sort.by(Direction.DESC, "date");
@@ -46,8 +46,7 @@ public class TransactionController
   }
 
   @Override
-  public ResponseEntity<List<MonthlySummary>> getTransactionsSummaryTrend(
-      String from, String to, String currency) {
+  public ResponseEntity<List<MonthlySummary>> getTransactionsSummaryTrend(String from, String to, String currency) {
     return ResponseEntity.ok(summaryService.getTrend(from, to, currency));
   }
 
@@ -98,12 +97,7 @@ public class TransactionController
   }
 
   @Override
-  public ResponseEntity<Transaction> replaceTransaction(UUID transactionId, TransactionWrite transactionCreate) {
-    return super.replaceInternal(transactionId, transactionCreate);
-  }
-
-  @Override
-  public ResponseEntity<Transaction> updateTransaction(UUID transactionId, TransactionUpdate transactionUpdate) {
+  public ResponseEntity<Transaction> updateTransaction(UUID transactionId, TransactionWrite transactionUpdate) {
     return super.updateInternal(transactionId, transactionUpdate);
   }
 
