@@ -231,8 +231,8 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
-      var replaced = parseBody(result, Category.class);
-      assertThat(replaced.getMonthlyBudget()).isNull();
+      var updated = parseBody(result, Category.class);
+      assertThat(updated.getMonthlyBudget()).isNull();
     }
 
     @Test
@@ -246,8 +246,8 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
-      var replaced = parseBody(result, Category.class);
-      assertThat(replaced.getMonthlyBudget()).isEqualTo(12345L);
+      var updated = parseBody(result, Category.class);
+      assertThat(updated.getMonthlyBudget()).isEqualTo(12345L);
     }
   }
 
