@@ -1,3 +1,9 @@
+## [1.9.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.9.0...v1.9.1) (2026-05-29)
+
+### Bug Fixes
+
+* resolve null local user id on concurrent first login ([#177](https://github.com/budget-buddy-org/budget-buddy-api/issues/177)) ([8944848](https://github.com/budget-buddy-org/budget-buddy-api/commit/89448484d17a61ebde54b979f3ac39c5caaf54d1)), closes [#result](https://github.com/budget-buddy-org/budget-buddy-api/issues/result)
+
 ## [1.9.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.8.0...v1.9.0) (2026-05-08)
 
 ### Features
