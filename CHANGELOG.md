@@ -1,3 +1,9 @@
+## [1.10.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.9.1...v1.10.0) (2026-05-29)
+
+### Features
+
+* remove PATCH http requests ([#176](https://github.com/budget-buddy-org/budget-buddy-api/issues/176)) ([2fdef84](https://github.com/budget-buddy-org/budget-buddy-api/commit/2fdef84c2cbb066a6282c2f265cfe0d355aee718))
+
 ## [1.9.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.9.0...v1.9.1) (2026-05-29)
 
 ### Bug Fixes
