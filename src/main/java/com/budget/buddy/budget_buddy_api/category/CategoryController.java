@@ -37,7 +37,7 @@ public class CategoryController
   }
 
   @Override
-  public ResponseEntity<Category> replaceCategory(UUID categoryId, CategoryWrite categoryUpdate) {
+  public ResponseEntity<Category> updateCategory(UUID categoryId, CategoryWrite categoryUpdate) {
     return super.updateInternal(categoryId, categoryUpdate);
   }
 

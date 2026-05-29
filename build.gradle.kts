@@ -30,7 +30,7 @@ repositories {
 dependencies {
   val mapstructVersion = "1.6.3"
   val lombokMapstructBindingVersion = "0.2.0"
-  val budgetBuddyContractsVersion = "6.0.0"
+  val budgetBuddyContractsVersion = "6.1.0"
   implementation("com.budgetbuddy:budget-buddy-contracts:${budgetBuddyContractsVersion}")
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
   implementation("org.springframework.boot:spring-boot-starter-security")

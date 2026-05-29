@@ -38,8 +38,8 @@ public class MeController implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<UserPreferences> replaceCurrentUserPreferences(UserPreferencesWrite body) {
-    throw notImplemented("replaceCurrentUserPreferences");
+  public ResponseEntity<UserPreferences> updateCurrentUserPreferences(UserPreferencesWrite body) {
+    throw notImplemented("updateCurrentUserPreferences");
   }
 
   @Override

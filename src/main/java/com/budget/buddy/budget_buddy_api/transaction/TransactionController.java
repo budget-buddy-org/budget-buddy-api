@@ -97,7 +97,7 @@ public class TransactionController
   }
 
   @Override
-  public ResponseEntity<Transaction> replaceTransaction(UUID transactionId, TransactionWrite transactionUpdate) {
+  public ResponseEntity<Transaction> updateTransaction(UUID transactionId, TransactionWrite transactionUpdate) {
     return super.updateInternal(transactionId, transactionUpdate);
   }
 
