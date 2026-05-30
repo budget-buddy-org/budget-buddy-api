@@ -2,9 +2,8 @@ package com.budget.buddy.budget_buddy_api.base.validation;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.FieldError;
 import jakarta.validation.ConstraintViolation;
-import lombok.NoArgsConstructor;
-
 import java.util.Objects;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class FieldErrorFactory {
@@ -23,10 +22,11 @@ public final class FieldErrorFactory {
 
   public static FieldError from(org.springframework.validation.FieldError fieldError) {
     Objects.requireNonNull(fieldError);
+    var message = Objects.requireNonNullElse(fieldError.getDefaultMessage(), "Invalid value");
 
     return new FieldError()
         .field(fieldError.getField())
-        .message(Objects.requireNonNullElse(fieldError.getDefaultMessage(), "Invalid value"));
+        .message(message);
   }
 
 }

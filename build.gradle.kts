@@ -28,13 +28,11 @@ repositories {
 }
 
 dependencies {
-  // mapstruct-processor and lombok-mapstruct-binding are not in the Spring Boot BOM, so pin them
-  // here; keep mapstruct's processor and runtime artifact on the same version.
   val mapstructVersion = "1.6.3"
   val lombokMapstructBindingVersion = "0.2.0"
+  val budgetBuddyContractsVersion = "6.1.0"
 
-  // budget-buddy-contracts is our own published artifact; Spring Boot's BOM doesn't manage it.
-  implementation("com.budgetbuddy:budget-buddy-contracts:6.1.0")
+  implementation("com.budgetbuddy:budget-buddy-contracts:${budgetBuddyContractsVersion}")
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
@@ -44,7 +42,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-liquibase")
   implementation("com.github.ben-manes.caffeine:caffeine")
   implementation("org.mapstruct:mapstruct:${mapstructVersion}")
-  implementation("org.jspecify:jspecify")   // version managed by the Spring Boot BOM
+  implementation("org.jspecify:jspecify")
 
   compileOnly("org.projectlombok:lombok")
 

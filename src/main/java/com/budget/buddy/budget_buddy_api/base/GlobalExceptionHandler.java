@@ -57,6 +57,7 @@ public class GlobalExceptionHandler {
         .title(title)
         .status(status.value())
         .instance(URI.create(getRequestUri(request)));
+
     // detail is optional (RFC 9457); setDetail accepts null, the fluent detail() builder does not
     problem.setDetail(detail);
 
