@@ -165,9 +165,18 @@ Profiles: `application.yaml` (shared) + `application-{dev,prod,test}.yaml`. Secr
 
 ### Null-Safety (JSpecify)
 
-Spring Boot 4 ships JSpecify nullness annotations; this codebase uses `org.jspecify.annotations.@Nullable` /
-`@NonNull`. Treat references as non-null by default and annotate only the genuinely nullable ones (e.g.
-`CategoryEntity.monthlyBudget`). Prefer JSpecify over `jakarta`/Spring nullability annotations.
+Every production package is `@NullMarked` (via a `package-info.java`), so references are **non-null by default**;
+annotate only the genuinely nullable ones with `org.jspecify.annotations.@Nullable` (e.g.
+`CategoryEntity.monthlyBudget`). **Do not write `@NonNull`** — it's redundant in a null-marked scope. Prefer JSpecify
+over `jakarta`/Spring nullability annotations.
+
+These annotations are **documentation + tooling hints**, not build-enforced: IntelliJ (and other JSpecify-aware tools)
+reads `@NullMarked`/`@Nullable` and flags mismatches in the editor. There is intentionally **no NullAway / Error Prone
+build gate** — keep the build simple and rely on the IDE plus the conventions below.
+
+- **Adding a new package?** Add a `package-info.java` declaring `@NullMarked` so the package opts into non-null-by-default.
+- **Framework-initialised fields**: Spring Data JDBC populates `@Column`-mapped entity fields after construction, so a
+  no-arg constructor legitimately leaves them unset — that's expected and needs no annotation gymnastics.
 
 ### Raw SQL Repositories (`JdbcClient`)
 

@@ -31,6 +31,7 @@ dependencies {
   val mapstructVersion = "1.6.3"
   val lombokMapstructBindingVersion = "0.2.0"
   val budgetBuddyContractsVersion = "6.1.0"
+
   implementation("com.budgetbuddy:budget-buddy-contracts:${budgetBuddyContractsVersion}")
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
   implementation("org.springframework.boot:spring-boot-starter-security")
@@ -41,6 +42,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-liquibase")
   implementation("com.github.ben-manes.caffeine:caffeine")
   implementation("org.mapstruct:mapstruct:${mapstructVersion}")
+  implementation("org.jspecify:jspecify")
 
   compileOnly("org.projectlombok:lombok")
 

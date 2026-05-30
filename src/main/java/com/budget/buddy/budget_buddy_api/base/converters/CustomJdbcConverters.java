@@ -1,10 +1,8 @@
 package com.budget.buddy.budget_buddy_api.base.converters;
 
 import com.budget.buddy.budget_buddy_api.transaction.TransactionType;
-import jakarta.annotation.Nonnull;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
@@ -31,7 +29,7 @@ public class CustomJdbcConverters {
   static class CurrencyReadingConverter implements Converter<String, Currency> {
 
     @Override
-    public Currency convert(@NonNull String source) {
+    public Currency convert(String source) {
       return Currency.getInstance(source);
     }
   }
@@ -40,7 +38,7 @@ public class CustomJdbcConverters {
   static class CurrencyWritingConverter implements Converter<Currency, String> {
 
     @Override
-    public String convert(@NonNull Currency source) {
+    public String convert(Currency source) {
       return source.getCurrencyCode();
     }
   }
@@ -49,7 +47,7 @@ public class CustomJdbcConverters {
   static class TimestampToOffsetDateTimeConverter implements Converter<Timestamp, OffsetDateTime> {
 
     @Override
-    public OffsetDateTime convert(@NonNull Timestamp source) {
+    public OffsetDateTime convert(Timestamp source) {
       return source.toInstant().atOffset(ZoneOffset.UTC);
     }
   }
@@ -58,7 +56,7 @@ public class CustomJdbcConverters {
   static class TransactionTypeWritingConverter implements Converter<TransactionType, JdbcValue> {
 
     @Override
-    public JdbcValue convert(@Nonnull TransactionType source) {
+    public JdbcValue convert(TransactionType source) {
       return JdbcValue.of(source, JDBCType.OTHER);
     }
   }

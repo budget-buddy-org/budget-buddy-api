@@ -2,6 +2,7 @@ package com.budget.buddy.budget_buddy_api.transaction;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.auditable.AuditableEntity;
 import com.budget.buddy.budget_buddy_api.category.CategoryRepository;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,8 +16,6 @@ import org.springframework.data.relational.core.query.Query;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import java.util.UUID;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -73,8 +72,10 @@ class TransactionPagingRepositoryImpl implements TransactionPagingRepository {
     if (filter.amountMax() != null) {
       criteria = criteria.and("amount").lessThanOrEquals(filter.amountMax());
     }
-    if (StringUtils.hasText(filter.query())) {
-      criteria = criteria.and(searchCriteria(filter.ownerId(), filter.query()));
+    var query = filter.query();
+
+    if (StringUtils.hasText(query)) {
+      criteria = criteria.and(searchCriteria(filter.ownerId(), query));
     }
     return criteria;
   }
