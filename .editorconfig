@@ -1,0 +1,66 @@
+# EditorConfig — single source of truth for formatting across editors and tools.
+# IntelliJ IDEA reads this natively and applies it over the project code style.
+# Docs: https://editorconfig.org  |  IntelliJ ij_* props: https://www.jetbrains.com/help/idea/editorconfig.html
+root = true
+
+# ── Defaults for every file ────────────────────────────────────────────────
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+max_line_length = 140
+
+# ── Java ───────────────────────────────────────────────────────────────────
+[*.java]
+indent_size = 2
+continuation_indent_size = 4
+
+# Imports: no wildcards, no blank lines between groups (matches this codebase).
+ij_java_use_single_class_import = true
+ij_java_class_count_to_use_import_on_demand = 999
+ij_java_names_count_to_use_import_on_demand = 999
+ij_java_packages_to_use_import_on_demand = none
+ij_java_imports_layout = $*, |, *
+ij_java_insert_inner_class_imports = false
+
+# Spacing / wrapping niceties IntelliJ applies on reformat.
+ij_java_keep_blank_lines_in_code = 1
+ij_java_blank_lines_after_class_header = 0
+ij_java_align_multiline_parameters = false
+ij_java_method_parameters_wrap = on_every_item
+ij_java_call_parameters_wrap = normal
+ij_java_doc_keep_empty_lines = true
+
+# ── Kotlin (Gradle DSL) ──────────────────────────────────────────────────--
+[*.{kt,kts}]
+indent_size = 2
+continuation_indent_size = 4
+ij_kotlin_name_count_to_use_star_import = 999
+ij_kotlin_name_count_to_use_star_import_for_members = 999
+
+# ── Config & data files ──────────────────────────────────────────────────--
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.{xml,sql,json,properties,toml}]
+indent_size = 2
+
+# ── Markdown ─────────────────────────────────────────────────────────────--
+# Keep trailing whitespace: two trailing spaces are a hard line break in Markdown.
+[*.md]
+trim_trailing_whitespace = false
+
+# ── Gradle wrapper & generated files ─────────────────────────────────────--
+[gradlew.bat]
+end_of_line = crlf
+
+[gradle/wrapper/*.properties]
+insert_final_newline = false
+
+# ── ASCII-art banner: preserve exact whitespace ──────────────────────────--
+[banner.txt]
+trim_trailing_whitespace = false
+insert_final_newline = false
