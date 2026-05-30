@@ -23,7 +23,7 @@ public class TransactionSummaryRepository {
   private static final String RANGE_START = "rangeStart";
   private static final String RANGE_END = "rangeEnd";
 
-  private static final RowMapper<TransactionSummaryRow> TRANSACTION_SUMMARY_ROW_ROW_MAPPER = (rs, _) ->
+  private static final RowMapper<TransactionSummaryRow> SUMMARY_ROW_MAPPER = (rs, _) ->
       new TransactionSummaryRow(
           rs.getLong("income"),
           rs.getLong("expense"),
@@ -35,7 +35,7 @@ public class TransactionSummaryRepository {
   private static final RowMapper<TransactionTrendBucket> TREND_BUCKET_ROW_MAPPER = (rs, rowNum) ->
       new TransactionTrendBucket(
           YearMonth.from(rs.getDate("month_start").toLocalDate()),
-          TRANSACTION_SUMMARY_ROW_ROW_MAPPER.mapRow(rs, rowNum)
+          SUMMARY_ROW_MAPPER.mapRow(rs, rowNum)
       );
 
   private static final String SUMMARY_SQL = """
@@ -83,7 +83,7 @@ public class TransactionSummaryRepository {
         .param(RANGE_START, rangeStart)
         .param(RANGE_END, rangeEnd)
         .param(CURRENCY, currency)
-        .query(TRANSACTION_SUMMARY_ROW_ROW_MAPPER)
+        .query(SUMMARY_ROW_MAPPER)
         .single();
   }
 

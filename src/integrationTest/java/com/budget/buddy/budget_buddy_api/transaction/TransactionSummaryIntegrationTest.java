@@ -1,11 +1,17 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
-import com.budget.buddy.budget_buddy_contracts.generated.model.*;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.MonthlySummary;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import tools.jackson.core.type.TypeReference;
@@ -13,6 +19,7 @@ import tools.jackson.core.type.TypeReference;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.EXPENSE;
 import static com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.INCOME;
@@ -195,36 +202,22 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
 
-    @Test
-    void should_Return400_When_MonthFormatInvalid() {
-      var result = mvc.get().uri("/v1/transactions/summary?month=2026-13&currency=EUR")
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("invalidSummaryRequests")
+    void should_Return400_When_InvalidRequest(String uri) {
+      var result = mvc.get().uri(uri)
           .with(jwtForUser(userId))
           .exchange();
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }
 
-    @Test
-    void should_Return400_When_CurrencyTooLong() {
-      var result = mvc.get().uri("/v1/transactions/summary?month=2026-03&currency=EURO")
-          .with(jwtForUser(userId))
-          .exchange();
-      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void should_Return400_When_MonthMissing() {
-      var result = mvc.get().uri("/v1/transactions/summary?currency=EUR")
-          .with(jwtForUser(userId))
-          .exchange();
-      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void should_Return400_When_CurrencyMissing() {
-      var result = mvc.get().uri("/v1/transactions/summary?month=2026-03")
-          .with(jwtForUser(userId))
-          .exchange();
-      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
+    static Stream<Named<String>> invalidSummaryRequests() {
+      return Stream.of(
+          Named.of("Invalid month format", "/v1/transactions/summary?month=2026-13&currency=EUR"),
+          Named.of("Currency too long", "/v1/transactions/summary?month=2026-03&currency=EURO"),
+          Named.of("Missing month", "/v1/transactions/summary?currency=EUR"),
+          Named.of("Missing currency", "/v1/transactions/summary?month=2026-03")
+      );
     }
   }
 
@@ -299,37 +292,22 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
               tuple(MARCH, 0L));
     }
 
-    @Test
-    void should_Return400_When_FromAfterTo() {
-      var result = mvc.get().uri("/v1/transactions/summary/trend?from=2026-05&to=2026-03&currency=EUR")
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("invalidTrendRequests")
+    void should_Return400_When_InvalidRequest(String uri) {
+      var result = mvc.get().uri(uri)
           .with(jwtForUser(userId))
           .exchange();
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }
 
-    @Test
-    void should_Return400_When_RangeExceedsCap() {
-      // 25 months (Jan 2024 → Jan 2026 inclusive) > 24-month cap.
-      var result = mvc.get().uri("/v1/transactions/summary/trend?from=2024-01&to=2026-01&currency=EUR")
-          .with(jwtForUser(userId))
-          .exchange();
-      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void should_Return400_When_FromMalformed() {
-      var result = mvc.get().uri("/v1/transactions/summary/trend?from=2026-13&to=2026-05&currency=EUR")
-          .with(jwtForUser(userId))
-          .exchange();
-      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
-    }
-
-    @Test
-    void should_Return400_When_FromMissing() {
-      var result = mvc.get().uri("/v1/transactions/summary/trend?to=2026-05&currency=EUR")
-          .with(jwtForUser(userId))
-          .exchange();
-      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
+    static Stream<Named<String>> invalidTrendRequests() {
+      return Stream.of(
+          Named.of("From after to", "/v1/transactions/summary/trend?from=2026-05&to=2026-03&currency=EUR"),
+          Named.of("Range exceeds 24-month cap", "/v1/transactions/summary/trend?from=2024-01&to=2026-01&currency=EUR"),
+          Named.of("From malformed", "/v1/transactions/summary/trend?from=2026-13&to=2026-05&currency=EUR"),
+          Named.of("Missing from", "/v1/transactions/summary/trend?to=2026-05&currency=EUR")
+      );
     }
 
     @Test

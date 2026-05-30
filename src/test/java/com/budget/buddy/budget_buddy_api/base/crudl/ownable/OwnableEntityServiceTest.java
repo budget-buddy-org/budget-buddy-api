@@ -164,8 +164,7 @@ class OwnableEntityServiceTest {
   class ExistsByIdInternalTests {
 
     @Test
-    @DisplayName("should return repository result")
-    void shouldReturnRepositoryResult() {
+    void should_ReturnRepositoryResult() {
       // Given
       var id = "123";
       when(repository.existsByIdAndOwnerId(id, ownerId)).thenReturn(true);
@@ -184,8 +183,7 @@ class OwnableEntityServiceTest {
   class CreateInternalTests {
 
     @Test
-    @DisplayName("should map to entity, set owner ID, and save")
-    void shouldCreateEntity() {
+    void should_MapToEntity_SetOwnerId_AndSave() {
       // Given
       var createRequest = new Object();
       var entity = new DummyOwnableEntity();
@@ -207,8 +205,7 @@ class OwnableEntityServiceTest {
   class CountInternalTests {
 
     @Test
-    @DisplayName("should return count by owner ID")
-    void shouldReturnCount() {
+    void should_ReturnCountByOwnerId() {
       // Given
       when(repository.countByOwnerId(ownerId)).thenReturn(5L);
 

@@ -1,11 +1,13 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
+import com.budget.buddy.budget_buddy_api.base.exception.ValidationException;
 import com.budget.buddy.budget_buddy_api.category.CategoryService;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -21,11 +23,11 @@ public class TransactionValidator implements BaseEntityValidator<TransactionEnti
 
   private void validateCategory(UUID categoryId) {
     if (categoryId == null) {
-      throw new IllegalArgumentException("Category ID must be set");
+      throw new ValidationException("Category ID must be set");
     }
 
     if (!categoryService.existsById(categoryId)) {
-      throw new IllegalArgumentException("Unknown category with id: " + categoryId);
+      throw new ValidationException("Unknown category with id: " + categoryId);
     }
   }
 }

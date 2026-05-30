@@ -1,6 +1,8 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +24,11 @@ import java.util.List;
 public abstract class AbstractBaseEntityService<E extends BaseEntity<I>, I, R, C, U>
     implements BaseEntityService<I, R, C, U> {
 
-  private static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
+  protected static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
 
+  @Getter(AccessLevel.PROTECTED)
   private final BaseEntityRepository<E, I> repository;
+  @Getter(AccessLevel.PROTECTED)
   private final BaseEntityMapper<E, R, C, U, ?> mapper;
   private final Iterable<BaseEntityValidator<E>> validators;
 

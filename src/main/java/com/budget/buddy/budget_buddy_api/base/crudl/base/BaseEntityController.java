@@ -1,6 +1,7 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -95,15 +96,23 @@ public abstract class BaseEntityController<I, R, C, U, L> {
    */
   public ResponseEntity<L> listInternal(Pageable pageable) {
     var items = service.list(pageable);
-
-    var meta = new PaginationMeta();
-    meta.setPage(items.getNumber());
-    meta.setSize(items.getSize());
-    meta.setTotal(items.getTotalElements());
-
-    var response = mapper.toPageResponse(items.getContent(), meta);
-
+    var response = mapper.toPageResponse(items.getContent(), toMeta(items));
     return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Builds the {@link PaginationMeta} envelope from a {@link Page}, mirroring its page number,
+   * size, and total element count.
+   *
+   * @param page the page to describe
+   * @return the populated pagination metadata
+   */
+  protected static PaginationMeta toMeta(Page<?> page) {
+    var meta = new PaginationMeta();
+    meta.setPage(page.getNumber());
+    meta.setSize(page.getSize());
+    meta.setTotal(page.getTotalElements());
+    return meta;
   }
 
   /**

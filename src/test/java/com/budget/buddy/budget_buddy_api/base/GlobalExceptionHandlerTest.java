@@ -1,5 +1,6 @@
 package com.budget.buddy.budget_buddy_api.base;
 
+import com.budget.buddy.budget_buddy_api.base.exception.ValidationException;
 import com.budget.buddy.budget_buddy_contracts.generated.model.FieldError;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Problem;
 import jakarta.servlet.http.HttpServletRequest;
@@ -383,6 +384,32 @@ class GlobalExceptionHandlerTest {
       var problem = response.getBody();
       assertThat(problem)
           .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::getTitle)
+          .returns(400, Problem::getStatus);
+    }
+  }
+
+  @Nested
+  @DisplayName("ValidationException Handler")
+  class ValidationExceptionTests {
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "Category ID must be set",
+        "Unknown category with id: 123"
+    })
+    @DisplayName("should handle ValidationException as 400 with the author-controlled message")
+    void shouldHandleValidation(String message) {
+      // Given
+      var exception = new ValidationException(message);
+
+      // When
+      var response = handler.handleValidation(exception, webRequest);
+
+      // Then
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody())
+          .returns(message, Problem::getDetail)
           .returns(400, Problem::getStatus);
     }
   }
