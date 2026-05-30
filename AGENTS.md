@@ -163,25 +163,20 @@ Bind external config with a `@Validated @ConfigurationProperties` **record** (co
 `CorsProperties`.
 Profiles: `application.yaml` (shared) + `application-{dev,prod,test}.yaml`. Secrets/issuer come from env vars.
 
-### Null-Safety (JSpecify + NullAway)
+### Null-Safety (JSpecify)
 
 Every production package is `@NullMarked` (via a `package-info.java`), so references are **non-null by default**;
 annotate only the genuinely nullable ones with `org.jspecify.annotations.@Nullable` (e.g.
 `CategoryEntity.monthlyBudget`). **Do not write `@NonNull`** — it's redundant in a null-marked scope. Prefer JSpecify
 over `jakarta`/Spring nullability annotations.
 
-This is **enforced at build time** by NullAway (an Error Prone plugin) — a nullness violation in production code fails
-`./gradlew compileJava`/`build`. Configuration lives in `build.gradle.kts`:
+These annotations are **documentation + tooling hints**, not build-enforced: IntelliJ (and other JSpecify-aware tools)
+reads `@NullMarked`/`@Nullable` and flags mismatches in the editor. There is intentionally **no NullAway / Error Prone
+build gate** — keep the build simple and rely on the IDE plus the conventions below.
 
-- Runs on `compileJava` only (`onlyNullMarked` + `jspecifyMode`); test code is not analysed.
-- Error Prone's default checks plus NullAway run; MapStruct `@Generated` impls are exempt
-  (`treatGeneratedAsUnannotated`).
-- **Framework-initialised fields**: Spring Data JDBC populates `@Column`-mapped entity fields after construction, so
-  the no-arg constructor legitimately leaves them unset. These are excluded from NullAway's *initialisation* check via
-  `excludedFieldAnnotations` (Spring Data's `@Column`) — **never** reach for `@SuppressWarnings("NullAway.Init")` on
-  entities; the build config already handles it.
-
-**Adding a new package?** Add a `package-info.java` declaring `@NullMarked`, or its code won't be null-checked.
+- **Adding a new package?** Add a `package-info.java` declaring `@NullMarked` so the package opts into non-null-by-default.
+- **Framework-initialised fields**: Spring Data JDBC populates `@Column`-mapped entity fields after construction, so a
+  no-arg constructor legitimately leaves them unset — that's expected and needs no annotation gymnastics.
 
 ### Raw SQL Repositories (`JdbcClient`)
 
