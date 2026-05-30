@@ -163,11 +163,25 @@ Bind external config with a `@Validated @ConfigurationProperties` **record** (co
 `CorsProperties`.
 Profiles: `application.yaml` (shared) + `application-{dev,prod,test}.yaml`. Secrets/issuer come from env vars.
 
-### Null-Safety (JSpecify)
+### Null-Safety (JSpecify + NullAway)
 
-Spring Boot 4 ships JSpecify nullness annotations; this codebase uses `org.jspecify.annotations.@Nullable` /
-`@NonNull`. Treat references as non-null by default and annotate only the genuinely nullable ones (e.g.
-`CategoryEntity.monthlyBudget`). Prefer JSpecify over `jakarta`/Spring nullability annotations.
+Every production package is `@NullMarked` (via a `package-info.java`), so references are **non-null by default**;
+annotate only the genuinely nullable ones with `org.jspecify.annotations.@Nullable` (e.g.
+`CategoryEntity.monthlyBudget`). **Do not write `@NonNull`** — it's redundant in a null-marked scope. Prefer JSpecify
+over `jakarta`/Spring nullability annotations.
+
+This is **enforced at build time** by NullAway (an Error Prone plugin) — a nullness violation in production code fails
+`./gradlew compileJava`/`build`. Configuration lives in `build.gradle.kts`:
+
+- Runs on `compileJava` only (`onlyNullMarked` + `jspecifyMode`); test code is not analysed.
+- Error Prone's default checks plus NullAway run; MapStruct `@Generated` impls are exempt
+  (`treatGeneratedAsUnannotated`).
+- **Framework-initialised fields**: Spring Data JDBC populates `@Column`-mapped entity fields after construction, so
+  the no-arg constructor legitimately leaves them unset. These are excluded from NullAway's *initialisation* check via
+  `excludedFieldAnnotations` (Spring Data's `@Column`) — **never** reach for `@SuppressWarnings("NullAway.Init")` on
+  entities; the build config already handles it.
+
+**Adding a new package?** Add a `package-info.java` declaring `@NullMarked`, or its code won't be null-checked.
 
 ### Raw SQL Repositories (`JdbcClient`)
 

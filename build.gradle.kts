@@ -1,9 +1,14 @@
+import net.ltgt.gradle.errorprone.errorprone
+import net.ltgt.gradle.nullaway.nullaway
+
 plugins {
   java
   `jvm-test-suite`
   jacoco
-  id("org.springframework.boot") version "4.0.6"
-  id("io.spring.dependency-management") version "1.1.7"
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
+    alias(libs.plugins.errorprone)
+    alias(libs.plugins.nullaway)
 }
 
 group = "com.budget.buddy"
@@ -28,10 +33,7 @@ repositories {
 }
 
 dependencies {
-  val mapstructVersion = "1.6.3"
-  val lombokMapstructBindingVersion = "0.2.0"
-  val budgetBuddyContractsVersion = "6.1.0"
-  implementation("com.budgetbuddy:budget-buddy-contracts:${budgetBuddyContractsVersion}")
+    implementation(libs.budget.buddy.contracts)
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
@@ -40,7 +42,11 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-cache")
   implementation("org.springframework.boot:spring-boot-starter-liquibase")
   implementation("com.github.ben-manes.caffeine:caffeine")
-  implementation("org.mapstruct:mapstruct:${mapstructVersion}")
+    implementation(libs.mapstruct)
+    implementation(libs.jspecify)
+
+    errorprone(libs.errorprone.core)
+    errorprone(libs.nullaway)
 
   compileOnly("org.projectlombok:lombok")
 
@@ -49,8 +55,8 @@ dependencies {
   developmentOnly("org.springframework.boot:spring-boot-devtools")
   developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 
-  annotationProcessor("org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}")
-  annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
+    annotationProcessor(libs.lombok.mapstruct.binding)
+    annotationProcessor(libs.mapstruct.processor)
   annotationProcessor("org.projectlombok:lombok")
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
@@ -58,10 +64,10 @@ dependencies {
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
   testCompileOnly("org.projectlombok:lombok")
-  testCompileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
-  testAnnotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
+    testCompileOnly(libs.mapstruct)
+    testAnnotationProcessor(libs.mapstruct.processor)
   testAnnotationProcessor("org.projectlombok:lombok")
-  testAnnotationProcessor("org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}")
+    testAnnotationProcessor(libs.lombok.mapstruct.binding)
 }
 
 @Suppress("UnstableApiUsage")
@@ -136,4 +142,33 @@ tasks.jacocoTestReport {
       exclude("**/generated/**")
     }
   }))
+}
+
+// JSpecify null-safety enforcement via NullAway (an Error Prone plugin).
+// The codebase is @NullMarked at the package level, so references are non-null
+// by default; NullAway fails the build on any nullness violation in production code.
+// onlyNullMarked: analysis scope is driven solely by @NullMarked (the JSpecify-native
+// model), rather than matching a package prefix that would also catch generated contracts.
+nullaway {
+    onlyNullMarked = true
+    jspecifyMode = true
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.errorprone {
+        // Run Error Prone's default checks; keep generated sources (MapStruct/Lombok) quiet.
+        disableWarningsInGeneratedCode = true
+        nullaway {
+            error()
+            // MapStruct impls are @Generated; don't hold generated code to the null contract.
+            treatGeneratedAsUnannotated = true
+            // Spring Data JDBC populates @Column-mapped fields after construction, so the
+            // no-arg constructor legitimately leaves them unset — exclude them from init checks.
+            excludedFieldAnnotations.add("org.springframework.data.relational.core.mapping.Column")
+        }
+    }
+    // Tests aren't null-marked; only police production code.
+    if (name != "compileJava") {
+        options.errorprone.enabled = false
+    }
 }

@@ -6,11 +6,13 @@ import com.budget.buddy.budget_buddy_api.base.mapper.CurrencyMapper;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
+import org.jspecify.annotations.Nullable;
 import org.mapstruct.Mapper;
 
 @Mapper(config = MapstructConfig.class, uses = CurrencyMapper.class)
 public interface TransactionMapper
     extends BaseEntityMapper<TransactionEntity, Transaction, TransactionWrite, TransactionWrite, PaginatedTransactions> {
 
-  TransactionType toModel(com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType source);
+  @Nullable
+  TransactionType toModel(com.budget.buddy.budget_buddy_contracts.generated.model.@Nullable TransactionType source);
 }

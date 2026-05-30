@@ -14,7 +14,6 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.UUID;
 
@@ -73,8 +72,9 @@ class TransactionPagingRepositoryImpl implements TransactionPagingRepository {
     if (filter.amountMax() != null) {
       criteria = criteria.and("amount").lessThanOrEquals(filter.amountMax());
     }
-    if (StringUtils.hasText(filter.query())) {
-      criteria = criteria.and(searchCriteria(filter.ownerId(), filter.query()));
+    var query = filter.query();
+    if (query != null && !query.isBlank()) {
+      criteria = criteria.and(searchCriteria(filter.ownerId(), query));
     }
     return criteria;
   }

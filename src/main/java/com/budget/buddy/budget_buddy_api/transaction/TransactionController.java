@@ -7,6 +7,7 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransact
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -56,9 +57,9 @@ public class TransactionController
   @Override
   public ResponseEntity<PaginatedTransactions> listTransactions(
       Integer page, Integer size,
-      String query, Long amountMin, Long amountMax,
-      UUID categoryId, LocalDate start, LocalDate end,
-      TransactionType type, String sort
+      @Nullable String query, @Nullable Long amountMin, @Nullable Long amountMax,
+      @Nullable UUID categoryId, @Nullable LocalDate start, @Nullable LocalDate end,
+      @Nullable TransactionType type, String sort
   ) {
     var pageable = PageRequest.of(page, size, buildSort(sort));
     var filter = TransactionFilter.builder()

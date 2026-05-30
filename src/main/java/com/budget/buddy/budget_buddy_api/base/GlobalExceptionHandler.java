@@ -5,6 +5,7 @@ import com.budget.buddy.budget_buddy_api.base.validation.FieldErrorFactory;
 import com.budget.buddy.budget_buddy_contracts.generated.model.FieldError;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Problem;
 import jakarta.validation.ConstraintViolationException;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -42,21 +43,22 @@ public class GlobalExceptionHandler {
   private static final String ACCESS_DENIED = "Access denied";
   private static final String AUTHENTICATION_FAILED = "Authentication failed";
 
-  private static ResponseEntity<Problem> problemResponse(HttpStatus status, String detail, WebRequest request) {
+  private static ResponseEntity<Problem> problemResponse(HttpStatus status, @Nullable String detail, WebRequest request) {
     return problemResponse(status, status.getReasonPhrase(), detail, request);
   }
 
-  private static ResponseEntity<Problem> problemResponse(HttpStatus status, String title, String detail, WebRequest request) {
+  private static ResponseEntity<Problem> problemResponse(HttpStatus status, String title, @Nullable String detail, WebRequest request) {
     return buildProblemResponse(new Problem(), status, title, detail, request);
   }
 
-  private static ResponseEntity<Problem> buildProblemResponse(Problem problem, HttpStatus status, String title, String detail, WebRequest request) {
+  private static ResponseEntity<Problem> buildProblemResponse(Problem problem, HttpStatus status, String title, @Nullable String detail, WebRequest request) {
     problem
         .type(URI.create("about:blank"))
         .title(title)
         .status(status.value())
-        .detail(detail)
         .instance(URI.create(getRequestUri(request)));
+    // detail is optional (RFC 9457); setDetail accepts null, the fluent detail() builder does not
+    problem.setDetail(detail);
 
     var headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);

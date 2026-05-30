@@ -1,0 +1,26 @@
+[versions]
+springBoot = "4.0.6"
+springDependencyManagement = "1.1.7"
+mapstruct = "1.6.3"
+lombokMapstructBinding = "0.2.0"
+budgetBuddyContracts = "6.1.0"
+jspecify = "1.0.0"
+errorprone = "2.49.0"
+errorpronePlugin = "5.1.0"
+nullaway = "0.13.4"
+nullawayPlugin = "3.0.0"
+
+[libraries]
+budget-buddy-contracts = { module = "com.budgetbuddy:budget-buddy-contracts", version.ref = "budgetBuddyContracts" }
+mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
+mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
+lombok-mapstruct-binding = { module = "org.projectlombok:lombok-mapstruct-binding", version.ref = "lombokMapstructBinding" }
+jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
+errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
+nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
+errorprone = { id = "net.ltgt.errorprone", version.ref = "errorpronePlugin" }
+nullaway = { id = "net.ltgt.nullaway", version.ref = "nullawayPlugin" }
