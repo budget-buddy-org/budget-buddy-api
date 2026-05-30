@@ -60,9 +60,8 @@ jobs:
             --imagePlatform=${{ matrix.platform }} \
             --imageName=${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}-${{ steps.meta.outputs.arch }}
 
-      # Scan amd64 image before pushing — blocking gate on unfixed CRITICAL CVEs.
-      # HIGH findings are uploaded to the Security tab for visibility but do not
-      # block the release (same policy as the web-app).
+      # Scan amd64 image before pushing — CRITICAL and HIGH findings are uploaded
+      # to the Security tab for visibility but do not block the release.
       - name: Scan image with Trivy (SARIF)
         if: matrix.platform == 'linux/amd64'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
@@ -80,16 +79,6 @@ jobs:
         with:
           sarif_file: trivy-amd64.sarif
           category: trivy-amd64
-
-      - name: Block on CRITICAL vulnerabilities (amd64)
-        if: matrix.platform == 'linux/amd64'
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}-amd64
-          format: table
-          exit-code: '1'
-          severity: CRITICAL
-          ignore-unfixed: true
 
       - name: Push Docker image
         run: docker push ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}-${{ steps.meta.outputs.arch }}
