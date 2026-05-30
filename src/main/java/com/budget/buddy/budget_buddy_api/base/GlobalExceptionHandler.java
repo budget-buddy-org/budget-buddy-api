@@ -1,5 +1,6 @@
 package com.budget.buddy.budget_buddy_api.base;
 
+import com.budget.buddy.budget_buddy_api.base.exception.ValidationException;
 import com.budget.buddy.budget_buddy_api.base.validation.FieldErrorFactory;
 import com.budget.buddy.budget_buddy_contracts.generated.model.FieldError;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Problem;
@@ -211,6 +212,20 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MissingServletRequestParameterException.class)
   public ResponseEntity<Problem> handleMissingParam(MissingServletRequestParameterException ex, WebRequest request) {
     log.debug("Missing request parameter: {}", ex.getMessage());
+    return problemResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+  }
+
+  /**
+   * Handles domain validation failures caused by client-supplied data. The message is
+   * author-controlled (see {@link ValidationException}) and surfaced to the client as-is.
+   *
+   * @param ex      the exception
+   * @param request the current web request
+   * @return a {@link ResponseEntity} containing a {@link Problem} detail
+   */
+  @ExceptionHandler(ValidationException.class)
+  public ResponseEntity<Problem> handleValidation(ValidationException ex, WebRequest request) {
+    log.debug("Validation failed: {}", ex.getMessage());
     return problemResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
   }
 

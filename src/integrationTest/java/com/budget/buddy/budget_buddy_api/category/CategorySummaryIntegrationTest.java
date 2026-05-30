@@ -1,7 +1,11 @@
 package com.budget.buddy.budget_buddy_api.category;
 
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
-import com.budget.buddy.budget_buddy_contracts.generated.model.*;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategorySpendingRow;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategorySpendingSummary;
+import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Nested;

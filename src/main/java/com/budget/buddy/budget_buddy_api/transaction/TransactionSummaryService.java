@@ -1,6 +1,7 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnerIdProvider;
+import com.budget.buddy.budget_buddy_api.base.exception.ValidationException;
 import com.budget.buddy.budget_buddy_contracts.generated.model.MonthlySummary;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class TransactionSummaryService {
    *
    * @param month    calendar month formatted {@code YYYY-MM}
    * @param currency ISO 4217 currency code; only matching transactions contribute to totals
-   * @throws IllegalArgumentException if {@code month} is not a valid {@code YYYY-MM} value
+   * @throws ValidationException if {@code month} is not a valid {@code YYYY-MM} value
    */
   public MonthlySummary getSummary(String month, String currency) {
     var yearMonth = parseMonth(month, "month");
@@ -54,18 +55,18 @@ public class TransactionSummaryService {
    * @param fromMonth first calendar month, inclusive ({@code YYYY-MM})
    * @param toMonth   last calendar month, inclusive ({@code YYYY-MM})
    * @param currency  ISO 4217 currency code
-   * @throws IllegalArgumentException if either bound is malformed, {@code fromMonth} is after
-   *                                  {@code toMonth}, or the span exceeds {@link #MAX_RANGE_MONTHS}
+   * @throws ValidationException if either bound is malformed, {@code fromMonth} is after
+   *                             {@code toMonth}, or the span exceeds {@link #MAX_RANGE_MONTHS}
    */
   public List<MonthlySummary> getTrend(String fromMonth, String toMonth, String currency) {
     var from = parseMonth(fromMonth, "from");
     var to = parseMonth(toMonth, "to");
     if (from.isAfter(to)) {
-      throw new IllegalArgumentException("'from' must be on or before 'to'");
+      throw new ValidationException("'from' must be on or before 'to'");
     }
     long span = ChronoUnit.MONTHS.between(from, to) + 1;
     if (span > MAX_RANGE_MONTHS) {
-      throw new IllegalArgumentException(
+      throw new ValidationException(
           "Range too wide: max " + MAX_RANGE_MONTHS + " months, requested " + span);
     }
 
@@ -96,9 +97,9 @@ public class TransactionSummaryService {
   private static YearMonth parseMonth(String value, String paramName) {
     try {
       return YearMonth.parse(value);
-    } catch (DateTimeParseException e) {
-      throw new IllegalArgumentException(
-          "Invalid '" + paramName + "' format: '" + value + "', expected YYYY-MM", e);
+    } catch (DateTimeParseException _) {
+      throw new ValidationException(
+          "Invalid '" + paramName + "' format: '" + value + "', expected YYYY-MM");
     }
   }
 

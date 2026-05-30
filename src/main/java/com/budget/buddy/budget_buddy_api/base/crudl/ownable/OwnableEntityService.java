@@ -26,12 +26,6 @@ import org.springframework.data.domain.Pageable;
 public class OwnableEntityService<E extends OwnableEntity<I>, I, R, C, U>
     extends AbstractBaseEntityService<E, I, R, C, U> {
 
-  private static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
-
-  @Getter(AccessLevel.PROTECTED)
-  private final OwnableEntityRepository<E, I> repository;
-  @Getter(AccessLevel.PROTECTED)
-  private final BaseEntityMapper<E, R, C, U, ?> mapper;
   @Getter(AccessLevel.PROTECTED)
   private final OwnerIdProvider<I> ownerIdProvider;
 
@@ -42,37 +36,40 @@ public class OwnableEntityService<E extends OwnableEntity<I>, I, R, C, U>
       OwnerIdProvider<I> ownerIdProvider
   ) {
     super(repository, mapper, entityValidators);
-    this.repository = repository;
-    this.mapper = mapper;
     this.ownerIdProvider = ownerIdProvider;
   }
 
   @Override
+  protected OwnableEntityRepository<E, I> getRepository() {
+    return (OwnableEntityRepository<E, I>) super.getRepository();
+  }
+
+  @Override
   protected Page<E> listInternal(Pageable pageRequest) {
-    return repository.findAllByOwnerId(ownerIdProvider.get(), pageRequest);
+    return getRepository().findAllByOwnerId(ownerIdProvider.get(), pageRequest);
   }
 
   @Override
   protected E readInternal(I id) {
-    return repository.findByIdAndOwnerId(id, ownerIdProvider.get())
+    return getRepository().findByIdAndOwnerId(id, ownerIdProvider.get())
         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));
   }
 
   @Override
   protected boolean existsByIdInternal(I id) {
-    return repository.existsByIdAndOwnerId(id, ownerIdProvider.get());
+    return getRepository().existsByIdAndOwnerId(id, ownerIdProvider.get());
   }
 
   @Override
   protected E createInternal(C createRequest) {
-    E entity = mapper.toEntity(createRequest);
+    E entity = getMapper().toEntity(createRequest);
     entity.setOwnerId(ownerIdProvider.get());
     validate(entity);
-    return repository.save(entity);
+    return getRepository().save(entity);
   }
 
   @Override
   protected long countInternal() {
-    return repository.countByOwnerId(ownerIdProvider.get());
+    return getRepository().countByOwnerId(ownerIdProvider.get());
   }
 }

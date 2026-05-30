@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -70,33 +69,30 @@ class UserRepositoryIntegrationTest extends BaseIntegrationTest {
     var issuer = "test_issuer";
     var threadCount = 16;
 
-    var pool = Executors.newFixedThreadPool(threadCount);
-    var barrier = new CyclicBarrier(threadCount);
-    var tasks = new ArrayList<Callable<UUID>>();
-    for (var i = 0; i < threadCount; i++) {
-      tasks.add(() -> {
-        barrier.await(); // release all threads at once to maximise overlap
-        return userRepository.upsert(UUID.randomUUID(), subject, issuer);
-      });
-    }
+    try (var pool = Executors.newFixedThreadPool(threadCount)) {
+      var barrier = new CyclicBarrier(threadCount);
+      var tasks = new ArrayList<Callable<UUID>>();
+      for (var i = 0; i < threadCount; i++) {
+        tasks.add(() -> {
+          barrier.await(); // release all threads at once to maximise overlap
+          return userRepository.upsert(UUID.randomUUID(), subject, issuer);
+        });
+      }
 
-    // When
-    List<UUID> results = new ArrayList<>();
-    try {
+      // When
+      List<UUID> results = new ArrayList<>();
       var futures = pool.invokeAll(tasks, 30, TimeUnit.SECONDS);
+
       for (Future<UUID> future : futures) {
         results.add(future.get());
       }
-    } finally {
-      pool.shutdownNow();
-    }
 
-    // Then every concurrent caller must resolve to the same, non-null user id.
-    assertThat(results)
-        .as("no concurrent first-login upsert should return a null id")
-        .doesNotContainNull();
-    assertThat(results)
-        .as("all concurrent first-login upserts should resolve to the same user id")
-        .containsOnly(results.getFirst());
+      // Then every concurrent caller must resolve to the same, non-null user id.
+      assertThat(results)
+          .as("no concurrent first-login upsert should return a null id")
+          .doesNotContainNull()
+          .as("all concurrent first-login upserts should resolve to the same user id")
+          .containsOnly(results.getFirst());
+    }
   }
 }

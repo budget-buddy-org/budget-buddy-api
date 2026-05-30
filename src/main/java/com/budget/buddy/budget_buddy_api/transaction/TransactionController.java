@@ -2,8 +2,11 @@ package com.budget.buddy.budget_buddy_api.transaction;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityController;
 import com.budget.buddy.budget_buddy_contracts.generated.api.TransactionsApi;
-import com.budget.buddy.budget_buddy_contracts.generated.model.*;
+import com.budget.buddy.budget_buddy_contracts.generated.model.MonthlySummary;
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
+import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -72,13 +75,7 @@ public class TransactionController
 
   ResponseEntity<PaginatedTransactions> listTransactions(TransactionFilter filter, Pageable pageable) {
     var items = service.list(filter, pageable);
-
-    var meta = new PaginationMeta();
-    meta.setPage(items.getNumber());
-    meta.setSize(items.getSize());
-    meta.setTotal(items.getTotalElements());
-
-    return ResponseEntity.ok(mapper.toPageResponse(items.getContent(), meta));
+    return ResponseEntity.ok(mapper.toPageResponse(items.getContent(), toMeta(items)));
   }
 
   @Override

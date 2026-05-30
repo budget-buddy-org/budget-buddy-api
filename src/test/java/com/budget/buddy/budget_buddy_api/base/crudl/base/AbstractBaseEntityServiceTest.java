@@ -13,8 +13,13 @@ import org.springframework.data.domain.PageRequest;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractBaseEntityServiceTest {
@@ -109,7 +114,8 @@ class AbstractBaseEntityServiceTest {
       // Then
       assertThat(actual).isEqualTo(expected);
       assertThat(existingEntity)
-          .returns(existingEntity.getId(), BaseEntity::getId);
+          .as("Update must preserve the entity id")
+          .returns(id, BaseEntity::getId);
       verify(repository).findById(id);
       verify(mapper).updateEntity(updateRequest, existingEntity);
       verify(repository).save(existingEntity);

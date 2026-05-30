@@ -1,18 +1,20 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
-
+import com.budget.buddy.budget_buddy_api.base.exception.ValidationException;
 import com.budget.buddy.budget_buddy_api.category.CategoryService;
-import java.util.Currency;
-import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Currency;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionValidatorTest {
@@ -54,8 +56,8 @@ class TransactionValidatorTest {
 
       // When & Then
       assertThatThrownBy(() -> validator.validate(entity))
-          .as("Should throw IllegalArgumentException when Category ID is null")
-          .isInstanceOf(IllegalArgumentException.class)
+          .as("Should throw ValidationException when Category ID is null")
+          .isInstanceOf(ValidationException.class)
           .hasMessage("Category ID must be set");
     }
 
@@ -68,8 +70,8 @@ class TransactionValidatorTest {
 
       // When & Then
       assertThatThrownBy(() -> validator.validate(entity))
-          .as("Should throw IllegalArgumentException when the specified category does not exist")
-          .isInstanceOf(IllegalArgumentException.class)
+          .as("Should throw ValidationException when the specified category does not exist")
+          .isInstanceOf(ValidationException.class)
           .hasMessage("Unknown category with id: " + categoryId);
     }
   }
