@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Base class for services managing entities that belong to a specific owner.
@@ -76,6 +77,7 @@ public class OwnableEntityService<E extends OwnableEntity<I>, I, R, C, U>
   /**
    * Deletes every entity owned by the current owner. Used when clearing all of a user's data.
    */
+  @Transactional
   public void deleteAllByOwnerId() {
     getRepository().deleteAllByOwnerId(ownerIdProvider.get());
   }
