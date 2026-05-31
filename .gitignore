@@ -170,3 +170,6 @@ Temporary Items
 # Node / semantic-release tooling
 node_modules/
 .junie/
+
+# Claude Code local runtime files
+.claude/scheduled_tasks.lock
