@@ -72,4 +72,11 @@ public class OwnableEntityService<E extends OwnableEntity<I>, I, R, C, U>
   protected long countInternal() {
     return getRepository().countByOwnerId(ownerIdProvider.get());
   }
+
+  /**
+   * Deletes every entity owned by the current owner. Used when clearing all of a user's data.
+   */
+  public void deleteAllByOwnerId() {
+    getRepository().deleteAllByOwnerId(ownerIdProvider.get());
+  }
 }
