@@ -36,7 +36,7 @@ class MeDataDeletionIntegrationTest extends BaseMvcIntegrationTest {
     return parseBody(result, Category.class).getId();
   }
 
-  private void createTransaction(String ownerId, UUID categoryId) throws Exception {
+  private void createTransaction(String ownerId, UUID categoryId) {
     mvc.post().uri("/v1/transactions")
         .with(jwtForUser(ownerId))
         .contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +93,7 @@ class MeDataDeletionIntegrationTest extends BaseMvcIntegrationTest {
     }
 
     @Test
-    void should_ReturnNoContent_When_AlreadyEmpty() throws Exception {
+    void should_ReturnNoContent_When_AlreadyEmpty() {
       mvc.delete().uri(DATA_URI).with(jwtForUser(userId)).exchange();
 
       var second = mvc.delete().uri(DATA_URI).with(jwtForUser(userId)).exchange();
