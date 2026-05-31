@@ -1,8 +1,17 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.ownable;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityMapper;
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,16 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("OwnableEntityService Unit Tests")
@@ -215,6 +214,20 @@ class OwnableEntityServiceTest {
       // Then
       assertThat(result).isEqualTo(5L);
       verify(repository).countByOwnerId(ownerId);
+    }
+  }
+
+  @Nested
+  @DisplayName("deleteAllByOwnerId")
+  class DeleteAllByOwnerIdTests {
+
+    @Test
+    void should_DeleteScopedToCurrentOwner() {
+      // When
+      service.deleteAllByOwnerId();
+
+      // Then
+      verify(repository).deleteAllByOwnerId(ownerId);
     }
   }
 

@@ -5,13 +5,12 @@ import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntityService
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnerIdProvider;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
+import java.util.Set;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * Service for managing user transactions. Extends {@link OwnableEntityService} to provide basic CRUD operations and includes custom filtering for transactions.

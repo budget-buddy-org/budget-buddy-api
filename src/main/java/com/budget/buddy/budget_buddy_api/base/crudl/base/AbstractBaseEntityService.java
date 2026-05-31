@@ -1,15 +1,14 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
+import java.util.Collections;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Abstract base service class providing common CRUDL operations for entities. Subclasses can extend this class to implement specific business logic for different entity types.
