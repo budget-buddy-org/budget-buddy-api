@@ -12,6 +12,7 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -71,36 +72,40 @@ class MeDataDeletionIntegrationTest extends BaseMvcIntegrationTest {
 
   // ── tests ──────────────────────────────────────────────────────────────────
 
-  @Test
-  void should_ClearCallersCategoriesAndTransactions() throws Exception {
-    var result = mvc.delete().uri(DATA_URI).with(jwtForUser(userId)).exchange();
+  @Nested
+  class ClearData {
 
-    assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
-    assertThat(transactionCount(userId)).as("caller's transactions are cleared").isZero();
-    assertThat(categoryCount(userId)).as("caller's categories are cleared").isZero();
-  }
+    @Test
+    void should_ClearCallersCategoriesAndTransactions() throws Exception {
+      var result = mvc.delete().uri(DATA_URI).with(jwtForUser(userId)).exchange();
 
-  @Test
-  void should_LeaveOtherUsersDataIntact() throws Exception {
-    mvc.delete().uri(DATA_URI).with(jwtForUser(userId)).exchange();
+      assertThat(result).hasStatus(HttpStatus.NO_CONTENT);
+      assertThat(transactionCount(userId)).as("caller's transactions are cleared").isZero();
+      assertThat(categoryCount(userId)).as("caller's categories are cleared").isZero();
+    }
 
-    assertThat(transactionCount(otherUserId)).as("other user's transactions are untouched").isEqualTo(1);
-    assertThat(categoryCount(otherUserId)).as("other user's categories are untouched").isEqualTo(1);
-  }
+    @Test
+    void should_LeaveDataIntact_When_BelongsToOtherUser() throws Exception {
+      mvc.delete().uri(DATA_URI).with(jwtForUser(userId)).exchange();
 
-  @Test
-  void should_BeIdempotent_When_AlreadyEmpty() throws Exception {
-    mvc.delete().uri(DATA_URI).with(jwtForUser(userId)).exchange();
+      assertThat(transactionCount(otherUserId)).as("other user's transactions are untouched").isEqualTo(1);
+      assertThat(categoryCount(otherUserId)).as("other user's categories are untouched").isEqualTo(1);
+    }
 
-    var second = mvc.delete().uri(DATA_URI).with(jwtForUser(userId)).exchange();
+    @Test
+    void should_ReturnNoContent_When_AlreadyEmpty() throws Exception {
+      mvc.delete().uri(DATA_URI).with(jwtForUser(userId)).exchange();
 
-    assertThat(second).hasStatus(HttpStatus.NO_CONTENT);
-  }
+      var second = mvc.delete().uri(DATA_URI).with(jwtForUser(userId)).exchange();
 
-  @Test
-  void should_Return401_When_NotAuthenticated() {
-    var result = mvc.delete().uri(DATA_URI).exchange();
+      assertThat(second).as("clearing an already-empty account is idempotent").hasStatus(HttpStatus.NO_CONTENT);
+    }
 
-    assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
+    @Test
+    void should_Return401_When_NotAuthenticated() {
+      var result = mvc.delete().uri(DATA_URI).exchange();
+
+      assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
+    }
   }
 }
