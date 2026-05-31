@@ -1,7 +1,7 @@
 package com.budget.buddy.budget_buddy_api.user.me;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntityService;
-import java.util.List;
+import com.budget.buddy.budget_buddy_api.category.CategoryService;
+import com.budget.buddy.budget_buddy_api.transaction.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,19 +9,21 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Clears all data owned by the current user without removing the user account itself.
  *
- * <p>The {@link OwnableEntityService} beans are injected as an ordered {@link List} — Spring honours
- * {@link org.springframework.core.annotation.Order @Order} on each service — so entities are deleted
- * in foreign-key-safe order (referencing rows before the rows they reference, e.g. transactions
- * before categories). Plain {@link java.util.Set} injection would not guarantee this ordering.
+ * <p>Deletion order is explicit and foreign-key-aware: {@code transactions.category_id} references
+ * {@code categories} via a non-cascading FK, so transactions must be deleted before categories.
+ * Each delete is scoped to the current owner by the underlying {@code OwnableEntityService}.
+ * When a new ownable feature is added, add an explicit delete call here in FK-safe order.
  */
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class UserDataDeletionService {
 
-  private final List<? extends OwnableEntityService<?, ?, ?, ?, ?>> services;
+  private final TransactionService transactionService;
+  private final CategoryService categoryService;
 
   public void deleteUserData() {
-    services.forEach(OwnableEntityService::deleteAllByOwnerId);
+    transactionService.deleteAllByOwnerId();
+    categoryService.deleteAllByOwnerId();
   }
 }

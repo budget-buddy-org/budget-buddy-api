@@ -7,7 +7,6 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import java.util.Set;
 import java.util.UUID;
-import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true)
 @Service
-// Deleted before CategoryService during user-data deletion: transactions.category_id references categories.
-@Order(10)
 public class TransactionService extends
     OwnableEntityService<TransactionEntity, UUID, Transaction, TransactionWrite, TransactionWrite> {
 
