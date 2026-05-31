@@ -1,3 +1,9 @@
+## [1.11.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.10.0...v1.11.0) (2026-05-31)
+
+### Features
+
+* Implement clear-current-user-data endpoint ([#185](https://github.com/budget-buddy-org/budget-buddy-api/issues/185)) ([ea1b8a3](https://github.com/budget-buddy-org/budget-buddy-api/commit/ea1b8a31751bf9ce9ea70dc57052ca16944383ad))
+
 ## [1.10.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.9.1...v1.10.0) (2026-05-29)
 
 ### Features
