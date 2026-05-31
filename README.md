@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/budget-buddy-org/budget-buddy-api/actions/workflows/ci.yaml/badge.svg)](https://github.com/budget-buddy-org/budget-buddy-api/actions/workflows/ci.yaml)
 [![Release](https://img.shields.io/github/v/release/budget-buddy-org/budget-buddy-api)](https://github.com/budget-buddy-org/budget-buddy-api/releases)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=budget-buddy-org_budget-buddy-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=budget-buddy-org_budget-buddy-api)
 
 REST API for personal budget management. Built with Spring Boot 4 and PostgreSQL.
 
