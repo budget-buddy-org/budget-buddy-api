@@ -1,5 +1,7 @@
 package com.budget.buddy.budget_buddy_api.user.me;
 
+import com.budget.buddy.budget_buddy_api.user.me.preferences.UserPreferencesService;
+import com.budget.buddy.budget_buddy_api.user.me.settings.UserClientSettingsService;
 import com.budget.buddy.budget_buddy_contracts.generated.api.UsersApi;
 import com.budget.buddy.budget_buddy_contracts.generated.model.ClientSettings;
 import com.budget.buddy.budget_buddy_contracts.generated.model.ClientSettingsWrite;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class MeController implements UsersApi {
 
   private final UserDataDeletionService dataDeletionService;
+  private final UserPreferencesService preferencesService;
+  private final UserClientSettingsService clientSettingsService;
 
   @Override
   public ResponseEntity<Me> getCurrentUser() {
@@ -42,32 +46,33 @@ public class MeController implements UsersApi {
 
   @Override
   public ResponseEntity<UserPreferences> getCurrentUserPreferences() {
-    throw notImplemented("getCurrentUserPreferences");
+    return ResponseEntity.ok(preferencesService.get());
   }
 
   @Override
   public ResponseEntity<UserPreferences> updateCurrentUserPreferences(UserPreferencesWrite body) {
-    throw notImplemented("updateCurrentUserPreferences");
+    return ResponseEntity.ok(preferencesService.update(body));
   }
 
   @Override
   public ResponseEntity<List<ClientSettings>> listCurrentUserClientSettings() {
-    throw notImplemented("listCurrentUserClientSettings");
+    return ResponseEntity.ok(clientSettingsService.list());
   }
 
   @Override
   public ResponseEntity<ClientSettings> getCurrentUserClientSettings(String clientId) {
-    throw notImplemented("getCurrentUserClientSettings");
+    return ResponseEntity.ok(clientSettingsService.get(clientId));
   }
 
   @Override
   public ResponseEntity<ClientSettings> upsertCurrentUserClientSettings(String clientId, ClientSettingsWrite body) {
-    throw notImplemented("upsertCurrentUserClientSettings");
+    return ResponseEntity.ok(clientSettingsService.upsert(clientId, body));
   }
 
   @Override
   public ResponseEntity<Void> deleteCurrentUserClientSettings(String clientId) {
-    throw notImplemented("deleteCurrentUserClientSettings");
+    clientSettingsService.delete(clientId);
+    return ResponseEntity.noContent().build();
   }
 
   private static UnsupportedOperationException notImplemented(String operationId) {
