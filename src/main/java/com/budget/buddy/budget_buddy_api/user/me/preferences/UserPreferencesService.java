@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Reads and replaces the authenticated user's global preferences. All operations are scoped to the
- * current user via {@link OwnerIdProvider}.
+ * Reads and replaces the authenticated user's global preferences, scoped to the current user via
+ * {@link OwnerIdProvider}.
  */
 @Service
 @Transactional(readOnly = true)
@@ -18,14 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserPreferencesService {
 
   private final UserPreferencesRepository repository;
+  private final UserPreferencesMapper mapper;
   private final OwnerIdProvider<UUID> ownerIdProvider;
 
   /**
    * Returns the current user's preferences, or unset server defaults when none have been stored.
    */
   public UserPreferences get() {
-    return repository.findByUserId(ownerIdProvider.get())
-        .map(UserPreferencesService::toModel)
+    return repository.findById(ownerIdProvider.get())
+        .map(mapper::toModel)
         .orElseGet(UserPreferences::new);
   }
 
@@ -34,16 +35,13 @@ public class UserPreferencesService {
    */
   @Transactional
   public UserPreferences update(UserPreferencesWrite write) {
-    var saved = repository.upsert(
-        ownerIdProvider.get(),
-        new UserPreferencesRow(write.getLanguage(), write.getCurrency(), write.getTimezone()));
-    return toModel(saved);
-  }
-
-  private static UserPreferences toModel(UserPreferencesRow row) {
-    return new UserPreferences()
-        .language(row.language())
-        .currency(row.currency())
-        .timezone(row.timezone());
+    var userId = ownerIdProvider.get();
+    var entity = repository.findById(userId).orElseGet(() -> {
+      var fresh = new UserPreferencesEntity();
+      fresh.setUserId(userId);
+      return fresh;
+    });
+    mapper.updateEntity(write, entity);
+    return mapper.toModel(repository.save(entity));
   }
 }

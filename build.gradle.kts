@@ -47,7 +47,8 @@ dependencies {
 
   compileOnly("org.projectlombok:lombok")
 
-  runtimeOnly("org.postgresql:postgresql")
+  // Compile scope (not runtimeOnly): jsonb custom converters reference org.postgresql.util.PGobject.
+  implementation("org.postgresql:postgresql")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
   developmentOnly("org.springframework.boot:spring-boot-docker-compose")

@@ -2,6 +2,8 @@ package com.budget.buddy.budget_buddy_api.user.me.settings;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -26,14 +29,16 @@ class UserClientSettingsServiceTest {
 
   @Mock
   private UserClientSettingsRepository repository;
+  @Mock
+  private ClientSettingsMapper mapper;
 
-  private final UUID userId = UUID.randomUUID();
+  private final UUID ownerId = UUID.randomUUID();
 
   private UserClientSettingsService service;
 
   @BeforeEach
   void setUp() {
-    service = new UserClientSettingsService(repository, () -> userId);
+    service = new UserClientSettingsService(repository, mapper, () -> ownerId);
   }
 
   @Nested
@@ -41,24 +46,21 @@ class UserClientSettingsServiceTest {
   class Get {
 
     @Test
-    void should_ReturnSettings_When_Found() {
+    void should_ReturnMappedSettings_When_Found() {
       // Given
-      when(repository.findByUserIdAndClientId(userId, "web"))
-          .thenReturn(Optional.of(new ClientSettingsRow("web", Map.of("theme", "dark"))));
+      var entity = new UserClientSettingsEntity();
+      var model = new ClientSettings();
+      when(repository.findByOwnerIdAndClientId(ownerId, "web")).thenReturn(Optional.of(entity));
+      when(mapper.toModel(entity)).thenReturn(model);
 
-      // When
-      var result = service.get("web");
-
-      // Then
-      assertThat(result)
-          .returns("web", ClientSettings::getClientId)
-          .returns(Map.of("theme", "dark"), ClientSettings::getSettings);
+      // When & Then
+      assertThat(service.get("web")).isSameAs(model);
     }
 
     @Test
-    void should_ThrowEntityNotFound_When_BelongsToOtherUserOrMissing() {
+    void should_ThrowEntityNotFound_When_MissingOrBelongsToOtherUser() {
       // Given
-      when(repository.findByUserIdAndClientId(userId, "web")).thenReturn(Optional.empty());
+      when(repository.findByOwnerIdAndClientId(ownerId, "web")).thenReturn(Optional.empty());
 
       // When & Then
       assertThatThrownBy(() -> service.get("web"))
@@ -72,19 +74,15 @@ class UserClientSettingsServiceTest {
   class ListSettings {
 
     @Test
-    void should_ReturnAllRowsForCurrentUser() {
+    void should_ReturnMappedRowsForCurrentUser() {
       // Given
-      when(repository.findAllByUserId(userId)).thenReturn(List.of(
-          new ClientSettingsRow("web", Map.of("theme", "dark")),
-          new ClientSettingsRow("mobile-ios", Map.of("push", true))));
+      var entities = List.of(new UserClientSettingsEntity());
+      var models = List.of(new ClientSettings().clientId("web"));
+      when(repository.findByOwnerIdOrderByCreatedAt(ownerId)).thenReturn(entities);
+      when(mapper.toModelList(entities)).thenReturn(models);
 
-      // When
-      var result = service.list();
-
-      // Then
-      assertThat(result)
-          .extracting(ClientSettings::getClientId)
-          .containsExactly("web", "mobile-ios");
+      // When & Then
+      assertThat(service.list()).isSameAs(models);
     }
   }
 
@@ -93,21 +91,43 @@ class UserClientSettingsServiceTest {
   class Upsert {
 
     @Test
-    void should_StoreScopedToCurrentUser_AndReturnSaved() {
+    void should_CreateRowScopedToCurrentUser_When_NoneExists() {
       // Given
-      var settings = Map.<String, Object>of("theme", "dark");
-      var write = new ClientSettingsWrite().settings(settings);
-      when(repository.upsert(userId, "web", settings))
-          .thenReturn(new ClientSettingsRow("web", settings));
+      var write = new ClientSettingsWrite().settings(Map.of("theme", "dark"));
+      var model = new ClientSettings();
+      when(repository.findByOwnerIdAndClientId(ownerId, "web")).thenReturn(Optional.empty());
+      when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+      when(mapper.toModel(any())).thenReturn(model);
 
       // When
       var result = service.upsert("web", write);
 
       // Then
-      verify(repository).upsert(userId, "web", settings);
-      assertThat(result)
-          .returns("web", ClientSettings::getClientId)
-          .returns(settings, ClientSettings::getSettings);
+      var entityCaptor = ArgumentCaptor.forClass(UserClientSettingsEntity.class);
+      verify(mapper).updateSettings(eq(write), entityCaptor.capture());
+      assertThat(entityCaptor.getValue())
+          .as("a freshly created row is keyed to the current user and requested client")
+          .returns(ownerId, UserClientSettingsEntity::getOwnerId)
+          .returns("web", UserClientSettingsEntity::getClientId);
+      verify(repository).save(entityCaptor.getValue());
+      assertThat(result).isSameAs(model);
+    }
+
+    @Test
+    void should_UpdateExistingRow_When_AlreadyStored() {
+      // Given
+      var write = new ClientSettingsWrite().settings(Map.of("theme", "light"));
+      var existing = new UserClientSettingsEntity();
+      when(repository.findByOwnerIdAndClientId(ownerId, "web")).thenReturn(Optional.of(existing));
+      when(repository.save(existing)).thenReturn(existing);
+      when(mapper.toModel(existing)).thenReturn(new ClientSettings());
+
+      // When
+      service.upsert("web", write);
+
+      // Then
+      verify(mapper).updateSettings(write, existing);
+      verify(repository).save(existing);
     }
   }
 
@@ -118,17 +138,20 @@ class UserClientSettingsServiceTest {
     @Test
     void should_Delete_When_RowExists() {
       // Given
-      when(repository.deleteByUserIdAndClientId(userId, "web")).thenReturn(1);
+      var existing = new UserClientSettingsEntity();
+      when(repository.findByOwnerIdAndClientId(ownerId, "web")).thenReturn(Optional.of(existing));
 
-      // When & Then
+      // When
       service.delete("web");
-      verify(repository).deleteByUserIdAndClientId(userId, "web");
+
+      // Then
+      verify(repository).delete(existing);
     }
 
     @Test
-    void should_ThrowEntityNotFound_When_NothingDeleted() {
+    void should_ThrowEntityNotFound_When_Missing() {
       // Given
-      when(repository.deleteByUserIdAndClientId(userId, "web")).thenReturn(0);
+      when(repository.findByOwnerIdAndClientId(ownerId, "web")).thenReturn(Optional.empty());
 
       // When & Then
       assertThatThrownBy(() -> service.delete("web"))

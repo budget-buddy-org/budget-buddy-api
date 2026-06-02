@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.UserPreferences;
@@ -25,6 +26,8 @@ class UserPreferencesServiceTest {
 
   @Mock
   private UserPreferencesRepository repository;
+  @Mock
+  private UserPreferencesMapper mapper;
 
   private final UUID userId = UUID.randomUUID();
 
@@ -32,7 +35,7 @@ class UserPreferencesServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new UserPreferencesService(repository, () -> userId);
+    service = new UserPreferencesService(repository, mapper, () -> userId);
   }
 
   @Nested
@@ -40,25 +43,21 @@ class UserPreferencesServiceTest {
   class Get {
 
     @Test
-    void should_ReturnStoredPreferences_When_RowExists() {
+    void should_ReturnMappedPreferences_When_RowExists() {
       // Given
-      when(repository.findByUserId(userId))
-          .thenReturn(Optional.of(new UserPreferencesRow("en", "EUR", "Europe/Tallinn")));
+      var entity = new UserPreferencesEntity();
+      var model = new UserPreferences();
+      when(repository.findById(userId)).thenReturn(Optional.of(entity));
+      when(mapper.toModel(entity)).thenReturn(model);
 
-      // When
-      var result = service.get();
-
-      // Then
-      assertThat(result)
-          .returns("en", UserPreferences::getLanguage)
-          .returns("EUR", UserPreferences::getCurrency)
-          .returns("Europe/Tallinn", UserPreferences::getTimezone);
+      // When & Then
+      assertThat(service.get()).isSameAs(model);
     }
 
     @Test
     void should_ReturnUnsetDefaults_When_NoRowExists() {
       // Given
-      when(repository.findByUserId(userId)).thenReturn(Optional.empty());
+      when(repository.findById(userId)).thenReturn(Optional.empty());
 
       // When
       var result = service.get();
@@ -69,6 +68,7 @@ class UserPreferencesServiceTest {
           .returns(null, UserPreferences::getLanguage)
           .returns(null, UserPreferences::getCurrency)
           .returns(null, UserPreferences::getTimezone);
+      verifyNoInteractions(mapper);
     }
   }
 
@@ -77,25 +77,43 @@ class UserPreferencesServiceTest {
   class Update {
 
     @Test
-    void should_UpsertScopedToCurrentUser_AndReturnSaved() {
+    void should_CreateRowScopedToCurrentUser_When_NoneExists() {
       // Given
       var write = new UserPreferencesWrite().language("de").currency("USD").timezone("Europe/Berlin");
-      when(repository.upsert(eq(userId), any()))
-          .thenReturn(new UserPreferencesRow("de", "USD", "Europe/Berlin"));
+      var model = new UserPreferences();
+      when(repository.findById(userId)).thenReturn(Optional.empty());
+      when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+      when(mapper.toModel(any())).thenReturn(model);
 
       // When
       var result = service.update(write);
 
       // Then
-      var rowCaptor = ArgumentCaptor.forClass(UserPreferencesRow.class);
-      verify(repository).upsert(eq(userId), rowCaptor.capture());
-      assertThat(rowCaptor.getValue())
-          .as("write fields are forwarded verbatim to the persistence row")
-          .isEqualTo(new UserPreferencesRow("de", "USD", "Europe/Berlin"));
-      assertThat(result)
-          .returns("de", UserPreferences::getLanguage)
-          .returns("USD", UserPreferences::getCurrency)
-          .returns("Europe/Berlin", UserPreferences::getTimezone);
+      var entityCaptor = ArgumentCaptor.forClass(UserPreferencesEntity.class);
+      verify(mapper).updateEntity(eq(write), entityCaptor.capture());
+      assertThat(entityCaptor.getValue().getUserId())
+          .as("a freshly created preferences row is keyed to the current user")
+          .isEqualTo(userId);
+      verify(repository).save(entityCaptor.getValue());
+      assertThat(result).isSameAs(model);
+    }
+
+    @Test
+    void should_UpdateExistingRow_When_AlreadyStored() {
+      // Given
+      var write = new UserPreferencesWrite().language("de").currency("USD").timezone("Europe/Berlin");
+      var existing = new UserPreferencesEntity();
+      existing.setUserId(userId);
+      when(repository.findById(userId)).thenReturn(Optional.of(existing));
+      when(repository.save(existing)).thenReturn(existing);
+      when(mapper.toModel(existing)).thenReturn(new UserPreferences());
+
+      // When
+      service.update(write);
+
+      // Then
+      verify(mapper).updateEntity(write, existing);
+      verify(repository).save(existing);
     }
   }
 }

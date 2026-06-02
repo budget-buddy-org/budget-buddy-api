@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Reads, stores, and deletes the authenticated user's per-client settings. All operations are scoped
- * to the current user via {@link OwnerIdProvider}, so one user can never see or mutate another's rows.
+ * Reads, stores, and deletes the authenticated user's per-client settings. Every query is scoped to
+ * the current user via {@link OwnerIdProvider}, so one user can never see or mutate another's rows.
  */
 @Service
 @Transactional(readOnly = true)
@@ -20,40 +20,41 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserClientSettingsService {
 
   private final UserClientSettingsRepository repository;
+  private final ClientSettingsMapper mapper;
   private final OwnerIdProvider<UUID> ownerIdProvider;
 
   public ClientSettings get(String clientId) {
-    return repository.findByUserIdAndClientId(ownerIdProvider.get(), clientId)
-        .map(UserClientSettingsService::toModel)
+    return repository.findByOwnerIdAndClientId(ownerIdProvider.get(), clientId)
+        .map(mapper::toModel)
         .orElseThrow(() -> notFound(clientId));
   }
 
   public List<ClientSettings> list() {
-    return repository.findAllByUserId(ownerIdProvider.get()).stream()
-        .map(UserClientSettingsService::toModel)
-        .toList();
+    return mapper.toModelList(repository.findByOwnerIdOrderByCreatedAt(ownerIdProvider.get()));
   }
 
   @Transactional
   public ClientSettings upsert(String clientId, ClientSettingsWrite write) {
-    var saved = repository.upsert(ownerIdProvider.get(), clientId, write.getSettings());
-    return toModel(saved);
+    var ownerId = ownerIdProvider.get();
+    var entity = repository.findByOwnerIdAndClientId(ownerId, clientId)
+        .orElseGet(() -> {
+          var fresh = new UserClientSettingsEntity();
+          fresh.setOwnerId(ownerId);
+          fresh.setClientId(clientId);
+          return fresh;
+        });
+    mapper.updateSettings(write, entity);
+    return mapper.toModel(repository.save(entity));
   }
 
   @Transactional
   public void delete(String clientId) {
-    if (repository.deleteByUserIdAndClientId(ownerIdProvider.get(), clientId) == 0) {
-      throw notFound(clientId);
-    }
+    var entity = repository.findByOwnerIdAndClientId(ownerIdProvider.get(), clientId)
+        .orElseThrow(() -> notFound(clientId));
+    repository.delete(entity);
   }
 
   private static EntityNotFoundException notFound(String clientId) {
     return new EntityNotFoundException("No settings stored for client: " + clientId);
-  }
-
-  private static ClientSettings toModel(ClientSettingsRow row) {
-    return new ClientSettings()
-        .clientId(row.clientId())
-        .settings(row.settings());
   }
 }
