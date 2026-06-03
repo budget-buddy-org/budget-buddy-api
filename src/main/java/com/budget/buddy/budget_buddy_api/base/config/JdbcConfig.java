@@ -1,15 +1,17 @@
 package com.budget.buddy.budget_buddy_api.base.config;
 
-import com.budget.buddy.budget_buddy_api.base.converters.CustomJdbcConverters;
-import com.budget.buddy.budget_buddy_api.base.converters.CustomJdbcConverters.JsonbToMapReadingConverter;
-import com.budget.buddy.budget_buddy_api.base.converters.CustomJdbcConverters.MapToJsonbWritingConverter;
+import com.budget.buddy.budget_buddy_api.base.config.CustomJdbcConverters.CurrencyReadingConverter;
+import com.budget.buddy.budget_buddy_api.base.config.CustomJdbcConverters.CurrencyWritingConverter;
+import com.budget.buddy.budget_buddy_api.base.config.CustomJdbcConverters.JsonbToMapReadingConverter;
+import com.budget.buddy.budget_buddy_api.base.config.CustomJdbcConverters.MapToJsonbWritingConverter;
+import com.budget.buddy.budget_buddy_api.base.config.CustomJdbcConverters.TimestampToOffsetDateTimeConverter;
+import com.budget.buddy.budget_buddy_api.base.config.CustomJdbcConverters.TransactionTypeWritingConverter;
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.data.jdbc.core.convert.JdbcCustomConversions;
 import org.springframework.data.jdbc.repository.config.EnableJdbcAuditing;
@@ -26,9 +28,15 @@ public class JdbcConfig {
 
   @Bean
   public JdbcCustomConversions jdbcCustomConversions(ObjectMapper objectMapper) {
-    var converters = new ArrayList<Converter<?, ?>>(CustomJdbcConverters.CONVERTERS);
-    converters.add(new MapToJsonbWritingConverter(objectMapper));
-    converters.add(new JsonbToMapReadingConverter(objectMapper));
+    var converters = List.of(
+        new CurrencyReadingConverter(),
+        new CurrencyWritingConverter(),
+        new TimestampToOffsetDateTimeConverter(),
+        new TransactionTypeWritingConverter(),
+        new MapToJsonbWritingConverter(objectMapper),
+        new JsonbToMapReadingConverter(objectMapper)
+    );
+
     return new JdbcCustomConversions(converters);
   }
 

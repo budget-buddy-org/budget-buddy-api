@@ -1,6 +1,13 @@
-package com.budget.buddy.budget_buddy_api.base.converters;
+package com.budget.buddy.budget_buddy_api.base.config;
 
 import com.budget.buddy.budget_buddy_api.transaction.TransactionType;
+import java.sql.JDBCType;
+import java.sql.Timestamp;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -9,26 +16,11 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.data.jdbc.core.mapping.JdbcValue;
-
-import java.sql.JDBCType;
-import java.sql.Timestamp;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Currency;
-import java.util.List;
-import java.util.Map;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class CustomJdbcConverters {
-
-  public static final List<Converter<?, ?>> CONVERTERS = List.of(
-      new CurrencyReadingConverter(),
-      new CurrencyWritingConverter(),
-      new TimestampToOffsetDateTimeConverter(),
-      new TransactionTypeWritingConverter()
-  );
+class CustomJdbcConverters {
 
   @ReadingConverter
   static class CurrencyReadingConverter implements Converter<String, Currency> {
@@ -72,7 +64,7 @@ public class CustomJdbcConverters {
    */
   @WritingConverter
   @RequiredArgsConstructor
-  public static class MapToJsonbWritingConverter implements Converter<Map<String, Object>, JdbcValue> {
+  static class MapToJsonbWritingConverter implements Converter<Map<String, Object>, JdbcValue> {
 
     private final ObjectMapper objectMapper;
 
@@ -88,7 +80,7 @@ public class CustomJdbcConverters {
    */
   @ReadingConverter
   @RequiredArgsConstructor
-  public static class JsonbToMapReadingConverter implements Converter<PGobject, Map<String, Object>> {
+  static class JsonbToMapReadingConverter implements Converter<PGobject, Map<String, Object>> {
 
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
@@ -98,7 +90,12 @@ public class CustomJdbcConverters {
     @Override
     public Map<String, Object> convert(PGobject source) {
       var json = source.getValue();
-      return json == null ? Map.of() : objectMapper.readValue(json, MAP_TYPE);
+
+      if (json == null) {
+        return Collections.emptyMap();
+      }
+
+      return objectMapper.readValue(json, MAP_TYPE);
     }
   }
 
