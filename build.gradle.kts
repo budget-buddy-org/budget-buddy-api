@@ -2,7 +2,7 @@ plugins {
   java
   `jvm-test-suite`
   jacoco
-  id("org.springframework.boot") version "4.0.6"
+  id("org.springframework.boot") version "4.1.0"
   id("io.spring.dependency-management") version "1.1.7"
 }
 
