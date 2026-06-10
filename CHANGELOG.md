@@ -1,3 +1,9 @@
+## [1.12.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.11.0...v1.12.0) (2026-06-10)
+
+### Features
+
+* upgrade spring-boot to 4.1.0 ([#192](https://github.com/budget-buddy-org/budget-buddy-api/issues/192)) ([f4266d3](https://github.com/budget-buddy-org/budget-buddy-api/commit/f4266d32b065f83b79e9b5fbd5133ebcd129d9d8))
+
 ## [1.11.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.10.0...v1.11.0) (2026-05-31)
 
 ### Features
