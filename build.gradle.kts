@@ -4,6 +4,7 @@ plugins {
   jacoco
   id("org.springframework.boot") version "4.1.0"
   id("io.spring.dependency-management") version "1.1.7"
+  id("org.sonarqube") version "7.3.1.8318"
 }
 
 group = "com.budget.buddy"
@@ -64,6 +65,10 @@ dependencies {
   testAnnotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
   testAnnotationProcessor("org.projectlombok:lombok")
   testAnnotationProcessor("org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}")
+}
+
+dependencyLocking {
+  lockAllConfigurations()
 }
 
 @Suppress("UnstableApiUsage")
@@ -138,4 +143,17 @@ tasks.jacocoTestReport {
       exclude("**/generated/**")
     }
   }))
+}
+
+sonar {
+  properties {
+    property("sonar.projectKey", "budget-buddy-org_budget-buddy-api")
+    property("sonar.organization", "budget-buddy-org")
+    property("sonar.host.url", "https://sonarcloud.io")
+  }
+}
+
+tasks.sonar {
+  dependsOn(tasks.jacocoTestReport)
+  dependsOn(testing.suites.named("integrationTest"))
 }
