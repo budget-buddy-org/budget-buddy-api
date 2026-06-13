@@ -26,15 +26,22 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.exc.MismatchedInputException;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
 
 import java.net.URI;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
@@ -65,8 +72,8 @@ class GlobalExceptionHandlerTest {
 
   @BeforeEach
   void init() {
-    when(httpServletRequest.getRequestURI()).thenReturn(REQUEST_URI);
-    when(webRequest.getRequest()).thenReturn(httpServletRequest);
+    lenient().when(httpServletRequest.getRequestURI()).thenReturn(REQUEST_URI);
+    lenient().when(webRequest.getRequest()).thenReturn(httpServletRequest);
     handler = new GlobalExceptionHandler();
   }
 
@@ -386,6 +393,98 @@ class GlobalExceptionHandlerTest {
           .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::getTitle)
           .returns(400, Problem::getStatus);
     }
+
+    @Test
+    @DisplayName("should return field error when cause is UnrecognizedPropertyException")
+    void shouldHandleUnrecognizedProperty() {
+      // Given
+      var cause = mock(UnrecognizedPropertyException.class);
+      when(cause.getPropertyName()).thenReturn("unknownField");
+      var exception = mock(HttpMessageNotReadableException.class);
+      when(exception.getCause()).thenReturn(cause);
+
+      // When
+      var response = handler.handleNotReadable(exception, webRequest);
+
+      // Then
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getErrors())
+          .hasSize(1)
+          .first()
+          .satisfies(e -> {
+            assertThat(e.getField()).isEqualTo("unknownField");
+            assertThat(e.getMessage()).isEqualTo("unknown field");
+          });
+    }
+
+    @Test
+    @DisplayName("should return field error with json path when cause is MismatchedInputException with path")
+    void shouldHandleMismatchedInputWithPath() {
+      // Given
+      var ref1 = new JacksonException.Reference(String.class, "amount");
+      var ref2 = new JacksonException.Reference(String.class, 0);
+      var cause = mock(MismatchedInputException.class);
+      when(cause.getPath()).thenReturn(List.of(ref1, ref2));
+      var exception = mock(HttpMessageNotReadableException.class);
+      when(exception.getCause()).thenReturn(cause);
+
+      // When
+      var response = handler.handleNotReadable(exception, webRequest);
+
+      // Then
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getErrors())
+          .hasSize(1)
+          .first()
+          .satisfies(e -> {
+            assertThat(e.getField()).isEqualTo("amount.[0]");
+            assertThat(e.getMessage()).isEqualTo("invalid value");
+          });
+    }
+
+    @Test
+    @DisplayName("should return null path when cause is MismatchedInputException with empty path")
+    void shouldHandleMismatchedInputWithEmptyPath() {
+      // Given
+      var cause = mock(MismatchedInputException.class);
+      when(cause.getPath()).thenReturn(Collections.emptyList());
+      var exception = mock(HttpMessageNotReadableException.class);
+      when(exception.getCause()).thenReturn(cause);
+
+      // When
+      var response = handler.handleNotReadable(exception, webRequest);
+
+      // Then
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getErrors())
+          .hasSize(1)
+          .first()
+          .satisfies(e -> assertThat(e.getField()).isEqualTo("null"));
+    }
+
+    @Test
+    @DisplayName("should return null path when cause is MismatchedInputException with null path")
+    void shouldHandleMismatchedInputWithNullPath() {
+      // Given
+      var cause = mock(MismatchedInputException.class);
+      when(cause.getPath()).thenReturn(null);
+      var exception = mock(HttpMessageNotReadableException.class);
+      when(exception.getCause()).thenReturn(cause);
+
+      // When
+      var response = handler.handleNotReadable(exception, webRequest);
+
+      // Then
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getErrors())
+          .hasSize(1)
+          .first()
+          .satisfies(e -> assertThat(e.getField()).isEqualTo("null"));
+    }
   }
 
   @Nested
@@ -468,6 +567,49 @@ class GlobalExceptionHandlerTest {
           .returns(HttpStatus.NOT_IMPLEMENTED.getReasonPhrase(), Problem::getTitle)
           .returns("Operation not supported", Problem::getDetail)
           .returns(501, Problem::getStatus);
+    }
+  }
+
+  @Nested
+  @DisplayName("DateTimeParseException Handler")
+  class DateTimeParseExceptionTests {
+
+    @Test
+    @DisplayName("should handle DateTimeParseException as 400 with the parsed string in the detail")
+    void shouldHandleDateTimeParse() {
+      // Given
+      var exception = new DateTimeParseException("Text 'invalid' could not be parsed", "invalid", 0);
+
+      // When
+      var response = handler.handleDateTimeParse(exception, webRequest);
+
+      // Then
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody())
+          .returns(400, Problem::getStatus)
+          .returns("Invalid date or time value: invalid", Problem::getDetail);
+    }
+  }
+
+  @Nested
+  @DisplayName("Request URI resolution")
+  class RequestUriTests {
+
+    @Test
+    @DisplayName("should return empty string when request is not a ServletWebRequest")
+    void shouldReturnEmptyUriForNonServletRequest() {
+      // Given — plain WebRequest mock, not a ServletWebRequest
+      var plainRequest = mock(WebRequest.class);
+      var exception = new NoSuchElementException("not found");
+
+      // When
+      var response = handler.handleNotFound(exception, plainRequest);
+
+      // Then
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getInstance())
+          .isEqualTo(URI.create(""));
     }
   }
 

@@ -22,7 +22,8 @@ public final class FieldErrorFactory {
 
   public static FieldError from(org.springframework.validation.FieldError fieldError) {
     Objects.requireNonNull(fieldError);
-    var message = Objects.requireNonNullElse(fieldError.getDefaultMessage(), "Invalid value");
+    var defaultMessage = fieldError.getDefaultMessage();
+    var message = defaultMessage != null ? defaultMessage : "Invalid value";
 
     return new FieldError()
         .field(fieldError.getField())

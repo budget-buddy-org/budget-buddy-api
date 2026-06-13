@@ -91,6 +91,23 @@ class FieldErrorFactoryTest {
     }
 
     @Test
+    @DisplayName("should fall back to 'Invalid value' when defaultMessage is null")
+    void shouldFallBackToDefaultMessageWhenNull() {
+      // Given — Spring allows null defaultMessage via the 3-arg constructor
+      var springFieldError = new org.springframework.validation.FieldError(
+          "user", "email", null
+      );
+
+      // When
+      FieldError result = FieldErrorFactory.from(springFieldError);
+
+      // Then
+      assertThat(result)
+          .returns("email", FieldError::getField)
+          .returns("Invalid value", FieldError::getMessage);
+    }
+
+    @Test
     @DisplayName("should throw NullPointerException when fieldError is null")
     void shouldThrowNpe() {
       assertThatThrownBy(() -> FieldErrorFactory.from((org.springframework.validation.FieldError) null))
