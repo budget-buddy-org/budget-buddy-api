@@ -13,7 +13,7 @@ import org.springframework.data.relational.core.mapping.Column;
  * subclasses are automatically scoped to the authenticated owner by
  * {@link OwnableEntityService} — no extra wiring required in subclasses.
  *
- * @param <ID> the identifier type (used for both the entity id and the owner id)
+ * <p>Type parameter {@code ID} is used for both the entity id and the owner id.
  */
 @Getter
 @Setter

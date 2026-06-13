@@ -29,7 +29,7 @@ import org.springframework.data.relational.core.mapping.Column;
  * <p>Spring Data JDBC populates these fields after construction via setters, so a
  * no-arg constructor legitimately leaves them unset.
  *
- * @param <ID> the identifier type
+ * <p>Type parameter {@code ID} is the identifier type.
  */
 @Getter
 @Setter
@@ -38,6 +38,7 @@ public abstract class BaseEntity<ID> implements Persistable<ID> {
 
   @Id
   @Column("id")
+  @Setter
   private @Nullable ID id;
 
   @Version
@@ -51,6 +52,11 @@ public abstract class BaseEntity<ID> implements Persistable<ID> {
   @LastModifiedDate
   @Column("updated_at")
   private @Nullable OffsetDateTime updatedAt;
+
+  @Override
+  public @Nullable ID getId() {
+    return id;
+  }
 
   @Override
   public boolean isNew() {
