@@ -24,15 +24,15 @@ import org.springframework.transaction.annotation.Transactional;
  * @param <C> the create request type (DTO)
  * @param <U> the update request type (DTO) used for PUT updates
  */
-public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
-    extends AbstractBaseEntityService<E, ID, R, C, U> {
+public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U, L>
+    extends AbstractBaseEntityService<E, ID, R, C, U, L> {
 
   @Getter(AccessLevel.PROTECTED)
   private final OwnerIdProvider<ID> ownerIdProvider;
 
   protected OwnableEntityService(
       OwnableEntityRepository<E, ID> repository,
-      BaseEntityMapper<E, R, C, U, ?> mapper,
+      BaseEntityMapper<E, R, C, U, L> mapper,
       Iterable<BaseEntityValidator<E>> entityValidators,
       OwnerIdProvider<ID> ownerIdProvider
   ) {

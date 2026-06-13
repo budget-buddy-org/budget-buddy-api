@@ -21,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Transactional(readOnly = true)
-public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R, C, U>
-    implements BaseEntityService<ID, R, C, U> {
+public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R, C, U, L>
+    implements BaseEntityService<ID, R, C, U, L> {
 
   protected static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
 
@@ -30,20 +30,20 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
   private final BaseEntityRepository<E, ID> repository;
 
   @Getter(AccessLevel.PROTECTED)
-  private final BaseEntityMapper<E, R, C, U, ?> mapper;
+  private final BaseEntityMapper<E, R, C, U, L> mapper;
 
   private final Iterable<BaseEntityValidator<E>> validators;
 
   protected AbstractBaseEntityService(
       BaseEntityRepository<E, ID> repository,
-      BaseEntityMapper<E, R, C, U, ?> mapper
+      BaseEntityMapper<E, R, C, U, L> mapper
   ) {
     this(repository, mapper, Collections.emptyList());
   }
 
   protected AbstractBaseEntityService(
       BaseEntityRepository<E, ID> repository,
-      BaseEntityMapper<E, R, C, U, ?> mapper,
+      BaseEntityMapper<E, R, C, U, L> mapper,
       Iterable<BaseEntityValidator<E>> validators
   ) {
     this.repository = repository;
@@ -93,10 +93,9 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
   }
 
   @Override
-  public Page<R> list(Pageable pageable) {
+  public L list(Pageable pageable) {
     log.debug("List all entities with pageRequest: {}", pageable);
-    return listInternal(pageable)
-        .map(mapper::toModel);
+    return mapper.toPage(listInternal(pageable).map(mapper::toModel));
   }
 
   @Override

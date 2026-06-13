@@ -1,6 +1,7 @@
 package com.budget.buddy.budget_buddy_api.category;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityController;
+import com.budget.buddy.budget_buddy_api.category.CategorySummaryService;
 import com.budget.buddy.budget_buddy_contracts.generated.api.CategoriesApi;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategorySpendingSummary;
@@ -21,8 +22,8 @@ public class CategoryController
 
   private final CategorySummaryService summaryService;
 
-  public CategoryController(CategoryService service, CategoryMapper mapper, CategorySummaryService summaryService) {
-    super(service, mapper);
+  public CategoryController(CategoryService service, CategorySummaryService summaryService) {
+    super(service);
     this.summaryService = summaryService;
   }
 

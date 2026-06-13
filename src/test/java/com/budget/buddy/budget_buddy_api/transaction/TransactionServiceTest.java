@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
@@ -78,14 +79,17 @@ class TransactionServiceTest {
       var entity = new TransactionEntity();
       var model = new Transaction();
 
-      when(repository.findAllByFilter(any(TransactionFilter.class), any())).thenReturn(new PageImpl<>(List.of(entity)));
+      var entities = new PageImpl<>(List.of(entity), pageable, 1);
+      when(repository.findAllByFilter(any(TransactionFilter.class), any())).thenReturn(entities);
       when(mapper.toModel(entity)).thenReturn(model);
 
       // When
-      var result = transactionService.list(filter, pageable);
+      transactionService.list(filter, pageable);
 
       // Then
-      assertThat(result.getContent())
+      var pageCaptor = ArgumentCaptor.forClass(Page.class);
+      verify(mapper).toPage(pageCaptor.capture());
+      assertThat(pageCaptor.getValue().getContent())
           .as("Filtered transactions should match the mocked models")
           .containsExactly(model);
 

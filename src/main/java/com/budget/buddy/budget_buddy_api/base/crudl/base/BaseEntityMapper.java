@@ -2,10 +2,7 @@ package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
 import java.util.List;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Builder;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.springframework.data.domain.Page;
 
 /**
  * Base interface for entity mappers using MapStruct.
@@ -24,11 +21,6 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    * @param createRequest the create request
    * @return the mapped entity
    */
-  @BeanMapping(builder = @Builder(disableBuilder = true))
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "version", ignore = true)
-  @Mapping(target = "createdAt", ignore = true)
-  @Mapping(target = "updatedAt", ignore = true)
   E toEntity(C createRequest);
 
   /**
@@ -56,6 +48,18 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    */
   L toPageResponse(List<R> items, PaginationMeta meta);
 
+  default L toPage(Page<R> page) {
+    return toPageResponse(page.getContent(), toMeta(page));
+  }
+
+  default PaginationMeta toMeta(Page<R> page) {
+    var meta = new PaginationMeta();
+    meta.setPage(page.getNumber());
+    meta.setSize(page.getSize());
+    meta.setTotal(page.getTotalElements());
+    return meta;
+  }
+
   /**
    * Fully updates an existing entity with values from an update request. All writable fields are overwritten,
    * including nulls. Immutable fields (id, version, createdAt, updatedAt) are preserved.
@@ -63,10 +67,6 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    * @param updateRequest the update request
    * @param existingEntity the entity to update
    */
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "version", ignore = true)
-  @Mapping(target = "createdAt", ignore = true)
-  @Mapping(target = "updatedAt", ignore = true)
-  void updateEntity(U updateRequest, @MappingTarget E existingEntity);
+  void updateEntity(U updateRequest, E existingEntity);
 
 }

@@ -1,20 +1,19 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Generic CRUDL (Create, Read, Update, Delete, List) service interface for managing entities.
  *
- * @param <I> The type of the unique identifier for the entities managed by the service.
+ * @param <ID> The type of the unique identifier for the entities managed by the service.
  * @param <R> The type of the resource/model returned by the service methods.
  * @param <C> The type of the create request object used for creating new entities.
  * @param <U> The type of the update request object used for fully updating existing entities via PUT.
+ * @param <L> The type of the paginated list response.
  */
-public interface BaseEntityService<I, R, C, U> {
+public interface BaseEntityService<ID, R, C, U, L> {
 
   /**
    * Create a new entity based on the provided createRequest request object.
@@ -31,7 +30,7 @@ public interface BaseEntityService<I, R, C, U> {
    * @return The resource/model representing the entity with the specified I.
    * @throws EntityNotFoundException If no entity with the specified I exists.
    */
-  R read(I id) throws EntityNotFoundException;
+  R read(ID id) throws EntityNotFoundException;
 
   /**
    * Fully update an existing entity identified by its unique identifier. All writable fields are overwritten;
@@ -42,7 +41,7 @@ public interface BaseEntityService<I, R, C, U> {
    * @return The updated resource/model.
    * @throws EntityNotFoundException If no entity with the specified I exists.
    */
-  R update(I id, U updateRequest) throws EntityNotFoundException;
+  R update(ID id, U updateRequest) throws EntityNotFoundException;
 
   /**
    * Delete an existing entity by its unique identifier.
@@ -50,7 +49,7 @@ public interface BaseEntityService<I, R, C, U> {
    * @param id The unique identifier of the entity to delete.
    * @throws EntityNotFoundException If no entity with the specified I exists.
    */
-  void delete(I id) throws EntityNotFoundException;
+  void delete(ID id) throws EntityNotFoundException;
 
   /**
    * List all existing entities.
@@ -63,9 +62,9 @@ public interface BaseEntityService<I, R, C, U> {
    * List entities with pagination support.
    *
    * @param pageable The page request.
-   * @return A page of resources/models representing the entities for the specified page and size.
+   * @return The paginated list response.
    */
-  Page<R> list(Pageable pageable);
+  L list(Pageable pageable);
 
   /**
    * Count the total number of existing entities.
@@ -80,5 +79,5 @@ public interface BaseEntityService<I, R, C, U> {
    * @param id the unique identifier
    * @return true if the entity exists, false otherwise
    */
-  boolean existsById(I id);
+  boolean existsById(ID id);
 }

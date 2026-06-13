@@ -7,6 +7,10 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransact
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,11 +18,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.net.URI;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Transaction controller for CRUDL operations on transactions.
@@ -38,7 +37,7 @@ public class TransactionController
       TransactionService service,
       TransactionMapper mapper,
       TransactionSummaryService summaryService) {
-    super(service, mapper);
+    super(service);
     this.service = service;
     this.mapper = mapper;
     this.summaryService = summaryService;
@@ -56,10 +55,16 @@ public class TransactionController
 
   @Override
   public ResponseEntity<PaginatedTransactions> listTransactions(
-      Integer page, Integer size,
-      @Nullable String query, @Nullable Long amountMin, @Nullable Long amountMax,
-      @Nullable UUID categoryId, @Nullable LocalDate start, @Nullable LocalDate end,
-      @Nullable TransactionType type, String sort
+      Integer page,
+      Integer size,
+      @Nullable String query,
+      @Nullable Long amountMin,
+      @Nullable Long amountMax,
+      @Nullable UUID categoryId,
+      @Nullable LocalDate start,
+      @Nullable LocalDate end,
+      @Nullable TransactionType type,
+      String sort
   ) {
     var pageable = PageRequest.of(page, size, buildSort(sort));
     var filter = TransactionFilter.builder()
@@ -75,8 +80,7 @@ public class TransactionController
   }
 
   ResponseEntity<PaginatedTransactions> listTransactions(TransactionFilter filter, Pageable pageable) {
-    var items = service.list(filter, pageable);
-    return ResponseEntity.ok(mapper.toPageResponse(items.getContent(), toMeta(items)));
+    return ResponseEntity.ok(service.list(filter, pageable));
   }
 
   @Override
