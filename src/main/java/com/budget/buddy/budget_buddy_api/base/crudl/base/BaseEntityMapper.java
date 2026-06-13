@@ -29,7 +29,6 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
   @Mapping(target = "version", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
-  @Mapping(target = "ownerId", ignore = true)
   E toEntity(C createRequest);
 
   /**
@@ -59,7 +58,7 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
 
   /**
    * Fully updates an existing entity with values from an update request. All writable fields are overwritten,
-   * including nulls. Immutable fields (id, version, createdAt, updatedAt, ownerId) are preserved.
+   * including nulls. Immutable fields (id, version, createdAt, updatedAt) are preserved.
    *
    * @param updateRequest the update request
    * @param existingEntity the entity to update
@@ -68,7 +67,6 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
   @Mapping(target = "version", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
-  @Mapping(target = "ownerId", ignore = true)
   void updateEntity(U updateRequest, @MappingTarget E existingEntity);
 
 }
