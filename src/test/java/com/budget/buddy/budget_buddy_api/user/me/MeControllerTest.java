@@ -67,7 +67,8 @@ class MeControllerTest {
 
     @Test
     void upsertCurrentUserClientSettings_ShouldThrowUnsupportedOperationException() {
-      assertThatThrownBy(() -> controller.upsertCurrentUserClientSettings("app", new ClientSettingsWrite()))
+      var body = new ClientSettingsWrite();
+      assertThatThrownBy(() -> controller.upsertCurrentUserClientSettings("app", body))
           .isInstanceOf(UnsupportedOperationException.class)
           .hasMessageContaining("upsertCurrentUserClientSettings");
     }
