@@ -67,6 +67,10 @@ dependencies {
   testAnnotationProcessor("org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}")
 }
 
+dependencyLocking {
+  lockAllConfigurations()
+}
+
 @Suppress("UnstableApiUsage")
 testing {
   suites {
