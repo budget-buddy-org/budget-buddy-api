@@ -1,6 +1,16 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -9,17 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractBaseEntityServiceTest {
@@ -115,7 +114,7 @@ class AbstractBaseEntityServiceTest {
       assertThat(actual).isEqualTo(expected);
       assertThat(existingEntity)
           .as("Update must preserve the entity id")
-          .returns(id, BaseEntity::getId);
+          .returns(id, DummyEntity::getId);
       verify(repository).findById(id);
       verify(mapper).updateEntity(updateRequest, existingEntity);
       verify(repository).save(existingEntity);

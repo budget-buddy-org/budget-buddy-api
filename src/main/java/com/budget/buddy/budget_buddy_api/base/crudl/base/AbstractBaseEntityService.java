@@ -13,33 +13,36 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Abstract base service class providing common CRUDL operations for entities. Subclasses can extend this class to implement specific business logic for different entity types.
  *
- * @param <E> Entity type extending BaseEntity
- * @param <R> Read model type (DTO)
- * @param <C> Create request type (DTO)
- * @param <U> Update request type (DTO) used for PUT updates
+ * @param <E> entity type extending BaseEntity
+ * @param <ID> identifier type
+ * @param <R> read model type (DTO)
+ * @param <C> create request type (DTO)
+ * @param <U> update request type (DTO) used for PUT updates
  */
 @Slf4j
 @Transactional(readOnly = true)
-public abstract class AbstractBaseEntityService<E extends BaseEntity<I>, I, R, C, U>
-    implements BaseEntityService<I, R, C, U> {
+public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R, C, U>
+    implements BaseEntityService<ID, R, C, U> {
 
   protected static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
 
   @Getter(AccessLevel.PROTECTED)
-  private final BaseEntityRepository<E, I> repository;
+  private final BaseEntityRepository<E, ID> repository;
+
   @Getter(AccessLevel.PROTECTED)
   private final BaseEntityMapper<E, R, C, U, ?> mapper;
+
   private final Iterable<BaseEntityValidator<E>> validators;
 
   protected AbstractBaseEntityService(
-      BaseEntityRepository<E, I> repository,
+      BaseEntityRepository<E, ID> repository,
       BaseEntityMapper<E, R, C, U, ?> mapper
   ) {
     this(repository, mapper, Collections.emptyList());
   }
 
   protected AbstractBaseEntityService(
-      BaseEntityRepository<E, I> repository,
+      BaseEntityRepository<E, ID> repository,
       BaseEntityMapper<E, R, C, U, ?> mapper,
       Iterable<BaseEntityValidator<E>> validators
   ) {
@@ -58,7 +61,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<I>, I, R, C
   }
 
   @Override
-  public R read(I id) {
+  public R read(ID id) {
     log.debug("Read entity by id: {}", id);
     E entity = readInternal(id);
     return mapper.toModel(entity);
@@ -66,7 +69,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<I>, I, R, C
 
   @Transactional
   @Override
-  public R update(I id, U updateRequest) {
+  public R update(ID id, U updateRequest) {
     log.debug("Update entity by id: {}", id);
     E updatedEntity = updateInternal(id, updateRequest);
     log.debug("Updated entity: {}", updatedEntity);
@@ -75,7 +78,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<I>, I, R, C
 
   @Transactional
   @Override
-  public void delete(I id) {
+  public void delete(ID id) {
     log.debug("Delete entity by id: {}", id);
     deleteInternal(id);
     log.debug("Successfully deleted entity with id: {}", id);
@@ -103,7 +106,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<I>, I, R, C
   }
 
   @Override
-  public boolean existsById(I id) {
+  public boolean existsById(ID id) {
     return existsByIdInternal(id);
   }
 
@@ -113,7 +116,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<I>, I, R, C
    * @param id the unique identifier
    * @return true if the entity exists, false otherwise
    */
-  protected boolean existsByIdInternal(I id) {
+  protected boolean existsByIdInternal(ID id) {
     return repository.existsById(id);
   }
 
@@ -136,7 +139,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<I>, I, R, C
    * @return the entity
    * @throws EntityNotFoundException if the entity is not found
    */
-  protected E readInternal(I id) {
+  protected E readInternal(ID id) {
     return repository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));
   }
@@ -148,7 +151,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<I>, I, R, C
    * @param updateRequest the update request
    * @return the updated entity
    */
-  protected E updateInternal(I id, U updateRequest) {
+  protected E updateInternal(ID id, U updateRequest) {
     E existingEntity = readInternal(id);
     mapper.updateEntity(updateRequest, existingEntity);
     validate(existingEntity);
@@ -160,7 +163,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<I>, I, R, C
    *
    * @param id the unique identifier
    */
-  protected void deleteInternal(I id) {
+  protected void deleteInternal(ID id) {
     var entity = readInternal(id);
     repository.delete(entity);
   }

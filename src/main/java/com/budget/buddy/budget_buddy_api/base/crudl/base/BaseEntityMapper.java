@@ -1,10 +1,11 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
+import java.util.List;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-
-import java.util.List;
 
 /**
  * Base interface for entity mappers using MapStruct.
@@ -23,6 +24,7 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    * @param createRequest the create request
    * @return the mapped entity
    */
+  @BeanMapping(builder = @Builder(disableBuilder = true))
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "version", ignore = true)
   @Mapping(target = "createdAt", ignore = true)

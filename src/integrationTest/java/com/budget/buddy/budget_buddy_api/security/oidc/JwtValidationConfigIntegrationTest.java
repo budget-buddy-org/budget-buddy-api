@@ -1,15 +1,15 @@
 package com.budget.buddy.budget_buddy_api.security.oidc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.budget.buddy.budget_buddy_api.BaseIntegrationTest;
 import com.budget.buddy.budget_buddy_api.base.config.CacheConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.JwkSetUriJwtDecoderBuilderCustomizer;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.JwkSetUriJwtDecoderBuilderCustomizer;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.env.Environment;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Verifies that JWT validation properties are correctly loaded.

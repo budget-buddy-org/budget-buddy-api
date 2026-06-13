@@ -1,18 +1,17 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.budget.buddy.budget_buddy_api.base.mapper.CurrencyMapperImpl;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 class TransactionMapperTest {
 
@@ -82,16 +81,16 @@ class TransactionMapperTest {
       var ownerId = UUID.randomUUID();
       var date = LocalDate.now();
 
-      var entity = new TransactionEntity(
-          id,
-          categoryId,
-          500L,
-          TransactionType.INCOME,
-          Currency.getInstance("USD"),
-          date,
-          "Income description",
-          ownerId
-      );
+      var entity = TransactionEntity.builder()
+          .categoryId(categoryId)
+          .amount(500L)
+          .type(TransactionType.INCOME)
+          .currency(Currency.getInstance("USD"))
+          .date(date)
+          .description("Income description")
+          .build();
+      entity.setId(id);
+      entity.setOwnerId(ownerId);
 
       // When
       var model = transactionMapper.toModel(entity);
@@ -118,8 +117,12 @@ class TransactionMapperTest {
       // Given
       var id1 = UUID.randomUUID();
       var id2 = UUID.randomUUID();
-      var e1 = new TransactionEntity(id1, UUID.randomUUID(), 100L, TransactionType.EXPENSE, Currency.getInstance("EUR"), LocalDate.now(), "D1", UUID.randomUUID());
-      var e2 = new TransactionEntity(id2, UUID.randomUUID(), 200L, TransactionType.INCOME, Currency.getInstance("USD"), LocalDate.now(), "D2", UUID.randomUUID());
+      var e1 = TransactionEntity.builder().categoryId(UUID.randomUUID()).amount(100L).type(TransactionType.EXPENSE).currency(
+          Currency.getInstance("EUR")).date(LocalDate.now()).description("D1").build();
+      e1.setId(id1);
+      var e2 = TransactionEntity.builder().categoryId(UUID.randomUUID()).amount(200L).type(TransactionType.INCOME).currency(
+          Currency.getInstance("USD")).date(LocalDate.now()).description("D2").build();
+      e2.setId(id2);
 
       // When
       var models = transactionMapper.toModelList(List.of(e1, e2));
@@ -153,16 +156,16 @@ class TransactionMapperTest {
       var originalUpdatedAt = OffsetDateTime.now().minusHours(1);
       var originalVersion = 5;
 
-      var entity = new TransactionEntity(
-          originalId,
-          UUID.randomUUID(),
-          100L,
-          TransactionType.EXPENSE,
-          Currency.getInstance("EUR"),
-          LocalDate.now(),
-          "Old Desc",
-          originalOwnerId
-      );
+      var entity = TransactionEntity.builder()
+          .categoryId(UUID.randomUUID())
+          .amount(100L)
+          .type(TransactionType.EXPENSE)
+          .currency(Currency.getInstance("EUR"))
+          .date(LocalDate.now())
+          .description("Old Desc")
+          .build();
+      entity.setId(originalId);
+      entity.setOwnerId(originalOwnerId);
       entity.setCreatedAt(originalCreatedAt);
       entity.setUpdatedAt(originalUpdatedAt);
       entity.setVersion(originalVersion);

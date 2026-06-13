@@ -1,15 +1,14 @@
 package com.budget.buddy.budget_buddy_api.category;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 class CategoryMapperTest {
 
@@ -60,7 +59,8 @@ class CategoryMapperTest {
     void should_MapCategoryEntityToCategory() {
       // Given
       var id = UUID.randomUUID();
-      var entity = new CategoryEntity(id, "Groceries", UUID.randomUUID(), 50000L);
+      var entity = CategoryEntity.builder().name("Groceries").monthlyBudget(50000L).build();
+      entity.setId(id);
 
       // When
       var model = categoryMapper.toModel(entity);
@@ -83,8 +83,10 @@ class CategoryMapperTest {
       // Given
       var id1 = UUID.randomUUID();
       var id2 = UUID.randomUUID();
-      var entity1 = new CategoryEntity(id1, "Cat 1", UUID.randomUUID(), null);
-      var entity2 = new CategoryEntity(id2, "Cat 2", UUID.randomUUID(), null);
+      var entity1 = CategoryEntity.builder().name("Cat 1").build();
+      entity1.setId(id1);
+      var entity2 = CategoryEntity.builder().name("Cat 2").build();
+      entity2.setId(id2);
 
       // When
       var models = categoryMapper.toModelList(List.of(entity1, entity2));
@@ -118,7 +120,9 @@ class CategoryMapperTest {
       var originalUpdatedAt = OffsetDateTime.now().minusHours(1);
       var originalVersion = 10;
 
-      var entity = new CategoryEntity(originalId, "Old Name", originalOwnerId, null);
+      var entity = CategoryEntity.builder().name("Old Name").build();
+      entity.setId(originalId);
+      entity.setOwnerId(originalOwnerId);
       entity.setCreatedAt(originalCreatedAt);
       entity.setUpdatedAt(originalUpdatedAt);
       entity.setVersion(originalVersion);

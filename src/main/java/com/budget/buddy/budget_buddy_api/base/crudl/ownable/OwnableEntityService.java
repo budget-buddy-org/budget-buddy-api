@@ -19,30 +19,30 @@ import org.springframework.transaction.annotation.Transactional;
  * verbatim because it dispatches through the overridden {@link #readInternal(Object)}.
  *
  * @param <E> the entity type
- * @param <I> the identifier type
+ * @param <ID> the identifier type
  * @param <R> the read model type (DTO)
  * @param <C> the create request type (DTO)
  * @param <U> the update request type (DTO) used for PUT updates
  */
-public class OwnableEntityService<E extends OwnableEntity<I>, I, R, C, U>
-    extends AbstractBaseEntityService<E, I, R, C, U> {
+public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U>
+    extends AbstractBaseEntityService<E, ID, R, C, U> {
 
   @Getter(AccessLevel.PROTECTED)
-  private final OwnerIdProvider<I> ownerIdProvider;
+  private final OwnerIdProvider<ID> ownerIdProvider;
 
   protected OwnableEntityService(
-      OwnableEntityRepository<E, I> repository,
+      OwnableEntityRepository<E, ID> repository,
       BaseEntityMapper<E, R, C, U, ?> mapper,
       Iterable<BaseEntityValidator<E>> entityValidators,
-      OwnerIdProvider<I> ownerIdProvider
+      OwnerIdProvider<ID> ownerIdProvider
   ) {
     super(repository, mapper, entityValidators);
     this.ownerIdProvider = ownerIdProvider;
   }
 
   @Override
-  protected OwnableEntityRepository<E, I> getRepository() {
-    return (OwnableEntityRepository<E, I>) super.getRepository();
+  protected OwnableEntityRepository<E, ID> getRepository() {
+    return (OwnableEntityRepository<E, ID>) super.getRepository();
   }
 
   @Override
@@ -51,13 +51,13 @@ public class OwnableEntityService<E extends OwnableEntity<I>, I, R, C, U>
   }
 
   @Override
-  protected E readInternal(I id) {
+  protected E readInternal(ID id) {
     return getRepository().findByIdAndOwnerId(id, ownerIdProvider.get())
         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));
   }
 
   @Override
-  protected boolean existsByIdInternal(I id) {
+  protected boolean existsByIdInternal(ID id) {
     return getRepository().existsByIdAndOwnerId(id, ownerIdProvider.get());
   }
 

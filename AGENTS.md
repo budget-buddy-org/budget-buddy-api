@@ -99,8 +99,8 @@ endpoint).
 Domain features (`category`, `transaction`) are **package-by-feature** and extend a shared generic CRUDL hierarchy in
 `base/crudl/`. The contract is:
 
-- **Entity** — extend `AuditableEntity` (auto `createdAt`/`updatedAt`/`version`) and implement `OwnableEntity<UUID>`
-  (adds `ownerId` for per-user isolation). Identity is assigned by `BaseEntityListener` on insert.
+- **Entity** — extend `OwnableEntity<UUID>` (inherits `id`, `version`, `createdAt`, `updatedAt` from `BaseEntity` and
+  adds `ownerId` for per-user isolation). Identity is assigned by `BaseEntityListener` on insert.
 - **Repository** — extend `OwnableEntityRepository<E, UUID>` (gives `findByIdAndOwnerId`, `findAllByOwnerId`,
   `existsByIdAndOwnerId`, `countByOwnerId`). Add derived-query methods as needed.
 - **Service** — extend `OwnableEntityService<E, UUID, R, C, U>`. All CRUDL operations are auto-scoped to the current
@@ -141,10 +141,9 @@ implement the regenerated interfaces.
 ### Persistence & Entities
 
 - **Spring Data JDBC, not JPA.** Aggregates are mutable POJOs: `@Table` + `@Id` + `@Column`, with Lombok
-  `@Getter @Setter @NoArgsConstructor @AllArgsConstructor`. Domain column names are string literals in `@Column`. The
-  exception is the shared audit columns, which `AuditableEntity` exposes as constants (`CREATED_AT`, `UPDATED_AT`) so
-  programmatic queries can reference them refactor-safely (e.g. `Sort.by(..., AuditableEntity.CREATED_AT)`).
-- **Optimistic locking** via the `@Version` field inherited from `AuditableEntity`; **auditing**
+  `@Getter @Setter @NoArgsConstructor @AllArgsConstructor`. Column names are string literals in `@Column` annotations —
+  use Java property names (e.g. `"createdAt"`) in `Sort.by(...)` and let Spring Data JDBC map them to column names.
+- **Optimistic locking** via the `@Version` field inherited from `BaseEntity`; **auditing**
   (`createdAt`/`updatedAt`) is automatic — never set these by hand.
 - **Custom type conversion** lives in `CustomJdbcConverters` (e.g. `Currency`, Postgres enums, timestamp→
   `OffsetDateTime`).

@@ -1,6 +1,5 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.auditable.AuditableEntity;
 import com.budget.buddy.budget_buddy_api.category.CategoryRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +47,7 @@ class TransactionPagingRepositoryImpl implements TransactionPagingRepository {
     return PageRequest.of(
         pageable.getPageNumber(),
         pageable.getPageSize(),
-        Sort.by(direction, "date", AuditableEntity.CREATED_AT));
+        Sort.by(direction, "date", "createdAt"));
   }
 
   private Criteria buildCriteria(TransactionFilter filter) {

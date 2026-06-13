@@ -1,18 +1,16 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.auditable.AuditableEntity;
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.relational.core.mapping.Table;
-
 import java.time.LocalDate;
 import java.util.Currency;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 /**
  * Transaction entity representing a financial transaction. Uses Spring Data JDBC for data access.
@@ -22,11 +20,8 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionEntity extends AuditableEntity implements OwnableEntity<UUID> {
-
-  @Id
-  @Column("id")
-  private UUID id;
+@Builder
+public class TransactionEntity extends OwnableEntity<UUID> {
 
   @Column("category_id")
   private UUID categoryId;
@@ -45,8 +40,5 @@ public class TransactionEntity extends AuditableEntity implements OwnableEntity<
 
   @Column("description")
   private String description;
-
-  @Column("owner_id")
-  private UUID ownerId;
 
 }

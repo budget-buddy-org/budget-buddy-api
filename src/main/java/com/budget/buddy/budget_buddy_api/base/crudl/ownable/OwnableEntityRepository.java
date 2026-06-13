@@ -7,16 +7,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
-public interface OwnableEntityRepository<E extends OwnableEntity<I>, I>
-    extends BaseEntityRepository<E, I> {
+public interface OwnableEntityRepository<E extends OwnableEntity<ID>, ID>
+    extends BaseEntityRepository<E, ID> {
 
-  Page<E> findAllByOwnerId(I ownerId, Pageable pageable);
+  Page<E> findAllByOwnerId(ID ownerId, Pageable pageable);
 
-  Optional<E> findByIdAndOwnerId(I id, I ownerId);
+  Optional<E> findByIdAndOwnerId(ID id, ID ownerId);
 
-  boolean existsByIdAndOwnerId(I id, I ownerId);
+  boolean existsByIdAndOwnerId(ID id, ID ownerId);
 
-  long countByOwnerId(I ownerId);
+  long countByOwnerId(ID ownerId);
 
-  void deleteAllByOwnerId(I ownerId);
+  void deleteAllByOwnerId(ID ownerId);
 }

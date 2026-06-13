@@ -1,17 +1,15 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.relational.core.mapping.event.BeforeConvertCallback;
 import org.springframework.stereotype.Component;
 
-import java.util.function.Supplier;
-
 @Component
 @RequiredArgsConstructor
-public class BaseEntityListener<E extends BaseEntity<I>, I>
-    implements BeforeConvertCallback<E> {
+public class BaseEntityListener<E extends BaseEntity<ID>, ID> implements BeforeConvertCallback<E> {
 
-  private final Supplier<I> idGenerator;
+  private final Supplier<ID> idGenerator;
 
   @Override
   public E onBeforeConvert(E entity) {

@@ -1,8 +1,7 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.ownable;
 
-import org.springframework.security.core.AuthenticationException;
-
 import java.util.function.Supplier;
+import org.springframework.security.core.AuthenticationException;
 
 /**
  * Resolves the I of the currently authenticated owner.
@@ -11,10 +10,10 @@ import java.util.function.Supplier;
  * {@link org.springframework.security.core.context.SecurityContextHolder}
  * — see {@code OidcOwnerIdProvider}.
  *
- * @param <I> the owner identifier type
+ * @param <OWNER_ID> the owner identifier type
  */
 @FunctionalInterface
-public interface OwnerIdProvider<I> extends Supplier<I> {
+public interface OwnerIdProvider<OWNER_ID> extends Supplier<OWNER_ID> {
 
   /**
    * Returns the I of the currently authenticated owner.
@@ -23,6 +22,6 @@ public interface OwnerIdProvider<I> extends Supplier<I> {
    * @throws AuthenticationException if no authenticated principal is present
    */
   @Override
-  I get() throws AuthenticationException;
+  OWNER_ID get() throws AuthenticationException;
 
 }

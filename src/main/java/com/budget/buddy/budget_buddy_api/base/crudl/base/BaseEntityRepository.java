@@ -5,13 +5,13 @@ import org.springframework.data.repository.ListPagingAndSortingRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
- * BaseRepository is a generic interface that defines common CRUD operations for entities that extend BaseEntity.
+ * Base repository interface providing common CRUD operations for entities extending {@link BaseEntity}.
  *
- * @param <E> the type of the entity
- * @param <I> the type of the entity's identifier
+ * @param <E> the entity type
+ * @param <ID> the identifier type
  */
 @NoRepositoryBean
-public interface BaseEntityRepository<E extends BaseEntity<I>, I>
-    extends ListCrudRepository<E, I>, ListPagingAndSortingRepository<E, I> {
+public interface BaseEntityRepository<E extends BaseEntity<ID>, ID>
+    extends ListCrudRepository<E, ID>, ListPagingAndSortingRepository<E, ID> {
 
 }

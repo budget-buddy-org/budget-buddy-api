@@ -233,10 +233,7 @@ class OwnableEntityServiceTest {
 
   @Getter
   @Setter
-  static class DummyOwnableEntity implements OwnableEntity<String> {
-
-    private String id;
-    private String ownerId;
+  static class DummyOwnableEntity extends OwnableEntity<String> {
   }
 
   static class DummyOwnableService extends OwnableEntityService<DummyOwnableEntity, String, Object, Object, Object> {
