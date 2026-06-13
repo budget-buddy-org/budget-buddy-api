@@ -15,7 +15,8 @@ class UserPreferencesMapperTest {
   @Test
   @DisplayName("toPage should throw UnsupportedOperationException — preferences is a singleton resource")
   void toPage_ShouldThrow() {
-    assertThatThrownBy(() -> mapper.toPage(Page.empty()))
+    var emptyPage = Page.<UserPreferencesEntity>empty();
+    assertThatThrownBy(() -> mapper.toPage(emptyPage))
         .isInstanceOf(UnsupportedOperationException.class)
         .hasMessageContaining("singleton resource");
   }

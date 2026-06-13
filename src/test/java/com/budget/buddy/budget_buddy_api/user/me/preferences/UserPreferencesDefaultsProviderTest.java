@@ -54,9 +54,7 @@ class UserPreferencesDefaultsProviderTest {
 
     @Test
     void should_ReturnLanguageWithoutCurrency_When_LocaleHasNoCountry() {
-      // "zh" resolves to Locale.CHINESE which has no country code;
-      // Currency.getInstance(Locale.CHINESE) throws IllegalArgumentException —
-      // the catch block returns Optional.empty() so currency stays null
+      // "zh" resolves to Locale.CHINESE which has no country — currency lookup fails silently
       when(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE)).thenReturn("zh");
 
       var result = provider.get();
