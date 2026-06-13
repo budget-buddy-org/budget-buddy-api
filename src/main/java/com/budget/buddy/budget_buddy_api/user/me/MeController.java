@@ -1,5 +1,6 @@
 package com.budget.buddy.budget_buddy_api.user.me;
 
+import com.budget.buddy.budget_buddy_api.user.me.preferences.UserPreferencesService;
 import com.budget.buddy.budget_buddy_contracts.generated.api.UsersApi;
 import com.budget.buddy.budget_buddy_contracts.generated.model.ClientSettings;
 import com.budget.buddy.budget_buddy_contracts.generated.model.ClientSettingsWrite;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MeController implements UsersApi {
 
   private final UserDataDeletionService dataDeletionService;
+  private final UserPreferencesService preferencesService;
 
   @Override
   public ResponseEntity<Me> getCurrentUser() {
@@ -42,12 +44,12 @@ public class MeController implements UsersApi {
 
   @Override
   public ResponseEntity<UserPreferences> getCurrentUserPreferences() {
-    throw notImplemented("getCurrentUserPreferences");
+    return ResponseEntity.ok(preferencesService.get());
   }
 
   @Override
   public ResponseEntity<UserPreferences> updateCurrentUserPreferences(UserPreferencesWrite body) {
-    throw notImplemented("updateCurrentUserPreferences");
+    return ResponseEntity.ok(preferencesService.update(body));
   }
 
   @Override

@@ -1,8 +1,6 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.ownable;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityMapper;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Builder;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
@@ -19,7 +17,6 @@ public interface OwnableEntityMapper<E extends OwnableEntity<?>, C, R, U, L>
     extends BaseEntityMapper<E, C, R, U, L> {
 
   @Override
-  @BeanMapping(builder = @Builder(disableBuilder = true))
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "version", ignore = true)
   @Mapping(target = "createdAt", ignore = true)

@@ -67,8 +67,10 @@ class CategoryMapperTest {
     void should_MapCategoryEntityToCategory() {
       // Given
       var id = UUID.randomUUID();
-      var entity = CategoryEntity.builder().name("Groceries").monthlyBudget(50000L).build();
+      var entity = new CategoryEntity();
       entity.setId(id);
+      entity.setName("Groceries");
+      entity.setMonthlyBudget(50000L);
 
       // When
       var model = categoryMapper.toModel(entity);
@@ -91,10 +93,12 @@ class CategoryMapperTest {
       // Given
       var id1 = UUID.randomUUID();
       var id2 = UUID.randomUUID();
-      var entity1 = CategoryEntity.builder().name("Cat 1").build();
+      var entity1 = new CategoryEntity();
       entity1.setId(id1);
-      var entity2 = CategoryEntity.builder().name("Cat 2").build();
+      entity1.setName("Cat 1");
+      var entity2 = new CategoryEntity();
       entity2.setId(id2);
+      entity2.setName("Cat 2");
 
       // When
       var models = categoryMapper.toModelList(List.of(entity1, entity2));
@@ -128,7 +132,8 @@ class CategoryMapperTest {
       var originalUpdatedAt = OffsetDateTime.now(FIXED_CLOCK).minusHours(1);
       var originalVersion = 10;
 
-      var entity = CategoryEntity.builder().name("Old Name").build();
+      var entity = new CategoryEntity();
+      entity.setName("Old Name");
       entity.setId(originalId);
       entity.setOwnerId(originalOwnerId);
       entity.setCreatedAt(originalCreatedAt);
