@@ -32,12 +32,25 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
   class Get {
 
     @Test
-    void should_ReturnUnsetDefaults_When_NeverStored() throws Exception {
+    void should_ReturnHttpDerivedDefaults_When_NeverStored() throws Exception {
+      var result = mvc.get().uri(URI)
+          .header("Accept-Language", "en-US")
+          .with(jwtForUser(userId))
+          .exchange();
+
+      assertThat(result).hasStatus(HttpStatus.OK);
+      var body = parseBody(result, UserPreferences.class);
+      assertThat(body.getLanguage()).isEqualTo("en");
+      assertThat(body.getCurrency()).isEqualTo("USD");
+    }
+
+    @Test
+    void should_ReturnNullDefaults_When_NeverStoredAndNoHeaders() throws Exception {
       var result = mvc.get().uri(URI).with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var body = parseBody(result, UserPreferences.class);
-      assertThat(body.getLanguage()).as("unset preferences default to null").isNull();
+      assertThat(body.getLanguage()).as("no headers → no derived defaults").isNull();
       assertThat(body.getCurrency()).isNull();
       assertThat(body.getTimezone()).isNull();
     }

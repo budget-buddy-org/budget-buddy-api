@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.UserPreferences;
@@ -28,6 +27,8 @@ class UserPreferencesServiceTest {
   private UserPreferencesRepository repository;
   @Mock
   private UserPreferencesMapper mapper;
+  @Mock
+  private UserPreferencesDefaultsProvider defaultsProvider;
 
   private final UUID userId = UUID.randomUUID();
 
@@ -35,7 +36,7 @@ class UserPreferencesServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new UserPreferencesService(repository, mapper, () -> userId);
+    service = new UserPreferencesService(repository, mapper, () -> userId, defaultsProvider);
   }
 
   @Nested
@@ -47,7 +48,7 @@ class UserPreferencesServiceTest {
       // Given
       var entity = new UserPreferencesEntity();
       var model = new UserPreferences();
-      when(repository.findById(userId)).thenReturn(Optional.of(entity));
+      when(repository.findByOwnerId(userId)).thenReturn(Optional.of(entity));
       when(mapper.toModel(entity)).thenReturn(model);
 
       // When & Then
@@ -55,20 +56,14 @@ class UserPreferencesServiceTest {
     }
 
     @Test
-    void should_ReturnUnsetDefaults_When_NoRowExists() {
+    void should_ReturnHttpDerivedDefaults_When_NoRowExists() {
       // Given
-      when(repository.findById(userId)).thenReturn(Optional.empty());
+      var defaults = new UserPreferences().language("en").currency("USD").timezone("America/New_York");
+      when(repository.findByOwnerId(userId)).thenReturn(Optional.empty());
+      when(defaultsProvider.get()).thenReturn(defaults);
 
-      // When
-      var result = service.get();
-
-      // Then
-      assertThat(result)
-          .as("absent preferences map to an empty object, not an error")
-          .returns(null, UserPreferences::getLanguage)
-          .returns(null, UserPreferences::getCurrency)
-          .returns(null, UserPreferences::getTimezone);
-      verifyNoInteractions(mapper);
+      // When & Then
+      assertThat(service.get()).isSameAs(defaults);
     }
   }
 
@@ -81,7 +76,9 @@ class UserPreferencesServiceTest {
       // Given
       var write = new UserPreferencesWrite().language("de").currency("USD").timezone("Europe/Berlin");
       var model = new UserPreferences();
-      when(repository.findById(userId)).thenReturn(Optional.empty());
+      var fresh = new UserPreferencesEntity();
+      when(repository.findByOwnerId(userId)).thenReturn(Optional.empty());
+      when(mapper.toEntity(write)).thenReturn(fresh);
       when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
       when(mapper.toModel(any())).thenReturn(model);
 
@@ -91,7 +88,7 @@ class UserPreferencesServiceTest {
       // Then
       var entityCaptor = ArgumentCaptor.forClass(UserPreferencesEntity.class);
       verify(mapper).updateEntity(eq(write), entityCaptor.capture());
-      assertThat(entityCaptor.getValue().getUserId())
+      assertThat(entityCaptor.getValue().getOwnerId())
           .as("a freshly created preferences row is keyed to the current user")
           .isEqualTo(userId);
       verify(repository).save(entityCaptor.getValue());
@@ -103,8 +100,8 @@ class UserPreferencesServiceTest {
       // Given
       var write = new UserPreferencesWrite().language("de").currency("USD").timezone("Europe/Berlin");
       var existing = new UserPreferencesEntity();
-      existing.setUserId(userId);
-      when(repository.findById(userId)).thenReturn(Optional.of(existing));
+      existing.setOwnerId(userId);
+      when(repository.findByOwnerId(userId)).thenReturn(Optional.of(existing));
       when(repository.save(existing)).thenReturn(existing);
       when(mapper.toModel(existing)).thenReturn(new UserPreferences());
 

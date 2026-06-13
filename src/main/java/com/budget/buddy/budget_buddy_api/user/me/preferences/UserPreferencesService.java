@@ -1,47 +1,55 @@
 package com.budget.buddy.budget_buddy_api.user.me.preferences;
 
+import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntityService;
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnerIdProvider;
 import com.budget.buddy.budget_buddy_contracts.generated.model.UserPreferences;
 import com.budget.buddy.budget_buddy_contracts.generated.model.UserPreferencesWrite;
+import java.util.Collections;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Reads and replaces the authenticated user's global preferences, scoped to the current user via
- * {@link OwnerIdProvider}.
- */
 @Service
-@Transactional(readOnly = true)
-@RequiredArgsConstructor
-public class UserPreferencesService {
+public class UserPreferencesService
+    extends OwnableEntityService<UserPreferencesEntity, UUID, UserPreferencesWrite, UserPreferences, UserPreferencesWrite, UserPreferences> {
 
-  private final UserPreferencesRepository repository;
-  private final UserPreferencesMapper mapper;
-  private final OwnerIdProvider<UUID> ownerIdProvider;
+  private final UserPreferencesDefaultsProvider defaultsProvider;
 
-  /**
-   * Returns the current user's preferences, or unset server defaults when none have been stored.
-   */
-  public UserPreferences get() {
-    return repository.findById(ownerIdProvider.get())
-        .map(mapper::toModel)
-        .orElseGet(UserPreferences::new);
+  public UserPreferencesService(
+      UserPreferencesRepository repository,
+      UserPreferencesMapper mapper,
+      OwnerIdProvider<UUID> ownerIdProvider,
+      UserPreferencesDefaultsProvider defaultsProvider
+  ) {
+    super(repository, mapper, Collections.emptySet(), ownerIdProvider);
+    this.defaultsProvider = defaultsProvider;
   }
 
-  /**
-   * Fully replaces the current user's preferences, creating the row on first call (PUT semantics).
-   */
+  @Override
+  protected UserPreferencesRepository getRepository() {
+    return (UserPreferencesRepository) super.getRepository();
+  }
+
+  public UserPreferences get() {
+    return getRepository()
+        .findByOwnerId(getOwnerIdProvider().get())
+        .map(getMapper()::toModel)
+        .orElseGet(defaultsProvider::get);
+  }
+
   @Transactional
   public UserPreferences update(UserPreferencesWrite write) {
-    var userId = ownerIdProvider.get();
-    var entity = repository.findById(userId).orElseGet(() -> {
-      var fresh = new UserPreferencesEntity();
-      fresh.setUserId(userId);
-      return fresh;
-    });
-    mapper.updateEntity(write, entity);
-    return mapper.toModel(repository.save(entity));
+    var ownerId = getOwnerIdProvider().get();
+
+    var entity = getRepository()
+        .findByOwnerId(ownerId)
+        .orElseGet(() -> {
+          var fresh = getMapper().toEntity(write);
+          fresh.setOwnerId(ownerId);
+          return fresh;
+        });
+
+    getMapper().updateEntity(write, entity);
+    return getMapper().toModel(getRepository().save(entity));
   }
 }
