@@ -1,9 +1,9 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
-import com.budget.buddy.budget_buddy_api.base.crudl.auditable.AuditableEntity;
 import com.budget.buddy.budget_buddy_api.category.CategoryRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.core.TypedPropertyPath;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,9 +38,12 @@ class TransactionPagingRepositoryImpl implements TransactionPagingRepository {
   }
 
   private static Pageable withSecondarySort(Pageable pageable) {
+    var datePath = TypedPropertyPath.of(TransactionEntity::getDate).toDotPath();
+    var createdAtPath = TypedPropertyPath.of(TransactionEntity::getCreatedAt).toDotPath();
+
     var direction = pageable.getSort()
         .stream()
-        .filter(o -> "date".equals(o.getProperty()))
+        .filter(o -> datePath.equals(o.getProperty()))
         .findFirst()
         .map(Order::getDirection)
         .orElse(Direction.DESC);
@@ -48,29 +51,29 @@ class TransactionPagingRepositoryImpl implements TransactionPagingRepository {
     return PageRequest.of(
         pageable.getPageNumber(),
         pageable.getPageSize(),
-        Sort.by(direction, "date", AuditableEntity.CREATED_AT));
+        Sort.by(direction, datePath, createdAtPath));
   }
 
   private Criteria buildCriteria(TransactionFilter filter) {
-    var criteria = Criteria.where("owner_id").is(filter.ownerId());
+    var criteria = Criteria.where(TransactionEntity::getOwnerId).is(filter.ownerId());
 
     if (filter.start() != null) {
-      criteria = criteria.and("date").greaterThanOrEquals(filter.start());
+      criteria = criteria.and(TransactionEntity::getDate).greaterThanOrEquals(filter.start());
     }
     if (filter.end() != null) {
-      criteria = criteria.and("date").lessThanOrEquals(filter.end());
+      criteria = criteria.and(TransactionEntity::getDate).lessThanOrEquals(filter.end());
     }
     if (filter.categoryId() != null) {
-      criteria = criteria.and("category_id").is(filter.categoryId());
+      criteria = criteria.and(TransactionEntity::getCategoryId).is(filter.categoryId());
     }
     if (filter.type() != null) {
-      criteria = criteria.and("type").is(filter.type());
+      criteria = criteria.and(TransactionEntity::getType).is(filter.type());
     }
     if (filter.amountMin() != null) {
-      criteria = criteria.and("amount").greaterThanOrEquals(filter.amountMin());
+      criteria = criteria.and(TransactionEntity::getAmount).greaterThanOrEquals(filter.amountMin());
     }
     if (filter.amountMax() != null) {
-      criteria = criteria.and("amount").lessThanOrEquals(filter.amountMax());
+      criteria = criteria.and(TransactionEntity::getAmount).lessThanOrEquals(filter.amountMax());
     }
     var query = filter.query();
 
@@ -87,7 +90,7 @@ class TransactionPagingRepositoryImpl implements TransactionPagingRepository {
    */
   private Criteria searchCriteria(UUID ownerId, String query) {
     var pattern = "%" + escapeLike(query) + "%";
-    var byDescription = Criteria.where("description").like(pattern).ignoreCase(true);
+    var byDescription = Criteria.where(TransactionEntity::getDescription).like(pattern).ignoreCase(true);
 
     var matchingCategoryIds = categoryRepository.findIdsByOwnerIdAndNameLike(ownerId, pattern);
 
@@ -95,7 +98,7 @@ class TransactionPagingRepositoryImpl implements TransactionPagingRepository {
       return byDescription;
     }
 
-    return byDescription.or(Criteria.where("category_id").in(matchingCategoryIds));
+    return byDescription.or(Criteria.where(TransactionEntity::getCategoryId).in(matchingCategoryIds));
   }
 
   /**

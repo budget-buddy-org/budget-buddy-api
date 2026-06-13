@@ -1,23 +1,65 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
+import java.time.OffsetDateTime;
+import java.util.Objects;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.jspecify.annotations.Nullable;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.Column;
 
 /**
- * Base interface for all entities in the application. Extends {@link Persistable} to provide standard persistence status.
+ * Abstract base class for all entities.
  *
- * @param <I> the identifier type
+ * <p>Provides identity and three audit fields, all managed automatically by the persistence
+ * layer — never set them by hand:
+ *
+ * <ul>
+ *   <li>{@code id} — assigned once on insert by {@code BaseEntityListener}.
+ *   <li>{@code version} — optimistic-locking counter incremented on every update.
+ *   <li>{@code createdAt} — timestamp (with offset) recorded once on insert.
+ *   <li>{@code updatedAt} — timestamp (with offset) refreshed on every update.
+ * </ul>
+ *
+ * <p>Spring Data JDBC populates these fields after construction via setters, so a
+ * no-arg constructor legitimately leaves them unset.
+ *
+ * <p>Type parameter {@code ID} is the identifier type.
  */
-public interface BaseEntity<I> extends Persistable<I> {
+@Getter
+@Setter
+@NoArgsConstructor
+public abstract class BaseEntity<ID> implements Persistable<ID> {
 
-  /**
-   * Sets the unique identifier for the entity.
-   *
-   * @param id the unique identifier
-   */
-  void setId(I id);
+  @Id
+  @Column("id")
+  @Setter
+  private @Nullable ID id;
+
+  @Version
+  @Column("version")
+  private @Nullable Integer version;
+
+  @CreatedDate
+  @Column("created_at")
+  private @Nullable OffsetDateTime createdAt;
+
+  @LastModifiedDate
+  @Column("updated_at")
+  private @Nullable OffsetDateTime updatedAt;
 
   @Override
-  default boolean isNew() {
-    return getId() == null;
+  public @Nullable ID getId() {
+    return id;
+  }
+
+  @Override
+  public boolean isNew() {
+    return Objects.isNull(getId());
   }
 }

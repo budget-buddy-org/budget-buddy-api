@@ -1,5 +1,7 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
@@ -7,16 +9,14 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransact
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-
-import java.time.LocalDate;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
@@ -40,7 +40,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   private Transaction createTransaction(String ownerId, UUID categoryId, String description) throws Exception {
-    return createTransaction(ownerId, categoryId, description, 1000L, LocalDate.of(2026, 3, 1));
+    return createTransaction(ownerId, categoryId, description, 1000L, LocalDate.of(2026, Month.MARCH, 1));
   }
 
   private Transaction createTransaction(
@@ -100,7 +100,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .amount(500L)
               .type(TransactionType.INCOME)
               .currency("EUR")
-              .date(LocalDate.of(2026, 3, 1))))
+              .date(LocalDate.of(2026, Month.MARCH, 1))))
           .exchange();
 
       assertThat(result)
@@ -118,7 +118,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .amount(1000L)
               .type(TransactionType.EXPENSE)
               .currency("EUR")
-              .date(LocalDate.of(2026, 3, 1))))
+              .date(LocalDate.of(2026, Month.MARCH, 1))))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
@@ -134,7 +134,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .amount(1000L)
               .type(TransactionType.EXPENSE)
               .currency("EUR")
-              .date(LocalDate.of(2026, 3, 1))))
+              .date(LocalDate.of(2026, Month.MARCH, 1))))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
@@ -149,7 +149,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .amount(1000L)
               .type(TransactionType.EXPENSE)
               .currency("EUR")
-              .date(LocalDate.of(2026, 3, 1))))
+              .date(LocalDate.of(2026, Month.MARCH, 1))))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
@@ -216,7 +216,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .amount(5000L)
           .type(TransactionType.INCOME)
           .currency("USD")
-          .date(LocalDate.of(2026, 6, 1));
+          .date(LocalDate.of(2026, Month.JUNE, 1));
 
       var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
           .with(jwtForUser(userId))
@@ -248,7 +248,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .amount(1000L)
               .type(TransactionType.EXPENSE)
               .currency("EUR")
-              .date(LocalDate.of(2026, 3, 1))))
+              .date(LocalDate.of(2026, Month.MARCH, 1))))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
@@ -266,7 +266,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .amount(1000L)
               .type(TransactionType.EXPENSE)
               .currency("EUR")
-              .date(LocalDate.of(2026, 3, 1))))
+              .date(LocalDate.of(2026, Month.MARCH, 1))))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
@@ -283,7 +283,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .amount(1000L)
               .type(TransactionType.EXPENSE)
               .currency("EUR")
-              .date(LocalDate.of(2026, 3, 1))))
+              .date(LocalDate.of(2026, Month.MARCH, 1))))
           .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
@@ -381,7 +381,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .amount(100L)
               .type(TransactionType.EXPENSE)
               .currency("EUR")
-              .date(LocalDate.of(2026, 1, 1))))
+              .date(LocalDate.of(2026, Month.JANUARY, 1))))
           .exchange();
 
       mvc.post().uri("/v1/transactions")
@@ -392,7 +392,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .amount(200L)
               .type(TransactionType.EXPENSE)
               .currency("EUR")
-              .date(LocalDate.of(2026, 6, 1))))
+              .date(LocalDate.of(2026, Month.JUNE, 1))))
           .exchange();
 
       var result = mvc.get().uri("/v1/transactions?start=2026-01-01&end=2026-03-31")
@@ -462,11 +462,11 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_FilterByAmountRange_Inclusive() throws Exception {
-      var low = createTransaction(userId, userCategoryId, "low", 100L, LocalDate.of(2026, 3, 1));
-      var mid = createTransaction(userId, userCategoryId, "mid", 500L, LocalDate.of(2026, 3, 1));
-      var high = createTransaction(userId, userCategoryId, "high", 1000L, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, userCategoryId, "tooLow", 99L, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, userCategoryId, "tooHigh", 1001L, LocalDate.of(2026, 3, 1));
+      var low = createTransaction(userId, userCategoryId, "low", 100L, LocalDate.of(2026, Month.MARCH, 1));
+      var mid = createTransaction(userId, userCategoryId, "mid", 500L, LocalDate.of(2026, Month.MARCH, 1));
+      var high = createTransaction(userId, userCategoryId, "high", 1000L, LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(userId, userCategoryId, "tooLow", 99L, LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(userId, userCategoryId, "tooHigh", 1001L, LocalDate.of(2026, Month.MARCH, 1));
 
       var result = mvc.get().uri("/v1/transactions?amountMin=100&amountMax=1000")
           .with(jwtForUser(userId))
@@ -481,8 +481,8 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_FilterByAmount_Exact_When_MinEqualsMax() throws Exception {
-      var exact = createTransaction(userId, userCategoryId, "exact", 250L, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, userCategoryId, "off-by-one", 251L, LocalDate.of(2026, 3, 1));
+      var exact = createTransaction(userId, userCategoryId, "exact", 250L, LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(userId, userCategoryId, "off-by-one", 251L, LocalDate.of(2026, Month.MARCH, 1));
 
       var result = mvc.get().uri("/v1/transactions?amountMin=250&amountMax=250")
           .with(jwtForUser(userId))
@@ -498,10 +498,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_CombineQueryAndAmount_AndCategory() throws Exception {
       var travelCategoryId = createCategory(userId, "Travel");
-      var match = createTransaction(userId, travelCategoryId, "Hotel in Paris", 500L, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, travelCategoryId, "Hotel in Paris", 50L, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, userCategoryId, "Hotel in Paris", 500L, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, travelCategoryId, "Souvenir", 500L, LocalDate.of(2026, 3, 1));
+      var match = createTransaction(userId, travelCategoryId, "Hotel in Paris", 500L, LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(userId, travelCategoryId, "Hotel in Paris", 50L, LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(userId, userCategoryId, "Hotel in Paris", 500L, LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(userId, travelCategoryId, "Souvenir", 500L, LocalDate.of(2026, Month.MARCH, 1));
 
       var result = mvc.get().uri(
               "/v1/transactions?query={q}&amountMin=100&amountMax=1000&categoryId={c}",

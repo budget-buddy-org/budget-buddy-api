@@ -1,11 +1,17 @@
 package com.budget.buddy.budget_buddy_api.category;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategorySpendingRow;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategorySpendingSummary;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Nested;
@@ -14,12 +20,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-
-import java.time.LocalDate;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
 
@@ -101,8 +101,8 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_SumOnlyExpenses_When_MixedTypes() throws Exception {
       var catId = createCategory(userId, "Food");
-      createTransaction(userId, catId, 1000L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 3, 15));
-      createTransaction(userId, catId, 5000L, TransactionType.INCOME, "EUR", LocalDate.of(2026, 3, 15));
+      createTransaction(userId, catId, 1000L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 15));
+      createTransaction(userId, catId, 5000L, TransactionType.INCOME, "EUR", LocalDate.of(2026, Month.MARCH, 15));
 
       var summary = getSummary(userId);
 
@@ -118,9 +118,9 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_SumMatchingCurrency_And_CountOthersAsExcluded() throws Exception {
       var catId = createCategory(userId, "Travel");
-      createTransaction(userId, catId, 2000L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 3, 10));
-      createTransaction(userId, catId, 3000L, TransactionType.EXPENSE, "USD", LocalDate.of(2026, 3, 10));
-      createTransaction(userId, catId, 500L, TransactionType.EXPENSE, "USD", LocalDate.of(2026, 3, 11));
+      createTransaction(userId, catId, 2000L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(userId, catId, 3000L, TransactionType.EXPENSE, "USD", LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(userId, catId, 500L, TransactionType.EXPENSE, "USD", LocalDate.of(2026, Month.MARCH, 11));
 
       var summary = getSummary(userId);
 
@@ -171,10 +171,10 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_IncludeBoundaryTransactions_When_OnFirstAndLastDayOfMonth() throws Exception {
       var catId = createCategory(userId, "Bills");
-      createTransaction(userId, catId, 100L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 3, 1));
-      createTransaction(userId, catId, 200L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 3, 31));
-      createTransaction(userId, catId, 999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 2, 28));
-      createTransaction(userId, catId, 999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 4, 1));
+      createTransaction(userId, catId, 100L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(userId, catId, 200L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 31));
+      createTransaction(userId, catId, 999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.FEBRUARY, 28));
+      createTransaction(userId, catId, 999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.APRIL, 1));
 
       var summary = getSummary(userId);
 
@@ -202,8 +202,8 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
     void should_NotCountOtherUsersTransactions() throws Exception {
       var catId = createCategory(userId, "Shared name");
       var otherCatId = createCategory(otherUserId, "Shared name");
-      createTransaction(userId, catId, 1000L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 3, 10));
-      createTransaction(otherUserId, otherCatId, 9999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, 3, 10));
+      createTransaction(userId, catId, 1000L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(otherUserId, otherCatId, 9999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 10));
 
       var summary = getSummary(userId);
 

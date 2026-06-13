@@ -1,26 +1,25 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.ownable;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntity;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.relational.core.mapping.Column;
 
 /**
- * Interface for entities that belong to a user.
+ * Abstract base class for entities that belong to a specific owner.
  *
- * @param <I> the user identifier type
+ * <p>Extends {@link BaseEntity} with an {@code ownerId} field. All CRUDL operations on
+ * subclasses are automatically scoped to the authenticated owner by
+ * {@link OwnableEntityService} — no extra wiring required in subclasses.
+ *
+ * <p>Type parameter {@code ID} is used for both the entity id and the owner id.
  */
-public interface OwnableEntity<I> extends BaseEntity<I> {
+@Getter
+@Setter
+@NoArgsConstructor
+public abstract class OwnableEntity<ID> extends BaseEntity<ID> {
 
-  /**
-   * Retrieves the I of the user who owns this entity.
-   *
-   * @return the owner I
-   */
-  I getOwnerId();
-
-  /**
-   * Sets the I of the user who owns this entity.
-   *
-   * @param id the owner I
-   */
-  void setOwnerId(I id);
-
+  @Column("owner_id")
+  private ID ownerId;
 }

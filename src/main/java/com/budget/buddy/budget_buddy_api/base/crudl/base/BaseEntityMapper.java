@@ -1,21 +1,19 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-
 import java.util.List;
+import org.springframework.data.domain.Page;
 
 /**
  * Base interface for entity mappers using MapStruct.
  *
  * @param <E> the entity type
- * @param <R> the read model type (DTO)
  * @param <C> the create request type (DTO)
+ * @param <R> the read model type (DTO)
  * @param <U> the update request type (DTO) used for PUT updates
  * @param <L> the list response type (DTO)
  */
-public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
+public interface BaseEntityMapper<E extends BaseEntity<?>, C, R, U, L> {
 
   /**
    * Maps a create request to an entity.
@@ -23,11 +21,6 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    * @param createRequest the create request
    * @return the mapped entity
    */
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "version", ignore = true)
-  @Mapping(target = "createdAt", ignore = true)
-  @Mapping(target = "updatedAt", ignore = true)
-  @Mapping(target = "ownerId", ignore = true)
   E toEntity(C createRequest);
 
   /**
@@ -46,27 +39,23 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    */
   List<R> toModelList(Iterable<E> entities);
 
-  /**
-   * Maps a list of items and pagination metadata to a page response.
-   *
-   * @param items the list of items
-   * @param meta the pagination metadata
-   * @return the page response
-   */
-  L toPageResponse(List<R> items, PaginationMeta meta);
+  L toPage(Page<E> page);
+
+  default PaginationMeta toPaginationMeta(Page<?> page) {
+    var meta = new PaginationMeta();
+    meta.setPage(page.getNumber());
+    meta.setSize(page.getSize());
+    meta.setTotal(page.getTotalElements());
+    return meta;
+  }
 
   /**
    * Fully updates an existing entity with values from an update request. All writable fields are overwritten,
-   * including nulls. Immutable fields (id, version, createdAt, updatedAt, ownerId) are preserved.
+   * including nulls. Immutable fields (id, version, createdAt, updatedAt) are preserved.
    *
    * @param updateRequest the update request
    * @param existingEntity the entity to update
    */
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "version", ignore = true)
-  @Mapping(target = "createdAt", ignore = true)
-  @Mapping(target = "updatedAt", ignore = true)
-  @Mapping(target = "ownerId", ignore = true)
-  void updateEntity(U updateRequest, @MappingTarget E existingEntity);
+  void updateEntity(U updateRequest, E existingEntity);
 
 }

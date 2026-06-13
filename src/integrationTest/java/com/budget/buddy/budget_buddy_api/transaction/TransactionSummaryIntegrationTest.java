@@ -1,11 +1,21 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
+import static com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.EXPENSE;
+import static com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.INCOME;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
 import com.budget.buddy.budget_buddy_api.BaseMvcIntegrationTest;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_contracts.generated.model.MonthlySummary;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Nested;
@@ -15,16 +25,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import tools.jackson.core.type.TypeReference;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import static com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.EXPENSE;
-import static com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.INCOME;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
 
@@ -114,9 +114,9 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_SumIncomeAndExpenseSeparately_AndComputeBalance() throws Exception {
       var catId = createCategory(userId, "Misc");
-      createTransaction(userId, catId, 5000L, INCOME, EUR, LocalDate.of(2026, 3, 5));
-      createTransaction(userId, catId, 2500L, INCOME, EUR, LocalDate.of(2026, 3, 12));
-      createTransaction(userId, catId, 1000L, EXPENSE, EUR, LocalDate.of(2026, 3, 15));
+      createTransaction(userId, catId, 5000L, INCOME, EUR, LocalDate.of(2026, Month.MARCH, 5));
+      createTransaction(userId, catId, 2500L, INCOME, EUR, LocalDate.of(2026, Month.MARCH, 12));
+      createTransaction(userId, catId, 1000L, EXPENSE, EUR, LocalDate.of(2026, Month.MARCH, 15));
 
       var summary = getSummary(userId);
 
@@ -136,10 +136,10 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_SumMatchingCurrency_And_CountOthersAsExcluded() throws Exception {
       var catId = createCategory(userId, "Travel");
-      createTransaction(userId, catId, 2000L, EXPENSE, EUR, LocalDate.of(2026, 3, 10));
-      createTransaction(userId, catId, 4000L, INCOME, EUR, LocalDate.of(2026, 3, 11));
-      createTransaction(userId, catId, 3000L, EXPENSE, USD, LocalDate.of(2026, 3, 10));
-      createTransaction(userId, catId, 500L, INCOME, GBP, LocalDate.of(2026, 3, 11));
+      createTransaction(userId, catId, 2000L, EXPENSE, EUR, LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(userId, catId, 4000L, INCOME, EUR, LocalDate.of(2026, Month.MARCH, 11));
+      createTransaction(userId, catId, 3000L, EXPENSE, USD, LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(userId, catId, 500L, INCOME, GBP, LocalDate.of(2026, Month.MARCH, 11));
 
       var summary = getSummary(userId);
 
@@ -159,10 +159,10 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_IncludeBoundaryTransactions_When_OnFirstAndLastDayOfMonth() throws Exception {
       var catId = createCategory(userId, "Bills");
-      createTransaction(userId, catId, 100L, EXPENSE, EUR, LocalDate.of(2026, 3, 1));
-      createTransaction(userId, catId, 200L, EXPENSE, EUR, LocalDate.of(2026, 3, 31));
-      createTransaction(userId, catId, 999L, EXPENSE, EUR, LocalDate.of(2026, 2, 28));
-      createTransaction(userId, catId, 999L, EXPENSE, EUR, LocalDate.of(2026, 4, 1));
+      createTransaction(userId, catId, 100L, EXPENSE, EUR, LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(userId, catId, 200L, EXPENSE, EUR, LocalDate.of(2026, Month.MARCH, 31));
+      createTransaction(userId, catId, 999L, EXPENSE, EUR, LocalDate.of(2026, Month.FEBRUARY, 28));
+      createTransaction(userId, catId, 999L, EXPENSE, EUR, LocalDate.of(2026, Month.APRIL, 1));
 
       var summary = getSummary(userId);
 
@@ -179,9 +179,9 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
     void should_NotCountOtherUsersTransactions() throws Exception {
       var myCat = createCategory(userId, "Mine");
       var otherCat = createCategory(otherUserId, "Other");
-      createTransaction(userId, myCat, 1000L, EXPENSE, EUR, LocalDate.of(2026, 3, 10));
-      createTransaction(otherUserId, otherCat, 9999L, EXPENSE, EUR, LocalDate.of(2026, 3, 10));
-      createTransaction(otherUserId, otherCat, 8888L, INCOME, EUR, LocalDate.of(2026, 3, 10));
+      createTransaction(userId, myCat, 1000L, EXPENSE, EUR, LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(otherUserId, otherCat, 9999L, EXPENSE, EUR, LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(otherUserId, otherCat, 8888L, INCOME, EUR, LocalDate.of(2026, Month.MARCH, 10));
 
       var summary = getSummary(userId);
 
@@ -227,9 +227,9 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_ReturnOneBucketPerMonth_OldestFirst() throws Exception {
       var catId = createCategory(userId, "Misc");
-      createTransaction(userId, catId, 1000L, EXPENSE, EUR, LocalDate.of(2026, 1, 5));
-      createTransaction(userId, catId, 2000L, INCOME, EUR, LocalDate.of(2026, 2, 12));
-      createTransaction(userId, catId, 500L, EXPENSE, EUR, LocalDate.of(2026, 3, 20));
+      createTransaction(userId, catId, 1000L, EXPENSE, EUR, LocalDate.of(2026, Month.JANUARY, 5));
+      createTransaction(userId, catId, 2000L, INCOME, EUR, LocalDate.of(2026, Month.FEBRUARY, 12));
+      createTransaction(userId, catId, 500L, EXPENSE, EUR, LocalDate.of(2026, Month.MARCH, 20));
 
       var trend = getTrend(userId, "2026-01");
 
@@ -245,8 +245,8 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
     void should_ZeroFillEmptyMonths() throws Exception {
       var catId = createCategory(userId, "Misc");
       // Only Jan and Mar have transactions; Feb is empty.
-      createTransaction(userId, catId, 1000L, EXPENSE, EUR, LocalDate.of(2026, 1, 5));
-      createTransaction(userId, catId, 500L, EXPENSE, EUR, LocalDate.of(2026, 3, 20));
+      createTransaction(userId, catId, 1000L, EXPENSE, EUR, LocalDate.of(2026, Month.JANUARY, 5));
+      createTransaction(userId, catId, 500L, EXPENSE, EUR, LocalDate.of(2026, Month.MARCH, 20));
 
       var trend = getTrend(userId, "2026-01");
 
@@ -265,7 +265,7 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_ReturnSingleBucket_When_FromEqualsTo() throws Exception {
       var catId = createCategory(userId, "Misc");
-      createTransaction(userId, catId, 7500L, INCOME, EUR, LocalDate.of(2026, 3, 5));
+      createTransaction(userId, catId, 7500L, INCOME, EUR, LocalDate.of(2026, Month.MARCH, 5));
 
       var trend = getTrend(userId, MARCH);
 
@@ -279,8 +279,8 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
     void should_NotIncludeOtherUsersTransactions() throws Exception {
       var myCat = createCategory(userId, "Mine");
       var otherCat = createCategory(otherUserId, "Other");
-      createTransaction(userId, myCat, 1000L, EXPENSE, EUR, LocalDate.of(2026, 2, 10));
-      createTransaction(otherUserId, otherCat, 9999L, EXPENSE, EUR, LocalDate.of(2026, 2, 10));
+      createTransaction(userId, myCat, 1000L, EXPENSE, EUR, LocalDate.of(2026, Month.FEBRUARY, 10));
+      createTransaction(otherUserId, otherCat, 9999L, EXPENSE, EUR, LocalDate.of(2026, Month.FEBRUARY, 10));
 
       var trend = getTrend(userId, "2026-01");
 

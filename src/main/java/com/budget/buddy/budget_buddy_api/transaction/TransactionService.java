@@ -3,11 +3,11 @@ package com.budget.buddy.budget_buddy_api.transaction;
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityValidator;
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntityService;
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnerIdProvider;
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import java.util.Set;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @Service
 public class TransactionService extends
-    OwnableEntityService<TransactionEntity, UUID, Transaction, TransactionWrite, TransactionWrite> {
+    OwnableEntityService<TransactionEntity, UUID, TransactionWrite, Transaction, TransactionWrite, PaginatedTransactions> {
 
   public TransactionService(
       TransactionRepository repository,
@@ -36,10 +36,11 @@ public class TransactionService extends
    * @param pageable the page request
    * @return list of transactions
    */
-  public Page<Transaction> list(TransactionFilter filter, Pageable pageable) {
-    return getRepository()
-        .findAllByFilter(filter.withOwnerId(getOwnerIdProvider().get()), pageable)
-        .map(getMapper()::toModel);
+  public PaginatedTransactions list(TransactionFilter filter, Pageable pageable) {
+    var enrichedFilter = filter.withOwnerId(getOwnerIdProvider().get());
+    var page = getRepository().findAllByFilter(enrichedFilter, pageable);
+
+    return getMapper().toPage(page);
   }
 
   @Override

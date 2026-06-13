@@ -233,17 +233,14 @@ class OwnableEntityServiceTest {
 
   @Getter
   @Setter
-  static class DummyOwnableEntity implements OwnableEntity<String> {
-
-    private String id;
-    private String ownerId;
+  static class DummyOwnableEntity extends OwnableEntity<String> {
   }
 
-  static class DummyOwnableService extends OwnableEntityService<DummyOwnableEntity, String, Object, Object, Object> {
+  static class DummyOwnableService extends OwnableEntityService<DummyOwnableEntity, String, Object, Object, Object, Object> {
 
     protected DummyOwnableService(
         OwnableEntityRepository<DummyOwnableEntity, String> repository,
-        BaseEntityMapper<DummyOwnableEntity, Object, Object, Object, ?> mapper,
+        BaseEntityMapper<DummyOwnableEntity, Object, Object, Object, Object> mapper,
         Iterable<BaseEntityValidator<DummyOwnableEntity>> entityValidators,
         OwnerIdProvider<String> ownerIdProvider
     ) {

@@ -3,7 +3,8 @@ package com.budget.buddy.budget_buddy_api.security;
 import com.budget.buddy.budget_buddy_api.base.config.CacheConfig;
 import com.budget.buddy.budget_buddy_api.security.oidc.OidcUserProvisioningFilter;
 import com.budget.buddy.budget_buddy_api.user.UserService;
-import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.JwkSetUriJwtDecoderBuilderCustomizer;
+import java.util.Objects;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.JwkSetUriJwtDecoderBuilderCustomizer;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,6 +53,7 @@ public class SecurityConfig {
   JwkSetUriJwtDecoderBuilderCustomizer jwkSetUriJwtDecoderBuilderCustomizer(
       CacheManager cacheManager
   ) {
-    return builder -> builder.cache(cacheManager.getCache(CacheConfig.JWKS));
+    var cache = Objects.requireNonNull(cacheManager.getCache(CacheConfig.JWKS));
+    return builder -> builder.cache(cache);
   }
 }

@@ -1,33 +1,24 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
-import com.budget.buddy.budget_buddy_contracts.generated.model.PaginationMeta;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import java.net.URI;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-
-import java.net.URI;
 
 /**
  * Base controller class providing common internal methods for CRUD operations. Designed to be extended by controllers that implement generated API interfaces.
  *
- * @param <I> the identifier type
- * @param <R> the read model type (DTO)
+ * @param <ID> the identifier type
  * @param <C> the create request type (DTO)
+ * @param <R> the read model type (DTO)
  * @param <U> the update request type (DTO) used for PUT updates
  * @param <L> the list response type (DTO)
  */
-public abstract class BaseEntityController<I, R, C, U, L> {
+public abstract class BaseEntityController<ID, C, R, U, L> {
 
-  private final BaseEntityService<I, R, C, U> service;
-  private final BaseEntityMapper<?, R, C, U, L> mapper;
+  private final BaseEntityService<ID, C, R, U, L> service;
 
-  protected BaseEntityController(
-      BaseEntityService<I, R, C, U> service,
-      BaseEntityMapper<?, R, C, U, L> mapper
-  ) {
+  protected BaseEntityController(BaseEntityService<ID, C, R, U, L> service) {
     this.service = service;
-    this.mapper = mapper;
   }
 
   /**
@@ -44,48 +35,37 @@ public abstract class BaseEntityController<I, R, C, U, L> {
   }
 
   /**
-   * Internal method to read an entity by I.
+   * Internal method to read an entity by ID.
    *
    * @param id the entity identifier
    * @return {@link ResponseEntity} with the entity
    */
-  public ResponseEntity<R> readInternal(I id) {
+  public ResponseEntity<R> readInternal(ID id) {
     var item = service.read(id);
     return ResponseEntity.ok(item);
   }
 
   /**
-   * Internal method to fully update an entity by I.
+   * Internal method to fully update an entity by ID.
    *
    * @param id the entity identifier
    * @param updateRequest the update request (all fields required)
    * @return {@link ResponseEntity} with the updated entity
    */
-  public ResponseEntity<R> updateInternal(I id, U updateRequest) {
+  public ResponseEntity<R> updateInternal(ID id, U updateRequest) {
     var updated = service.update(id, updateRequest);
     return ResponseEntity.ok(updated);
   }
 
   /**
-   * Internal method to delete an entity by I.
+   * Internal method to delete an entity by ID.
    *
    * @param id the entity identifier
    * @return {@link ResponseEntity} with no content
    */
-  public ResponseEntity<Void> deleteInternal(I id) {
+  public ResponseEntity<Void> deleteInternal(ID id) {
     service.delete(id);
     return ResponseEntity.noContent().build();
-  }
-
-  /**
-   * Internal method to list entities with page and size.
-   *
-   * @param page zero-based page number
-   * @param size the number of items per page
-   * @return {@link ResponseEntity} with the paginated response
-   */
-  public ResponseEntity<L> listInternal(Integer page, Integer size) {
-    return listInternal(PageRequest.of(page, size));
   }
 
   /**
@@ -95,24 +75,7 @@ public abstract class BaseEntityController<I, R, C, U, L> {
    * @return {@link ResponseEntity} with the paginated response
    */
   public ResponseEntity<L> listInternal(Pageable pageable) {
-    var items = service.list(pageable);
-    var response = mapper.toPageResponse(items.getContent(), toMeta(items));
-    return ResponseEntity.ok(response);
-  }
-
-  /**
-   * Builds the {@link PaginationMeta} envelope from a {@link Page}, mirroring its page number,
-   * size, and total element count.
-   *
-   * @param page the page to describe
-   * @return the populated pagination metadata
-   */
-  protected static PaginationMeta toMeta(Page<?> page) {
-    var meta = new PaginationMeta();
-    meta.setPage(page.getNumber());
-    meta.setSize(page.getSize());
-    meta.setTotal(page.getTotalElements());
-    return meta;
+    return ResponseEntity.ok(service.list(pageable));
   }
 
   /**

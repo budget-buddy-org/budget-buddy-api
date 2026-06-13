@@ -1,8 +1,19 @@
 package com.budget.buddy.budget_buddy_api.security.oidc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
 import com.budget.buddy.budget_buddy_api.user.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,19 +29,14 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import java.io.IOException;
-import java.time.Instant;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-
 @DisplayName("OidcUserProvisioningFilter Unit Tests")
 @ExtendWith(MockitoExtension.class)
 class OidcUserProvisioningFilterTest {
+
+  private static final Clock FIXED_CLOCK = Clock.fixed(
+      Instant.parse("2026-06-13T10:00:00Z"),
+      ZoneOffset.UTC
+  );
 
   @Mock
   private UserService userService;
@@ -134,8 +140,8 @@ class OidcUserProvisioningFilterTest {
         .header("alg", "RS256")
         .subject(subject)
         .issuer(issuer)
-        .issuedAt(Instant.now())
-        .expiresAt(Instant.now().plusSeconds(300))
+        .issuedAt(Instant.now(FIXED_CLOCK))
+        .expiresAt(Instant.now(FIXED_CLOCK).plusSeconds(300))
         .build();
   }
 
@@ -148,8 +154,8 @@ class OidcUserProvisioningFilterTest {
         .header("alg", "RS256")
         .subject("user-123")
         .claim("custom", "value")
-        .issuedAt(Instant.now())
-        .expiresAt(Instant.now().plusSeconds(300))
+        .issuedAt(Instant.now(FIXED_CLOCK))
+        .expiresAt(Instant.now(FIXED_CLOCK).plusSeconds(300))
         .build();
     SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
   }

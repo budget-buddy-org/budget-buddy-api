@@ -1,6 +1,16 @@
 package com.budget.buddy.budget_buddy_api.base.crudl.base;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -9,17 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractBaseEntityServiceTest {
@@ -30,7 +29,7 @@ class AbstractBaseEntityServiceTest {
   @Mock
   private BaseEntityRepository<DummyEntity, String> repository;
 
-  private AbstractBaseEntityService<DummyEntity, String, Object, Object, Object> service;
+  private AbstractBaseEntityService<DummyEntity, String, Object, Object, Object, Object> service;
 
   @BeforeEach
   void setUp() {
@@ -115,7 +114,7 @@ class AbstractBaseEntityServiceTest {
       assertThat(actual).isEqualTo(expected);
       assertThat(existingEntity)
           .as("Update must preserve the entity id")
-          .returns(id, BaseEntity::getId);
+          .returns(id, DummyEntity::getId);
       verify(repository).findById(id);
       verify(mapper).updateEntity(updateRequest, existingEntity);
       verify(repository).save(existingEntity);
@@ -199,22 +198,20 @@ class AbstractBaseEntityServiceTest {
       // Given
       var entity1 = new DummyEntity();
       var entity2 = new DummyEntity();
-      var model1 = new Object();
-      var model2 = new Object();
-      var entities = new PageImpl<>(List.of(entity1, entity2));
+      var expected = List.of("model1", "model2");
       var pageable = PageRequest.of(1, 2);
+      var entities = new PageImpl<>(List.of(entity1, entity2), pageable, 2);
+
       when(repository.findAll(pageable)).thenReturn(entities);
-      when(mapper.toModel(entity1)).thenReturn(model1);
-      when(mapper.toModel(entity2)).thenReturn(model2);
+      when(mapper.toPage(entities)).thenReturn(expected);
 
       // When
       var actual = service.list(pageable);
 
       // Then
-      assertThat(actual).containsExactlyInAnyOrder(model1, model2);
       verify(repository).findAll(pageable);
-      verify(mapper).toModel(entity1);
-      verify(mapper).toModel(entity2);
+      verify(mapper).toPage(entities);
+      assertThat(actual).isEqualTo(expected);
     }
   }
 
