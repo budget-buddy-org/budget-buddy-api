@@ -1,19 +1,17 @@
 package com.budget.buddy.budget_buddy_api.category;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.base.BaseEntityController;
-import com.budget.buddy.budget_buddy_api.category.CategorySummaryService;
 import com.budget.buddy.budget_buddy_contracts.generated.api.CategoriesApi;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategorySpendingSummary;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
 import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedCategories;
+import java.net.URI;
+import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.net.URI;
-import java.util.UUID;
 
 @RestController
 public class CategoryController

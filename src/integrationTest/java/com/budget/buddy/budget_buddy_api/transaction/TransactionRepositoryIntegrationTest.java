@@ -1,8 +1,14 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.budget.buddy.budget_buddy_api.BaseOwnableIntegrationTest;
 import com.budget.buddy.budget_buddy_api.category.CategoryEntity;
 import com.budget.buddy.budget_buddy_api.category.CategoryRepository;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.Currency;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,17 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 
-import java.time.LocalDate;
-import java.util.Currency;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @DisplayName("TransactionRepository Integration Tests")
 class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
 
   private static final Currency USD = Currency.getInstance("USD");
-  private static final LocalDate TODAY = LocalDate.of(2026, 4, 26);
+  private static final LocalDate TODAY = LocalDate.of(2026, Month.APRIL, 26);
 
   @Autowired
   private TransactionRepository transactionRepository;
@@ -45,6 +45,11 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
   @DisplayName("should save and find transaction by id and owner id")
   void shouldSaveAndFindByIdAndOwnerId() {
     var saved = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 50L);
+
+    assertThat(saved).
+        isNotNull()
+        .extracting(TransactionEntity::getId)
+        .isNotNull();
 
     var found = transactionRepository.findByIdAndOwnerId(saved.getId(), ownerId);
 

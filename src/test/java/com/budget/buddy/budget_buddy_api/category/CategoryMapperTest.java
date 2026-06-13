@@ -4,13 +4,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class CategoryMapperTest {
+
+  private static final Clock FIXED_CLOCK = Clock.fixed(
+      Instant.parse("2026-06-13T10:00:00Z"),
+      ZoneOffset.UTC
+  );
 
   private final CategoryMapper categoryMapper = new CategoryMapperImpl();
 
@@ -116,8 +124,8 @@ class CategoryMapperTest {
       // Given
       var originalId = UUID.randomUUID();
       var originalOwnerId = UUID.randomUUID();
-      var originalCreatedAt = OffsetDateTime.now().minusDays(1);
-      var originalUpdatedAt = OffsetDateTime.now().minusHours(1);
+      var originalCreatedAt = OffsetDateTime.now(FIXED_CLOCK).minusDays(1);
+      var originalUpdatedAt = OffsetDateTime.now(FIXED_CLOCK).minusHours(1);
       var originalVersion = 10;
 
       var entity = CategoryEntity.builder().name("Old Name").build();

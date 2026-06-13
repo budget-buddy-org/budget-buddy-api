@@ -10,6 +10,7 @@ import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransact
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -45,7 +46,7 @@ class MeDataDeletionIntegrationTest extends BaseMvcIntegrationTest {
             .amount(1000L)
             .type(TransactionType.EXPENSE)
             .currency("EUR")
-            .date(LocalDate.of(2026, 3, 1))))
+            .date(LocalDate.of(2026, Month.MARCH, 1))))
         .exchange();
   }
 
