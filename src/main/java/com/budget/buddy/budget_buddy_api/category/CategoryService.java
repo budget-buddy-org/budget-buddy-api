@@ -11,7 +11,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CategoryService extends OwnableEntityService<CategoryEntity, UUID, Category, CategoryWrite, CategoryWrite, PaginatedCategories> {
+public class CategoryService extends OwnableEntityService<CategoryEntity, UUID, CategoryWrite, Category, CategoryWrite, PaginatedCategories> {
 
   public CategoryService(
       CategoryRepository repository,

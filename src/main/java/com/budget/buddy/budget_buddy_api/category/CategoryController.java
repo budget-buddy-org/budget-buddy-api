@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @RestController
 public class CategoryController
-    extends BaseEntityController<UUID, Category, CategoryWrite, CategoryWrite, PaginatedCategories>
+    extends BaseEntityController<UUID, CategoryWrite, Category, CategoryWrite, PaginatedCategories>
     implements CategoriesApi {
 
   private final CategorySummaryService summaryService;

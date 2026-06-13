@@ -8,12 +8,12 @@ import org.springframework.data.domain.Pageable;
  * Generic CRUDL (Create, Read, Update, Delete, List) service interface for managing entities.
  *
  * @param <ID> The type of the unique identifier for the entities managed by the service.
- * @param <R> The type of the resource/model returned by the service methods.
  * @param <C> The type of the create request object used for creating new entities.
+ * @param <R> The type of the resource/model returned by the service methods.
  * @param <U> The type of the update request object used for fully updating existing entities via PUT.
  * @param <L> The type of the paginated list response.
  */
-public interface BaseEntityService<ID, R, C, U, L> {
+public interface BaseEntityService<ID, C, R, U, L> {
 
   /**
    * Create a new entity based on the provided createRequest request object.
@@ -27,8 +27,8 @@ public interface BaseEntityService<ID, R, C, U, L> {
    * Read an existing entity by its unique identifier.
    *
    * @param id The unique identifier of the entity to read.
-   * @return The resource/model representing the entity with the specified I.
-   * @throws EntityNotFoundException If no entity with the specified I exists.
+   * @return The resource/model representing the entity with the specified identifier.
+   * @throws EntityNotFoundException If no entity with the specified identifier exists.
    */
   R read(ID id) throws EntityNotFoundException;
 
@@ -39,7 +39,7 @@ public interface BaseEntityService<ID, R, C, U, L> {
    * @param id The unique identifier of the entity to update.
    * @param updateRequest The update request containing all fields for the update.
    * @return The updated resource/model.
-   * @throws EntityNotFoundException If no entity with the specified I exists.
+   * @throws EntityNotFoundException If no entity with the specified identifier exists.
    */
   R update(ID id, U updateRequest) throws EntityNotFoundException;
 
@@ -47,7 +47,7 @@ public interface BaseEntityService<ID, R, C, U, L> {
    * Delete an existing entity by its unique identifier.
    *
    * @param id The unique identifier of the entity to delete.
-   * @throws EntityNotFoundException If no entity with the specified I exists.
+   * @throws EntityNotFoundException If no entity with the specified identifier exists.
    */
   void delete(ID id) throws EntityNotFoundException;
 

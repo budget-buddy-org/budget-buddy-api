@@ -15,8 +15,8 @@ import org.mapstruct.MappingTarget;
  * <p>Type parameters match {@link BaseEntityMapper}; {@code E} is further constrained to
  * {@link OwnableEntity}.
  */
-public interface OwnableEntityMapper<E extends OwnableEntity<?>, R, C, U, L>
-    extends BaseEntityMapper<E, R, C, U, L> {
+public interface OwnableEntityMapper<E extends OwnableEntity<?>, C, R, U, L>
+    extends BaseEntityMapper<E, C, R, U, L> {
 
   @Override
   @BeanMapping(builder = @Builder(disableBuilder = true))

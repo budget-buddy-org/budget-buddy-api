@@ -8,12 +8,12 @@ import org.springframework.data.domain.Page;
  * Base interface for entity mappers using MapStruct.
  *
  * @param <E> the entity type
- * @param <R> the read model type (DTO)
  * @param <C> the create request type (DTO)
+ * @param <R> the read model type (DTO)
  * @param <U> the update request type (DTO) used for PUT updates
  * @param <L> the list response type (DTO)
  */
-public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
+public interface BaseEntityMapper<E extends BaseEntity<?>, C, R, U, L> {
 
   /**
    * Maps a create request to an entity.
@@ -39,20 +39,9 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, R, C, U, L> {
    */
   List<R> toModelList(Iterable<E> entities);
 
-  /**
-   * Maps a list of items and pagination metadata to a page response.
-   *
-   * @param items the list of items
-   * @param meta the pagination metadata
-   * @return the page response
-   */
-  L toPageResponse(List<R> items, PaginationMeta meta);
+  L toPage(Page<E> page);
 
-  default L toPage(Page<R> page) {
-    return toPageResponse(page.getContent(), toMeta(page));
-  }
-
-  default PaginationMeta toMeta(Page<R> page) {
+  default PaginationMeta toPaginationMeta(Page<?> page) {
     var meta = new PaginationMeta();
     meta.setPage(page.getNumber());
     meta.setSize(page.getSize());

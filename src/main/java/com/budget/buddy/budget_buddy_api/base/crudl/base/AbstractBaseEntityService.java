@@ -15,14 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @param <E> entity type extending BaseEntity
  * @param <ID> identifier type
- * @param <R> read model type (DTO)
  * @param <C> create request type (DTO)
+ * @param <R> read model type (DTO)
  * @param <U> update request type (DTO) used for PUT updates
+ * @param <L> paginated list response type (DTO)
  */
 @Slf4j
 @Transactional(readOnly = true)
-public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R, C, U, L>
-    implements BaseEntityService<ID, R, C, U, L> {
+public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, C, R, U, L>
+    implements BaseEntityService<ID, C, R, U, L> {
 
   protected static final String ENTITY_NOT_FOUND_MESSAGE = "Entity not found with id: %s";
 
@@ -30,20 +31,20 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
   private final BaseEntityRepository<E, ID> repository;
 
   @Getter(AccessLevel.PROTECTED)
-  private final BaseEntityMapper<E, R, C, U, L> mapper;
+  private final BaseEntityMapper<E, C, R, U, L> mapper;
 
   private final Iterable<BaseEntityValidator<E>> validators;
 
   protected AbstractBaseEntityService(
       BaseEntityRepository<E, ID> repository,
-      BaseEntityMapper<E, R, C, U, L> mapper
+      BaseEntityMapper<E, C, R, U, L> mapper
   ) {
     this(repository, mapper, Collections.emptyList());
   }
 
   protected AbstractBaseEntityService(
       BaseEntityRepository<E, ID> repository,
-      BaseEntityMapper<E, R, C, U, L> mapper,
+      BaseEntityMapper<E, C, R, U, L> mapper,
       Iterable<BaseEntityValidator<E>> validators
   ) {
     this.repository = repository;
@@ -95,7 +96,7 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, R,
   @Override
   public L list(Pageable pageable) {
     log.debug("List all entities with pageRequest: {}", pageable);
-    return mapper.toPage(listInternal(pageable).map(mapper::toModel));
+    return mapper.toPage(listInternal(pageable));
   }
 
   @Override

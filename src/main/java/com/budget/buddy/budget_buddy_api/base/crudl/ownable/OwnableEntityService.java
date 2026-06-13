@@ -20,19 +20,20 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @param <E> the entity type
  * @param <ID> the identifier type
- * @param <R> the read model type (DTO)
  * @param <C> the create request type (DTO)
+ * @param <R> the read model type (DTO)
  * @param <U> the update request type (DTO) used for PUT updates
+ * @param <L> the paginated list response type (DTO)
  */
-public class OwnableEntityService<E extends OwnableEntity<ID>, ID, R, C, U, L>
-    extends AbstractBaseEntityService<E, ID, R, C, U, L> {
+public class OwnableEntityService<E extends OwnableEntity<ID>, ID, C, R, U, L>
+    extends AbstractBaseEntityService<E, ID, C, R, U, L> {
 
   @Getter(AccessLevel.PROTECTED)
   private final OwnerIdProvider<ID> ownerIdProvider;
 
   protected OwnableEntityService(
       OwnableEntityRepository<E, ID> repository,
-      BaseEntityMapper<E, R, C, U, L> mapper,
+      BaseEntityMapper<E, C, R, U, L> mapper,
       Iterable<BaseEntityValidator<E>> entityValidators,
       OwnerIdProvider<ID> ownerIdProvider
   ) {

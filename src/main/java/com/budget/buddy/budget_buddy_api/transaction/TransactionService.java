@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @Service
 public class TransactionService extends
-    OwnableEntityService<TransactionEntity, UUID, Transaction, TransactionWrite, TransactionWrite, PaginatedTransactions> {
+    OwnableEntityService<TransactionEntity, UUID, TransactionWrite, Transaction, TransactionWrite, PaginatedTransactions> {
 
   public TransactionService(
       TransactionRepository repository,
@@ -37,9 +37,9 @@ public class TransactionService extends
    * @return list of transactions
    */
   public PaginatedTransactions list(TransactionFilter filter, Pageable pageable) {
-    var page = getRepository()
-        .findAllByFilter(filter.withOwnerId(getOwnerIdProvider().get()), pageable)
-        .map(getMapper()::toModel);
+    var enrichedFilter = filter.withOwnerId(getOwnerIdProvider().get());
+    var page = getRepository().findAllByFilter(enrichedFilter, pageable);
+
     return getMapper().toPage(page);
   }
 

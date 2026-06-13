@@ -8,16 +8,16 @@ import org.springframework.http.ResponseEntity;
  * Base controller class providing common internal methods for CRUD operations. Designed to be extended by controllers that implement generated API interfaces.
  *
  * @param <ID> the identifier type
- * @param <R> the read model type (DTO)
  * @param <C> the create request type (DTO)
+ * @param <R> the read model type (DTO)
  * @param <U> the update request type (DTO) used for PUT updates
  * @param <L> the list response type (DTO)
  */
-public abstract class BaseEntityController<ID, R, C, U, L> {
+public abstract class BaseEntityController<ID, C, R, U, L> {
 
-  private final BaseEntityService<ID, R, C, U, L> service;
+  private final BaseEntityService<ID, C, R, U, L> service;
 
-  protected BaseEntityController(BaseEntityService<ID, R, C, U, L> service) {
+  protected BaseEntityController(BaseEntityService<ID, C, R, U, L> service) {
     this.service = service;
   }
 

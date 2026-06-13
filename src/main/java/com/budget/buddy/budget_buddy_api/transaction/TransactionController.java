@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class TransactionController
-    extends BaseEntityController<UUID, Transaction, TransactionWrite, TransactionWrite, PaginatedTransactions>
+    extends BaseEntityController<UUID, TransactionWrite, Transaction, TransactionWrite, PaginatedTransactions>
     implements TransactionsApi {
 
   private static final Sort DEFAULT_SORT = Sort.by(Direction.DESC, "date");

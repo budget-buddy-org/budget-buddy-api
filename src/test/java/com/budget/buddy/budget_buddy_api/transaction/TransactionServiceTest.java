@@ -1,7 +1,15 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.budget.buddy.budget_buddy_contracts.generated.model.PaginatedTransactions;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,19 +19,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -77,21 +75,17 @@ class TransactionServiceTest {
       var filter = TransactionFilter.builder().build();
       var pageable = PageRequest.of(0, 10, direction, "date");
       var entity = new TransactionEntity();
-      var model = new Transaction();
-
+      var models = new PaginatedTransactions().items(List.of(new Transaction()));
       var entities = new PageImpl<>(List.of(entity), pageable, 1);
-      when(repository.findAllByFilter(any(TransactionFilter.class), any())).thenReturn(entities);
-      when(mapper.toModel(entity)).thenReturn(model);
+      var enrichedFilter = filter.withOwnerId(currentUserId);
+      when(repository.findAllByFilter(enrichedFilter, pageable)).thenReturn(entities);
+      when(mapper.toPage(entities)).thenReturn(models);
 
       // When
       transactionService.list(filter, pageable);
 
       // Then
-      var pageCaptor = ArgumentCaptor.forClass(Page.class);
-      verify(mapper).toPage(pageCaptor.capture());
-      assertThat(pageCaptor.getValue().getContent())
-          .as("Filtered transactions should match the mocked models")
-          .containsExactly(model);
+      verify(mapper).toPage(entities);
 
       var filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
       var pageableCaptor = ArgumentCaptor.forClass(PageRequest.class);

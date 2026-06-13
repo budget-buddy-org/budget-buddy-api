@@ -15,8 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.springframework.data.domain.Page;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
@@ -200,24 +198,20 @@ class AbstractBaseEntityServiceTest {
       // Given
       var entity1 = new DummyEntity();
       var entity2 = new DummyEntity();
-      var model1 = new Object();
-      var model2 = new Object();
+      var expected = List.of("model1", "model2");
       var pageable = PageRequest.of(1, 2);
       var entities = new PageImpl<>(List.of(entity1, entity2), pageable, 2);
+
       when(repository.findAll(pageable)).thenReturn(entities);
-      when(mapper.toModel(entity1)).thenReturn(model1);
-      when(mapper.toModel(entity2)).thenReturn(model2);
+      when(mapper.toPage(entities)).thenReturn(expected);
 
       // When
-      service.list(pageable);
+      var actual = service.list(pageable);
 
       // Then
       verify(repository).findAll(pageable);
-      verify(mapper).toModel(entity1);
-      verify(mapper).toModel(entity2);
-      var pageCaptor = ArgumentCaptor.forClass(Page.class);
-      verify(mapper).toPage(pageCaptor.capture());
-      assertThat(pageCaptor.getValue().getContent()).containsExactly(model1, model2);
+      verify(mapper).toPage(entities);
+      assertThat(actual).isEqualTo(expected);
     }
   }
 
