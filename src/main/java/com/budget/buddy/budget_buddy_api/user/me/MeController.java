@@ -1,7 +1,6 @@
 package com.budget.buddy.budget_buddy_api.user.me;
 
 import com.budget.buddy.budget_buddy_api.user.me.preferences.UserPreferencesService;
-import com.budget.buddy.budget_buddy_api.user.me.settings.UserClientSettingsService;
 import com.budget.buddy.budget_buddy_contracts.generated.api.UsersApi;
 import com.budget.buddy.budget_buddy_contracts.generated.model.ClientSettings;
 import com.budget.buddy.budget_buddy_contracts.generated.model.ClientSettingsWrite;
@@ -26,7 +25,6 @@ public class MeController implements UsersApi {
 
   private final UserDataDeletionService dataDeletionService;
   private final UserPreferencesService preferencesService;
-  private final UserClientSettingsService clientSettingsService;
 
   @Override
   public ResponseEntity<Me> getCurrentUser() {
@@ -56,23 +54,22 @@ public class MeController implements UsersApi {
 
   @Override
   public ResponseEntity<List<ClientSettings>> listCurrentUserClientSettings() {
-    return ResponseEntity.ok(clientSettingsService.list());
+    throw notImplemented("listCurrentUserClientSettings");
   }
 
   @Override
   public ResponseEntity<ClientSettings> getCurrentUserClientSettings(String clientId) {
-    return ResponseEntity.ok(clientSettingsService.get(clientId));
+    throw notImplemented("getCurrentUserClientSettings");
   }
 
   @Override
   public ResponseEntity<ClientSettings> upsertCurrentUserClientSettings(String clientId, ClientSettingsWrite body) {
-    return ResponseEntity.ok(clientSettingsService.upsert(clientId, body));
+    throw notImplemented("upsertCurrentUserClientSettings");
   }
 
   @Override
   public ResponseEntity<Void> deleteCurrentUserClientSettings(String clientId) {
-    clientSettingsService.delete(clientId);
-    return ResponseEntity.noContent().build();
+    throw notImplemented("deleteCurrentUserClientSettings");
   }
 
   private static UnsupportedOperationException notImplemented(String operationId) {

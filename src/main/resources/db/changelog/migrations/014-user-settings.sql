@@ -12,17 +12,4 @@ CREATE TABLE user_preferences
     updated_at TIMESTAMPTZ NOT NULL
 );
 
-CREATE TABLE user_client_settings
-(
-    id         UUID PRIMARY KEY,
-    owner_id   UUID        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    client_id  VARCHAR(32) NOT NULL,
-    settings   JSONB       NOT NULL,
-    version    INTEGER     NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL,
-    updated_at TIMESTAMPTZ NOT NULL,
-    UNIQUE (owner_id, client_id)
-);
-
---rollback DROP TABLE user_client_settings;
 --rollback DROP TABLE user_preferences;

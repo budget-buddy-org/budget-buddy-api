@@ -44,6 +44,19 @@ endpoint).
 ./gradlew build
 ```
 
+**Pre-PR verification checklist** — run these before opening a pull request:
+
+1. **Tests pass**
+   ```bash
+   ./gradlew test integrationTest
+   ```
+2. **No open Sonar issues** — if the `MCP_DOCKER` MCP server is available, query it directly:
+   ```
+   Tool: mcp__MCP_DOCKER__search_sonar_issues_in_projects
+   Args: { "projects": ["budget-buddy-org_budget-buddy-api"], "issueStatuses": ["OPEN"] }
+   ```
+   Resolve any `OPEN` issues before merging. Project key: `budget-buddy-org_budget-buddy-api`.
+
 ---
 
 ## Agent Conventions
