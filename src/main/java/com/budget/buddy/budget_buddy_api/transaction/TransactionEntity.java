@@ -4,8 +4,6 @@ import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnableEntity;
 import java.time.LocalDate;
 import java.util.Currency;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,8 +17,6 @@ import org.springframework.data.relational.core.mapping.Table;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class TransactionEntity extends OwnableEntity<UUID> {
 
   @Column("category_id")

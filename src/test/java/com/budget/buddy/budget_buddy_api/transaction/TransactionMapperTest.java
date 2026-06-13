@@ -94,16 +94,15 @@ class TransactionMapperTest {
       var categoryId = UUID.randomUUID();
       var ownerId = UUID.randomUUID();
 
-      var entity = TransactionEntity.builder()
-          .categoryId(categoryId)
-          .amount(500L)
-          .type(TransactionType.INCOME)
-          .currency(USD)
-          .date(FIXED_DATE)
-          .description("Income description")
-          .build();
+      var entity = new TransactionEntity();
       entity.setId(id);
       entity.setOwnerId(ownerId);
+      entity.setCategoryId(categoryId);
+      entity.setAmount(500L);
+      entity.setType(TransactionType.INCOME);
+      entity.setCurrency(USD);
+      entity.setDate(FIXED_DATE);
+      entity.setDescription("Income description");
 
       // When
       var model = transactionMapper.toModel(entity);
@@ -129,27 +128,27 @@ class TransactionMapperTest {
     void should_MapEntitiesToModels() {
       // Given
       var id1 = UUID.randomUUID();
+      var entity1 = new TransactionEntity();
+      entity1.setId(id1);
+      entity1.setCategoryId(UUID.randomUUID());
+      entity1.setAmount(100L);
+      entity1.setType(TransactionType.EXPENSE);
+      entity1.setCurrency(Currency.getInstance("EUR"));
+      entity1.setDate(FIXED_DATE);
+      entity1.setDescription("D1");
+
       var id2 = UUID.randomUUID();
-      var e1 = TransactionEntity.builder()
-          .categoryId(UUID.randomUUID()).amount(100L)
-          .type(TransactionType.EXPENSE)
-          .currency(Currency.getInstance("EUR"))
-          .date(FIXED_DATE)
-          .description("D1")
-          .build();
-      e1.setId(id1);
-      var e2 = TransactionEntity.builder()
-          .categoryId(UUID.randomUUID())
-          .amount(200L)
-          .type(TransactionType.INCOME)
-          .currency(USD)
-          .date(FIXED_DATE)
-          .description("D2")
-          .build();
-      e2.setId(id2);
+      var entity2 = new TransactionEntity();
+      entity2.setId(id2);
+      entity2.setCategoryId(UUID.randomUUID());
+      entity2.setAmount(200L);
+      entity2.setType(TransactionType.INCOME);
+      entity2.setCurrency(USD);
+      entity2.setDate(FIXED_DATE);
+      entity2.setDescription("D2");
 
       // When
-      var models = transactionMapper.toModelList(List.of(e1, e2));
+      var models = transactionMapper.toModelList(List.of(entity1, entity2));
 
       // Then
       assertThat(models)
@@ -180,14 +179,13 @@ class TransactionMapperTest {
       var originalUpdatedAt = FIXED_UPDATED_AT.minusHours(1);
       var originalVersion = 5;
 
-      var entity = TransactionEntity.builder()
-          .categoryId(UUID.randomUUID())
-          .amount(100L)
-          .type(TransactionType.EXPENSE)
-          .currency(Currency.getInstance("EUR"))
-          .date(FIXED_DATE)
-          .description("Old Desc")
-          .build();
+      var entity = new TransactionEntity();
+      entity.setCategoryId(UUID.randomUUID());
+      entity.setAmount(100L);
+      entity.setType(TransactionType.EXPENSE);
+      entity.setCurrency(Currency.getInstance("EUR"));
+      entity.setDate(FIXED_DATE);
+      entity.setDescription("Old Desc");
       entity.setId(originalId);
       entity.setOwnerId(originalOwnerId);
       entity.setCreatedAt(originalCreatedAt);
