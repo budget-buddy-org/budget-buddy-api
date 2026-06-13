@@ -1,3 +1,9 @@
+## [1.13.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.12.1...v1.13.0) (2026-06-13)
+
+### Features
+
+* implement user preferences endpoints ([#186](https://github.com/budget-buddy-org/budget-buddy-api/issues/186)) ([16e05a4](https://github.com/budget-buddy-org/budget-buddy-api/commit/16e05a485266cb8fc76f2a63de2c5181805d95d8))
+
 ## [1.12.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.12.0...v1.12.1) (2026-06-13)
 
 ### Bug Fixes
