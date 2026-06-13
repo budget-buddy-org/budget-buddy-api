@@ -1,3 +1,9 @@
+## [1.12.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.12.0...v1.12.1) (2026-06-13)
+
+### Bug Fixes
+
+* resolve Sonar issues and improve test coverage ([#195](https://github.com/budget-buddy-org/budget-buddy-api/issues/195)) ([3ddf5bd](https://github.com/budget-buddy-org/budget-buddy-api/commit/3ddf5bdd5d31c3fe26bc72a428fe4f9cc8548edb))
+
 ## [1.12.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.11.0...v1.12.0) (2026-06-10)
 
 ### Features
