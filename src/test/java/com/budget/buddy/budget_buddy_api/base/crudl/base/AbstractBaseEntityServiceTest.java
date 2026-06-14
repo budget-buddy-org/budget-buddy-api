@@ -233,4 +233,37 @@ class AbstractBaseEntityServiceTest {
     }
 
   }
+
+  @Nested
+  class ExistsTests {
+
+    @Test
+    void should_ReturnTrue_When_EntityExists() {
+      // Given
+      var id = "existingId";
+      when(repository.existsById(id)).thenReturn(true);
+
+      // When
+      var actual = service.existsById(id);
+
+      // Then
+      assertThat(actual).isTrue();
+      verify(repository).existsById(id);
+    }
+
+    @Test
+    void should_ReturnFalse_When_EntityDoesNotExist() {
+      // Given
+      var id = "missingId";
+      when(repository.existsById(id)).thenReturn(false);
+
+      // When
+      var actual = service.existsById(id);
+
+      // Then
+      assertThat(actual).isFalse();
+      verify(repository).existsById(id);
+    }
+
+  }
 }
