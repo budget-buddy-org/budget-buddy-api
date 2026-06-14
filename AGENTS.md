@@ -50,7 +50,19 @@ endpoint).
    ```bash
    ./gradlew test integrationTest
    ```
-2. **No open Sonar issues** — if the `MCP_DOCKER` MCP server is available, query it directly:
+2. **100% code coverage on changed files** — every new or modified production class must be fully covered (lines + branches). Check via Sonar on the open PR:
+   ```
+   Tool: mcp__MCP_DOCKER__search_files_by_coverage
+   Args: { "projectKey": "budget-buddy-org_budget-buddy-api", "pullRequest": "<PR number>", "maxCoverage": 100 }
+   ```
+   For any file below 100%, get the exact uncovered lines:
+   ```
+   Tool: mcp__MCP_DOCKER__get_file_coverage_details
+   Args: { "key": "<file key from above>", "pullRequest": "<PR number>" }
+   ```
+   Add tests until all files report 100% line and branch coverage. Generated code (MapStruct mappers, Lombok) and `package-info.java` are excluded automatically via `sonar.coverage.exclusions`.
+
+3. **No open Sonar issues** — if the `MCP_DOCKER` MCP server is available, query it directly:
    ```
    Tool: mcp__MCP_DOCKER__search_sonar_issues_in_projects
    Args: { "projects": ["budget-buddy-org_budget-buddy-api"], "issueStatuses": ["OPEN"] }
