@@ -36,5 +36,8 @@ springdoc:
     enabled: false
 
 logging:
+  structured:
+    format:
+      console: ecs
   level:
     root: INFO

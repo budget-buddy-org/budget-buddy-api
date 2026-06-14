@@ -39,7 +39,7 @@ public class UserService {
    */
   @Cacheable(value = CacheConfig.LOCAL_USER_IDS, key = "#oidcIssuer + '|' + #oidcSubject", unless = "#result == null")
   public UUID findOrCreateByOidcSubject(String oidcSubject, String oidcIssuer) {
-    log.debug("Resolving local user for OIDC issuer: {}", oidcIssuer);
+    log.debug("Cache miss: resolving local user from DB for issuer={}", oidcIssuer);
     return repository.upsert(idGenerator.get(), oidcSubject, oidcIssuer);
   }
 }

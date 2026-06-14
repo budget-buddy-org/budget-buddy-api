@@ -71,6 +71,24 @@ endpoint).
 - **Request URI**: The `instance` field should contain the current request URI, retrieved using `ServletWebRequest` in
   `GlobalExceptionHandler`.
 
+### Logging
+
+- **Always use `@Slf4j`**: Declare loggers via Lombok `@Slf4j` on the class — never use `LoggerFactory.getLogger()` manually.
+- **Log levels**:
+  - `ERROR` — unexpected failures that need immediate attention; always include the exception as a second argument (`log.error("...", ex)`).
+  - `WARN` — recoverable issues the system can handle but that need visibility: auth failures, access-denied, data integrity violations.
+  - `INFO` — significant business events: entity created (`id=…`), entity deleted (`id=…`). Visible in all environments.
+  - `DEBUG` — request flow detail: reads, updates, list/count calls, validation steps. Off in production by default.
+  - `TRACE` — fine-grained internals; reserved for framework-level diagnostics.
+- **No PII in logs**: Never log OIDC subjects, raw JWTs, or personal data at any level. Internal UUIDs (our own generated IDs) are safe to log. Use DEBUG for anything that might be user-identifying.
+- **No full-object logging**: Never pass a full request/response/entity to a log statement — log only IDs and counts to avoid inadvertently leaking user data.
+- **MDC correlation**: Every request carries two MDC keys populated automatically:
+  - `requestId` — set by `RequestCorrelationFilter` (propagated from `X-Request-ID` header or generated); echoed back in the response header.
+  - `userId` — set by `OidcUserProvisioningFilter` after JWT authentication resolves to a local user UUID.
+  - Both keys appear in every log line. Do not clear or overwrite them; let the filters manage the lifecycle.
+- **Dev vs prod output**: Dev uses Spring Boot's default human-readable console pattern extended with `[requestId] [userId]`. Prod emits structured JSON (ECS format via `logging.structured.format.console: ecs`) — all MDC keys appear as top-level fields automatically.
+- **Parameterized messages**: Always use SLF4J placeholders (`log.debug("id={}", id)`) — never string concatenation.
+
 ### Security & OIDC
 
 - **Stateless resource server**: The API validates JWTs from an external OIDC provider. No sessions, no server-side

@@ -55,53 +55,46 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, C,
   @Transactional
   @Override
   public R create(C createRequest) {
-    log.debug("Create entity: {}", createRequest);
     E savedEntity = createInternal(createRequest);
-    log.debug("Saved entity: {}", savedEntity);
+    log.info("Created entity: id={}", savedEntity.getId());
     return mapper.toModel(savedEntity);
   }
 
   @Override
   public R read(ID id) {
-    log.debug("Read entity by id: {}", id);
-    E entity = readInternal(id);
-    return mapper.toModel(entity);
+    log.debug("Read entity: id={}", id);
+    return mapper.toModel(readInternal(id));
   }
 
   @Transactional
   @Override
   public R update(ID id, U updateRequest) {
-    log.debug("Update entity by id: {}", id);
-    E updatedEntity = updateInternal(id, updateRequest);
-    log.debug("Updated entity: {}", updatedEntity);
-    return mapper.toModel(updatedEntity);
+    log.debug("Update entity: id={}", id);
+    return mapper.toModel(updateInternal(id, updateRequest));
   }
 
   @Transactional
   @Override
   public void delete(ID id) {
-    log.debug("Delete entity by id: {}", id);
     deleteInternal(id);
-    log.debug("Successfully deleted entity with id: {}", id);
+    log.info("Deleted entity: id={}", id);
   }
 
   @Override
   public List<R> list() {
-    log.debug("List all entities");
-    List<E> entities = listInternal();
-    log.debug("Found {} entities", entities.size());
-    return mapper.toModelList(entities);
+    log.debug("List entities");
+    return mapper.toModelList(listInternal());
   }
 
   @Override
   public L list(Pageable pageable) {
-    log.debug("List all entities with pageRequest: {}", pageable);
+    log.debug("List entities: page={}, size={}", pageable.getPageNumber(), pageable.getPageSize());
     return mapper.toPage(listInternal(pageable));
   }
 
   @Override
   public long count() {
-    log.debug("Count all entities");
+    log.debug("Count entities");
     return countInternal();
   }
 
