@@ -5,9 +5,8 @@ import com.budget.buddy.budget_buddy_api.base.validation.FieldErrorFactory;
 import com.budget.buddy.budget_buddy_contracts.generated.model.FieldError;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Problem;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -34,10 +33,9 @@ import java.util.NoSuchElementException;
 /**
  * Global exception handler for the application. Converts various exceptions into standardized {@link Problem} responses.
  */
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   private static final String RESOURCE_NOT_FOUND = "Resource not found";
   private static final String ACCESS_DENIED = "Access denied";
@@ -90,6 +88,7 @@ public class GlobalExceptionHandler {
         .map(FieldErrorFactory::from)
         .toList();
 
+    log.debug("Validation failed: {} field error(s)", errors.size());
     var problem = new Problem().errors(errors);
     return buildProblemResponse(problem, HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "One or more fields are invalid", request);
   }
@@ -108,6 +107,7 @@ public class GlobalExceptionHandler {
         .map(FieldErrorFactory::from)
         .toList();
 
+    log.debug("Constraint violations: {} error(s)", errors.size());
     var problem = new Problem().errors(errors);
     return buildProblemResponse(problem, HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.getReasonPhrase(), "Constraint violations", request);
   }

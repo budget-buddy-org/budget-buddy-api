@@ -27,6 +27,7 @@ public class TransactionValidator implements BaseEntityValidator<TransactionEnti
       throw new ValidationException("Category ID must be set");
     }
 
+    log.debug("Validating transaction category: id={}", categoryId);
     if (!categoryService.existsById(categoryId)) {
       throw new ValidationException("Unknown category with id: " + categoryId);
     }
