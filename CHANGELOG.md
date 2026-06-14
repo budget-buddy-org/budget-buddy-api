@@ -1,3 +1,9 @@
+## [1.14.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.13.0...v1.14.0) (2026-06-14)
+
+### Features
+
+* establish logging standards and MDC request correlation ([#199](https://github.com/budget-buddy-org/budget-buddy-api/issues/199)) ([3b2b79c](https://github.com/budget-buddy-org/budget-buddy-api/commit/3b2b79c4df0d07dfe8113cd7096acc97433f81cf))
+
 ## [1.13.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.12.1...v1.13.0) (2026-06-13)
 
 ### Features
