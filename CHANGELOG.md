@@ -1,3 +1,9 @@
+## [1.15.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.15.0...v1.15.1) (2026-06-15)
+
+### Bug Fixes
+
+* decouple Liquibase migration 009 from OIDC issuer URI ([#202](https://github.com/budget-buddy-org/budget-buddy-api/issues/202)) ([18fe2a0](https://github.com/budget-buddy-org/budget-buddy-api/commit/18fe2a05ddc802be8c8f2f8c0ab366814bbd12b8))
+
 ## [1.15.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.14.1...v1.15.0) (2026-06-15)
 
 ### Features
