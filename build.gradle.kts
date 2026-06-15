@@ -140,7 +140,7 @@ tasks.jacocoTestReport {
   executionData(fileTree(layout.buildDirectory).include("jacoco/*.exec"))
   classDirectories.setFrom(files(classDirectories.files.map {
     fileTree(it).matching {
-      exclude("**/generated/**")
+      exclude("**/generated/**", "**/Application.class")
     }
   }))
 }
