@@ -1,6 +1,7 @@
 --liquibase formatted sql
 
 --changeset g.remniov@gmail.com:009-oidc-subject
+--validCheckSum: ANY
 ALTER TABLE users
     ADD COLUMN oidc_issuer VARCHAR(255) NOT NULL DEFAULT '${oidc-issuer-uri}';
 
