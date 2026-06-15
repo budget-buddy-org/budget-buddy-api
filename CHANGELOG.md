@@ -1,3 +1,13 @@
+## [1.15.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.14.1...v1.15.0) (2026-06-15)
+
+### Features
+
+* implement DELETE /v1/users/me account deletion ([#201](https://github.com/budget-buddy-org/budget-buddy-api/issues/201)) ([11030c3](https://github.com/budget-buddy-org/budget-buddy-api/commit/11030c3ac0543ac6f924b7c1aedf14da4200172c))
+
+### Bug Fixes
+
+* replace @InjectMocks with explicit constructor to fix CI test failure ([d09316e](https://github.com/budget-buddy-org/budget-buddy-api/commit/d09316e1a4079257e0537c5087e51dd596d173ff))
+
 ## [1.14.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.14.0...v1.14.1) (2026-06-15)
 
 ### Bug Fixes
