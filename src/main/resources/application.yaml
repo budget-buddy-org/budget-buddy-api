@@ -7,6 +7,8 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     enabled: true
+    parameters:
+      oidc-issuer-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}
   security:
     oauth2:
       resourceserver:
