@@ -1,5 +1,6 @@
 package com.budget.buddy.budget_buddy_api.user.me;
 
+import com.budget.buddy.budget_buddy_api.user.UserService;
 import com.budget.buddy.budget_buddy_api.user.me.preferences.UserPreferencesService;
 import com.budget.buddy.budget_buddy_contracts.generated.api.UsersApi;
 import com.budget.buddy.budget_buddy_contracts.generated.model.ClientSettings;
@@ -25,6 +26,7 @@ public class MeController implements UsersApi {
 
   private final UserDataDeletionService dataDeletionService;
   private final UserPreferencesService preferencesService;
+  private final UserService userService;
 
   @Override
   public ResponseEntity<Me> getCurrentUser() {
@@ -33,7 +35,8 @@ public class MeController implements UsersApi {
 
   @Override
   public ResponseEntity<Void> deleteCurrentUser() {
-    throw notImplemented("deleteCurrentUser");
+    userService.deleteCurrentUser();
+    return ResponseEntity.noContent().build();
   }
 
   @Override

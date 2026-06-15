@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.budget.buddy.budget_buddy_api.user.UserService;
 import com.budget.buddy.budget_buddy_api.user.me.preferences.UserPreferencesService;
 import com.budget.buddy.budget_buddy_contracts.generated.model.ClientSettingsWrite;
 import com.budget.buddy.budget_buddy_contracts.generated.model.UserPreferences;
@@ -26,12 +27,14 @@ class MeControllerTest {
   private UserDataDeletionService deletionService;
   @Mock
   private UserPreferencesService preferencesService;
+  @Mock
+  private UserService userService;
 
   private MeController controller;
 
   @BeforeEach
   void setUp() {
-    controller = new MeController(deletionService, preferencesService);
+    controller = new MeController(deletionService, preferencesService, userService);
   }
 
   @Nested
@@ -42,13 +45,6 @@ class MeControllerTest {
       assertThatThrownBy(() -> controller.getCurrentUser())
           .isInstanceOf(UnsupportedOperationException.class)
           .hasMessageContaining("getCurrentUser");
-    }
-
-    @Test
-    void deleteCurrentUser_ShouldThrowUnsupportedOperationException() {
-      assertThatThrownBy(() -> controller.deleteCurrentUser())
-          .isInstanceOf(UnsupportedOperationException.class)
-          .hasMessageContaining("deleteCurrentUser");
     }
 
     @Test
@@ -78,6 +74,18 @@ class MeControllerTest {
       assertThatThrownBy(() -> controller.deleteCurrentUserClientSettings("app"))
           .isInstanceOf(UnsupportedOperationException.class)
           .hasMessageContaining("deleteCurrentUserClientSettings");
+    }
+  }
+
+  @Nested
+  class DeleteCurrentUser {
+
+    @Test
+    void should_DelegateToServiceAndReturn204() {
+      var response = controller.deleteCurrentUser();
+
+      verify(userService).deleteCurrentUser();
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
   }
 
