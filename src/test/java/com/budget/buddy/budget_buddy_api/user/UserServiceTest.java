@@ -1,5 +1,6 @@
 package com.budget.buddy.budget_buddy_api.user;
 
+import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnerIdProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,6 +11,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,8 +23,21 @@ class UserServiceTest {
   @Mock
   private Supplier<UUID> idGenerator;
 
+  @Mock
+  private OwnerIdProvider<UUID> ownerIdProvider;
+
   @InjectMocks
   private UserService userService;
+
+  @Test
+  void deleteCurrentUser_Should_DeleteByResolvedOwnerId() {
+    var userId = UUID.randomUUID();
+    when(ownerIdProvider.get()).thenReturn(userId);
+
+    userService.deleteCurrentUser();
+
+    verify(userRepository).deleteById(userId);
+  }
 
   @Test
   void upsert_Should_DelegateToRepository() {

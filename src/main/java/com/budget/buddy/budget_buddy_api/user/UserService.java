@@ -1,10 +1,13 @@
 package com.budget.buddy.budget_buddy_api.user;
 
 import com.budget.buddy.budget_buddy_api.base.config.CacheConfig;
+import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnerIdProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -26,6 +29,7 @@ public class UserService {
 
   private final UserRepository repository;
   private final Supplier<UUID> idGenerator;
+  private final OwnerIdProvider<UUID> ownerIdProvider;
 
   /**
    * Finds or creates a local user for the given OIDC subject.
@@ -41,5 +45,13 @@ public class UserService {
   public UUID findOrCreateByOidcSubject(String oidcSubject, String oidcIssuer) {
     log.debug("Cache miss: resolving local user from DB for issuer={}", oidcIssuer);
     return repository.upsert(idGenerator.get(), oidcSubject, oidcIssuer);
+  }
+
+  @Transactional
+  @CacheEvict(value = CacheConfig.LOCAL_USER_IDS, allEntries = true)
+  public void deleteCurrentUser() {
+    var userId = ownerIdProvider.get();
+    log.info("Deleting user account id={}", userId);
+    repository.deleteById(userId);
   }
 }

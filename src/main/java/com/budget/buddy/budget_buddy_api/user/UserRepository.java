@@ -42,4 +42,6 @@ public interface UserRepository extends Repository<UserEntity, UUID> {
       @Param("oidcIssuer") String oidcIssuer
   );
 
+  void deleteById(UUID id);
+
 }
