@@ -1,3 +1,9 @@
+## [1.14.1](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.14.0...v1.14.1) (2026-06-15)
+
+### Bug Fixes
+
+* remove user preferences on delete data request ([#200](https://github.com/budget-buddy-org/budget-buddy-api/issues/200)) ([6fbcabf](https://github.com/budget-buddy-org/budget-buddy-api/commit/6fbcabf4cb2324b87386f1c1cb70c26331e43e54))
+
 ## [1.14.0](https://github.com/budget-buddy-org/budget-buddy-api/compare/v1.13.0...v1.14.0) (2026-06-14)
 
 ### Features
