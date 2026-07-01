@@ -1,6 +1,7 @@
 # This is a Gradle generated file for dependency locking.
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
+# To regenerate this file, run: ./gradlew :dependencies --write-locks
 biz.aQute.bnd:biz.aQute.bnd.annotation:7.1.0=compileClasspath,integrationTestCompileClasspath,testCompileClasspath
 ch.qos.logback:logback-classic:1.5.34=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 ch.qos.logback:logback-core:1.5.34=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
@@ -72,7 +73,7 @@ org.junit.platform:junit-platform-engine:6.0.3=integrationTestRuntimeClasspath,t
 org.junit.platform:junit-platform-launcher:6.0.3=integrationTestRuntimeClasspath,testRuntimeClasspath
 org.junit:junit-bom:6.0.3=integrationTestCompileClasspath,integrationTestRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.liquibase:liquibase-core:5.0.3=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
-org.mapstruct:mapstruct-processor:1.6.3=annotationProcessor,compileClasspath,integrationTestAnnotationProcessor,testAnnotationProcessor
+org.mapstruct:mapstruct-processor:1.6.3=annotationProcessor,compileClasspath,integrationTestAnnotationProcessor,integrationTestCompileClasspath,testAnnotationProcessor,testCompileClasspath
 org.mapstruct:mapstruct:1.6.3=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.mockito:mockito-core:5.23.0=integrationTestCompileClasspath,integrationTestRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.mockito:mockito-junit-jupiter:5.23.0=integrationTestCompileClasspath,integrationTestRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
@@ -87,7 +88,7 @@ org.ow2.asm:asm-tree:9.9=jacocoAnt
 org.ow2.asm:asm:9.7.1=integrationTestCompileClasspath,integrationTestRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.ow2.asm:asm:9.9=jacocoAnt
 org.postgresql:postgresql:42.7.11=integrationTestRuntimeClasspath,productionRuntimeClasspath,runtimeClasspath,testRuntimeClasspath
-org.projectlombok:lombok-mapstruct-binding:0.2.0=annotationProcessor,compileClasspath,integrationTestAnnotationProcessor,testAnnotationProcessor
+org.projectlombok:lombok-mapstruct-binding:0.2.0=annotationProcessor,compileClasspath,integrationTestAnnotationProcessor,integrationTestCompileClasspath,testAnnotationProcessor,testCompileClasspath
 org.projectlombok:lombok:1.18.46=annotationProcessor,compileClasspath,integrationTestAnnotationProcessor,integrationTestCompileClasspath,testAnnotationProcessor,testCompileClasspath
 org.rnorth.duct-tape:duct-tape:1.0.8=integrationTestCompileClasspath,integrationTestRuntimeClasspath
 org.skyscreamer:jsonassert:1.5.3=integrationTestCompileClasspath,integrationTestRuntimeClasspath,testCompileClasspath,testRuntimeClasspath
@@ -100,7 +101,7 @@ org.springframework.boot:spring-boot-actuator-autoconfigure:4.1.0=compileClasspa
 org.springframework.boot:spring-boot-actuator:4.1.0=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.springframework.boot:spring-boot-autoconfigure:4.1.0=compileClasspath,developmentOnly,integrationTestCompileClasspath,integrationTestRuntimeClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.springframework.boot:spring-boot-cache:4.1.0=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
-org.springframework.boot:spring-boot-configuration-processor:4.1.0=annotationProcessor,compileClasspath
+org.springframework.boot:spring-boot-configuration-processor:4.1.0=annotationProcessor,compileClasspath,integrationTestAnnotationProcessor,integrationTestCompileClasspath,testAnnotationProcessor,testCompileClasspath
 org.springframework.boot:spring-boot-data-commons:4.1.0=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.springframework.boot:spring-boot-data-jdbc-test:4.1.0=integrationTestCompileClasspath,integrationTestRuntimeClasspath
 org.springframework.boot:spring-boot-data-jdbc:4.1.0=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath

@@ -60,11 +60,6 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-  testCompileOnly("org.projectlombok:lombok")
-  testCompileOnly("org.mapstruct:mapstruct:${mapstructVersion}")
-  testAnnotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
-  testAnnotationProcessor("org.projectlombok:lombok")
-  testAnnotationProcessor("org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}")
 }
 
 dependencyLocking {
@@ -74,7 +69,7 @@ dependencyLocking {
 @Suppress("UnstableApiUsage")
 testing {
   suites {
-    val test by getting(JvmTestSuite::class) {
+    getByName<JvmTestSuite>("test") {
       useJUnitJupiter()
     }
 
@@ -95,7 +90,7 @@ testing {
       targets {
         all {
           testTask.configure {
-            shouldRunAfter(test)
+            shouldRunAfter(tasks.named("test"))
           }
         }
       }
@@ -105,6 +100,12 @@ testing {
 
 configurations {
   compileOnly {
+    extendsFrom(configurations.annotationProcessor.get())
+  }
+  testCompileOnly {
+    extendsFrom(configurations.compileOnly.get())
+  }
+  testAnnotationProcessor {
     extendsFrom(configurations.annotationProcessor.get())
   }
   named("integrationTestImplementation") {
