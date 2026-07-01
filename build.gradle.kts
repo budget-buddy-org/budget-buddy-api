@@ -153,6 +153,7 @@ sonar {
   }
 }
 
+@Suppress("UnstableApiUsage")
 tasks.sonar {
   dependsOn(tasks.jacocoTestReport)
   dependsOn(testing.suites.named("integrationTest"))
