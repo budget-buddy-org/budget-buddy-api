@@ -2,9 +2,9 @@ plugins {
   java
   `jvm-test-suite`
   jacoco
-  id("org.springframework.boot") version "4.1.1"
+  id("org.springframework.boot") version "4.1.2"
   id("io.spring.dependency-management") version "1.1.7"
-  id("org.sonarqube") version "7.3.1.8318"
+  id("org.sonarqube") version "7.5.0.8588"
 }
 
 group = "com.budget.buddy"
@@ -31,7 +31,7 @@ repositories {
 dependencies {
   val mapstructVersion = "1.6.3"
   val lombokMapstructBindingVersion = "0.2.0"
-  val budgetBuddyContractsVersion = "6.1.0"
+  val budgetBuddyContractsVersion = "6.1.3"
 
   implementation("com.budgetbuddy:budget-buddy-contracts:${budgetBuddyContractsVersion}")
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
