@@ -14,6 +14,10 @@ on:
       - '.github/workflows/**'
       - 'gradle.properties'
       - 'docker-compose*.yaml'
+      - '.releaserc.cjs'
+      - 'release-notes-preset.mjs'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
   pull_request:
     types: [ opened, synchronize, reopened ]
     paths:
@@ -26,6 +30,10 @@ on:
       - '.github/workflows/**'
       - 'gradle.properties'
       - 'docker-compose*.yaml'
+      - '.releaserc.cjs'
+      - 'release-notes-preset.mjs'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
   workflow_dispatch:
 
 jobs:
