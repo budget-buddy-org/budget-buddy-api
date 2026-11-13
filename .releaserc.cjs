@@ -21,7 +21,7 @@ module.exports = {
       ],
     }],
     ['@semantic-release/release-notes-generator', {
-      preset: 'conventionalcommits',
+      config: './release-notes-preset.mjs',
     }],
     ['@semantic-release/changelog', {
       changelogFile: 'CHANGELOG.md',
