@@ -2,6 +2,7 @@ name: Commitlint
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited]
 
 permissions:
   contents: read
@@ -9,4 +10,4 @@ permissions:
 
 jobs:
   commitlint:
-    uses: budget-buddy-org/ci-workflows/.github/workflows/commitlint.yml@13b3845c903d05c808385c09ed6bf457569d662a
+    uses: budget-buddy-org/ci-workflows/.github/workflows/commitlint.yml@7a37d06338527f3ba0029328af408cc17e0c561a
