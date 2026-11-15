@@ -37,7 +37,7 @@ on:
   workflow_dispatch:
     inputs:
       dry-run-release:
-        description: Preview release using the default branch
+        description: Preview release from this ref
         type: boolean
         default: false
 
@@ -47,14 +47,14 @@ permissions:
 
 jobs:
   ci:
-    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-ci.yml@1736e615609d211e1cdbe74314e4199faed158b6
+    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-ci.yml@b70aceef21adb495e9e2d03fced5c7abb8b6aa44
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   release:
     needs: ci
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.dry-run-release)
-    uses: budget-buddy-org/ci-workflows/.github/workflows/release.yml@1736e615609d211e1cdbe74314e4199faed158b6
+    uses: budget-buddy-org/ci-workflows/.github/workflows/release.yml@b70aceef21adb495e9e2d03fced5c7abb8b6aa44
     with:
       dry-run: ${{ github.event_name == 'workflow_dispatch' }}
     secrets:
