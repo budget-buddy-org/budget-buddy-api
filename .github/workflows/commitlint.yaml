@@ -10,4 +10,4 @@ permissions:
 
 jobs:
   commitlint:
-    uses: budget-buddy-org/ci-workflows/.github/workflows/commitlint.yml@235bd4425fe8005786d300dee35a35bd2ba90b96
+    uses: budget-buddy-org/ci-workflows/.github/workflows/commitlint.yml@0b05bd0245bda46e60f8998361a8ed05772368ff
