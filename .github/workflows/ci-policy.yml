@@ -1,0 +1,10 @@
+name: CI policy
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  policy:
+    uses: budget-buddy-org/ci-workflows/.github/workflows/consumer-policy.yml@235bd4425fe8005786d300dee35a35bd2ba90b96
