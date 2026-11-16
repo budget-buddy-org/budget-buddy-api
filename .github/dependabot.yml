@@ -5,6 +5,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # Shared library changes also need matching runtime/lockfile metadata.
+    # The central rollout coordinator owns these updates.
+    ignore:
+      - dependency-name: "budget-buddy-org/ci-workflows*"
     commit-message:
       prefix: "chore"
 
