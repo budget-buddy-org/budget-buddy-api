@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Propagates or generates a request correlation ID and makes it available in the
- * MDC under {@value #REQUEST_ID_MDC_KEY} for the duration of the request.
+ * Propagates or generates a request correlation ID and makes it available in the MDC under {@value
+ * #REQUEST_ID_MDC_KEY} for the duration of the request.
  *
- * <p>If the caller supplies an {@code X-Request-ID} header it is reused;
- * otherwise a new UUID is generated. The same value is echoed back in the
- * response header so clients can correlate their own logs.
+ * <p>If the caller supplies an {@code X-Request-ID} header it is reused; otherwise a new UUID is
+ * generated. The same value is echoed back in the response header so clients can correlate their
+ * own logs.
  */
 @Slf4j
 @Component
@@ -31,12 +31,11 @@ public class RequestCorrelationFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      FilterChain chain
-  ) throws ServletException, IOException {
+      HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+      throws ServletException, IOException {
     var inbound = request.getHeader(REQUEST_ID_HEADER);
-    var requestId = (inbound != null && !inbound.isBlank()) ? inbound : UUID.randomUUID().toString();
+    var requestId =
+        (inbound != null && !inbound.isBlank()) ? inbound : UUID.randomUUID().toString();
 
     MDC.put(REQUEST_ID_MDC_KEY, requestId);
     response.setHeader(REQUEST_ID_HEADER, requestId);

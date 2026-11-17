@@ -19,5 +19,4 @@ public class BaseEntityListener<E extends BaseEntity<ID>, ID> implements BeforeC
 
     return entity;
   }
-
 }

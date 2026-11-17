@@ -15,11 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class BaseEntityListenerTest {
 
-  @Mock
-  private Supplier<String> idGenerator;
+  @Mock private Supplier<String> idGenerator;
 
-  @InjectMocks
-  private BaseEntityListener<DummyEntity, String> listener;
+  @InjectMocks private BaseEntityListener<DummyEntity, String> listener;
 
   @Test
   void onBeforeConvert_ShouldSetId_When_NewEntity() {
@@ -50,5 +48,4 @@ class BaseEntityListenerTest {
     assertThat(entity.getId()).isEqualTo(existingId);
     verifyNoInteractions(idGenerator);
   }
-
 }

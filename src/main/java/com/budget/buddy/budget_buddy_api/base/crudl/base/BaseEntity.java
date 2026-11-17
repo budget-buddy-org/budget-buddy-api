@@ -16,8 +16,8 @@ import org.springframework.data.relational.core.mapping.Column;
 /**
  * Abstract base class for all entities.
  *
- * <p>Provides identity and three audit fields, all managed automatically by the persistence
- * layer — never set them by hand:
+ * <p>Provides identity and three audit fields, all managed automatically by the persistence layer —
+ * never set them by hand:
  *
  * <ul>
  *   <li>{@code id} — assigned once on insert by {@code BaseEntityListener}.
@@ -26,8 +26,8 @@ import org.springframework.data.relational.core.mapping.Column;
  *   <li>{@code updatedAt} — timestamp (with offset) refreshed on every update.
  * </ul>
  *
- * <p>Spring Data JDBC populates these fields after construction via setters, so a
- * no-arg constructor legitimately leaves them unset.
+ * <p>Spring Data JDBC populates these fields after construction via setters, so a no-arg
+ * constructor legitimately leaves them unset.
  *
  * <p>Type parameter {@code ID} is the identifier type.
  */

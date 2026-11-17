@@ -9,9 +9,9 @@ import org.springframework.data.relational.core.mapping.Column;
 /**
  * Abstract base class for entities that belong to a specific owner.
  *
- * <p>Extends {@link BaseEntity} with an {@code ownerId} field. All CRUDL operations on
- * subclasses are automatically scoped to the authenticated owner by
- * {@link OwnableEntityService} — no extra wiring required in subclasses.
+ * <p>Extends {@link BaseEntity} with an {@code ownerId} field. All CRUDL operations on subclasses
+ * are automatically scoped to the authenticated owner by {@link OwnableEntityService} — no extra
+ * wiring required in subclasses.
  *
  * <p>Type parameter {@code ID} is used for both the entity id and the owner id.
  */

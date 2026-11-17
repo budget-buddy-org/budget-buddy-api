@@ -11,7 +11,4 @@ public record CorsProperties(
     List<String> allowedMethods,
     List<String> allowedHeaders,
     boolean allowCredentials,
-    long maxAge
-) {
-
-}
+    long maxAge) {}

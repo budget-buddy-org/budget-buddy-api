@@ -50,12 +50,12 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, C, R, U, L> {
   }
 
   /**
-   * Fully updates an existing entity with values from an update request. All writable fields are overwritten,
-   * including nulls. Immutable fields (id, version, createdAt, updatedAt) are preserved.
+   * Fully updates an existing entity with values from an update request. All writable fields are
+   * overwritten, including nulls. Immutable fields (id, version, createdAt, updatedAt) are
+   * preserved.
    *
    * @param updateRequest the update request
    * @param existingEntity the entity to update
    */
   void updateEntity(U updateRequest, E existingEntity);
-
 }

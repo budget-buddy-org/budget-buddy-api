@@ -10,7 +10,8 @@ import org.springframework.data.domain.Pageable;
  * @param <ID> The type of the unique identifier for the entities managed by the service.
  * @param <C> The type of the create request object used for creating new entities.
  * @param <R> The type of the resource/model returned by the service methods.
- * @param <U> The type of the update request object used for fully updating existing entities via PUT.
+ * @param <U> The type of the update request object used for fully updating existing entities via
+ *     PUT.
  * @param <L> The type of the paginated list response.
  */
 public interface BaseEntityService<ID, C, R, U, L> {
@@ -33,8 +34,8 @@ public interface BaseEntityService<ID, C, R, U, L> {
   R read(ID id) throws EntityNotFoundException;
 
   /**
-   * Fully update an existing entity identified by its unique identifier. All writable fields are overwritten;
-   * omitting optional fields clears them.
+   * Fully update an existing entity identified by its unique identifier. All writable fields are
+   * overwritten; omitting optional fields clears them.
    *
    * @param id The unique identifier of the entity to update.
    * @param updateRequest The update request containing all fields for the update.

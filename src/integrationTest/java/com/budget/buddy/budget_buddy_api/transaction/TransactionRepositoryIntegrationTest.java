@@ -26,11 +26,9 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
   private static final Currency USD = Currency.getInstance("USD");
   private static final LocalDate TODAY = LocalDate.of(2026, Month.APRIL, 26);
 
-  @Autowired
-  private TransactionRepository transactionRepository;
+  @Autowired private TransactionRepository transactionRepository;
 
-  @Autowired
-  private CategoryRepository categoryRepository;
+  @Autowired private CategoryRepository categoryRepository;
 
   private UUID ownerId;
   private UUID categoryId;
@@ -46,14 +44,12 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
   void shouldSaveAndFindByIdAndOwnerId() {
     var saved = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 50L);
 
-    assertThat(saved).
-        isNotNull()
-        .extracting(TransactionEntity::getId)
-        .isNotNull();
+    assertThat(saved).isNotNull().extracting(TransactionEntity::getId).isNotNull();
 
     var found = transactionRepository.findByIdAndOwnerId(saved.getId(), ownerId);
 
-    assertThat(found).get()
+    assertThat(found)
+        .get()
         .returns(saved.getId(), TransactionEntity::getId)
         .returns(ownerId, TransactionEntity::getOwnerId)
         .returns(categoryId, TransactionEntity::getCategoryId)
@@ -74,9 +70,8 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var on = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 2L);
       var after = save(ownerId, categoryId, TODAY.plusDays(2), TransactionType.EXPENSE, 3L);
 
-      var result = transactionRepository.findAllByFilter(
-          filter().start(TODAY).build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(filter().start(TODAY).build(), defaultPageable());
 
       assertThat(result.getContent())
           .extracting(TransactionEntity::getId)
@@ -91,9 +86,8 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var on = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 2L);
       var after = save(ownerId, categoryId, TODAY.plusDays(2), TransactionType.EXPENSE, 3L);
 
-      var result = transactionRepository.findAllByFilter(
-          filter().end(TODAY).build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(filter().end(TODAY).build(), defaultPageable());
 
       assertThat(result.getContent())
           .extracting(TransactionEntity::getId)
@@ -108,9 +102,9 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var matching = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 1L);
       save(ownerId, otherCategoryId, TODAY, TransactionType.EXPENSE, 2L);
 
-      var result = transactionRepository.findAllByFilter(
-          filter().categoryId(categoryId).build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(
+              filter().categoryId(categoryId).build(), defaultPageable());
 
       assertThat(result.getContent())
           .singleElement()
@@ -124,9 +118,9 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 1L);
       var income = save(ownerId, categoryId, TODAY, TransactionType.INCOME, 2L);
 
-      var result = transactionRepository.findAllByFilter(
-          filter().type(TransactionType.INCOME).build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(
+              filter().type(TransactionType.INCOME).build(), defaultPageable());
 
       assertThat(result.getContent())
           .singleElement()
@@ -142,9 +136,7 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var mine = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 1L);
       save(otherOwnerId, otherOwnerCategoryId, TODAY, TransactionType.EXPENSE, 2L);
 
-      var result = transactionRepository.findAllByFilter(
-          filter().build(),
-          defaultPageable());
+      var result = transactionRepository.findAllByFilter(filter().build(), defaultPageable());
 
       assertThat(result.getContent())
           .singleElement()
@@ -160,9 +152,9 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var middle = save(ownerId, categoryId, TODAY.minusDays(1), TransactionType.EXPENSE, 2L);
       var newest = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 3L);
 
-      var result = transactionRepository.findAllByFilter(
-          filter().build(),
-          PageRequest.of(0, 10, direction, "date"));
+      var result =
+          transactionRepository.findAllByFilter(
+              filter().build(), PageRequest.of(0, 10, direction, "date"));
 
       var ids = result.getContent().stream().map(TransactionEntity::getId).toList();
       if (direction == Direction.ASC) {
@@ -179,19 +171,18 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
         save(ownerId, categoryId, TODAY.minusDays(i), TransactionType.EXPENSE, i);
       }
 
-      var firstPage = transactionRepository.findAllByFilter(
-          filter().build(),
-          PageRequest.of(0, 2, Direction.DESC, "date"));
-      var secondPage = transactionRepository.findAllByFilter(
-          filter().build(),
-          PageRequest.of(1, 2, Direction.DESC, "date"));
+      var firstPage =
+          transactionRepository.findAllByFilter(
+              filter().build(), PageRequest.of(0, 2, Direction.DESC, "date"));
+      var secondPage =
+          transactionRepository.findAllByFilter(
+              filter().build(), PageRequest.of(1, 2, Direction.DESC, "date"));
 
       assertThat(firstPage.getContent()).hasSize(2);
       assertThat(firstPage.getTotalElements()).isEqualTo(5);
       assertThat(firstPage.getTotalPages()).isEqualTo(3);
       assertThat(secondPage.getContent()).hasSize(2);
-      assertThat(firstPage.getContent())
-          .doesNotContainAnyElementsOf(secondPage.getContent());
+      assertThat(firstPage.getContent()).doesNotContainAnyElementsOf(secondPage.getContent());
     }
 
     @Test
@@ -199,9 +190,9 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
     void returnsEmptyPage() {
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 1L);
 
-      var result = transactionRepository.findAllByFilter(
-          filter().start(TODAY.plusDays(10)).build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(
+              filter().start(TODAY.plusDays(10)).build(), defaultPageable());
 
       assertThat(result.getContent()).isEmpty();
       assertThat(result.getTotalElements()).isZero();
@@ -215,12 +206,19 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
     @Test
     @DisplayName("matches transaction description (case-insensitive, partial)")
     void matchesDescription() {
-      var coffee = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 1L, "Morning Coffee at the cafe");
+      var coffee =
+          save(
+              ownerId,
+              categoryId,
+              TODAY,
+              TransactionType.EXPENSE,
+              1L,
+              "Morning Coffee at the cafe");
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 2L, "Lunch");
 
-      var result = transactionRepository.findAllByFilter(
-          filter().query("coffee").build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(
+              filter().query("coffee").build(), defaultPageable());
 
       assertThat(result.getContent())
           .singleElement()
@@ -231,12 +229,12 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
     @DisplayName("matches category name when description does not match")
     void matchesCategoryName() {
       var travelCategoryId = createCategory(ownerId, "Travel");
-      var match = save(ownerId, travelCategoryId, TODAY, TransactionType.EXPENSE, 1L, "Hotel booking");
+      var match =
+          save(ownerId, travelCategoryId, TODAY, TransactionType.EXPENSE, 1L, "Hotel booking");
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 2L, "Groceries");
 
-      var result = transactionRepository.findAllByFilter(
-          filter().query("trav").build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(filter().query("trav").build(), defaultPageable());
 
       assertThat(result.getContent())
           .singleElement()
@@ -248,12 +246,13 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
     @DisplayName("query is case-insensitive against both description and category name")
     void caseInsensitive(String queryString) {
       var travelCategoryId = createCategory(ownerId, "Coffee Shops");
-      var byDescription = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 1L, "morning coffee");
+      var byDescription =
+          save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 1L, "morning coffee");
       var byCategory = save(ownerId, travelCategoryId, TODAY, TransactionType.EXPENSE, 2L, "tea");
 
-      var result = transactionRepository.findAllByFilter(
-          filter().query(queryString).build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(
+              filter().query(queryString).build(), defaultPageable());
 
       assertThat(result.getContent())
           .extracting(TransactionEntity::getId)
@@ -266,9 +265,9 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var travelCategoryId = createCategory(ownerId, "Travel");
       var match = save(ownerId, travelCategoryId, TODAY, TransactionType.EXPENSE, 1L, null);
 
-      var result = transactionRepository.findAllByFilter(
-          filter().query("travel").build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(
+              filter().query("travel").build(), defaultPageable());
 
       assertThat(result.getContent())
           .singleElement()
@@ -281,9 +280,8 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var literal = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 1L, "100% off");
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 2L, "50 off");
 
-      var result = transactionRepository.findAllByFilter(
-          filter().query("100%").build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(filter().query("100%").build(), defaultPageable());
 
       assertThat(result.getContent())
           .singleElement()
@@ -296,9 +294,8 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 1L, "anything");
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 2L, "another");
 
-      var result = transactionRepository.findAllByFilter(
-          filter().query("   ").build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(filter().query("   ").build(), defaultPageable());
 
       assertThat(result.getContent()).hasSize(2);
     }
@@ -315,9 +312,9 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var equal = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 100L);
       var above = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 101L);
 
-      var result = transactionRepository.findAllByFilter(
-          filter().amountMin(100L).build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(
+              filter().amountMin(100L).build(), defaultPageable());
 
       assertThat(result.getContent())
           .extracting(TransactionEntity::getId)
@@ -332,9 +329,9 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var equal = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 100L);
       var above = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 101L);
 
-      var result = transactionRepository.findAllByFilter(
-          filter().amountMax(100L).build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(
+              filter().amountMax(100L).build(), defaultPageable());
 
       assertThat(result.getContent())
           .extracting(TransactionEntity::getId)
@@ -351,9 +348,9 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var inHigh = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 200L);
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 201L);
 
-      var result = transactionRepository.findAllByFilter(
-          filter().amountMin(100L).amountMax(200L).build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(
+              filter().amountMin(100L).amountMax(200L).build(), defaultPageable());
 
       assertThat(result.getContent())
           .extracting(TransactionEntity::getId)
@@ -367,9 +364,9 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var exact = save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 100L);
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 101L);
 
-      var result = transactionRepository.findAllByFilter(
-          filter().amountMin(100L).amountMax(100L).build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(
+              filter().amountMin(100L).amountMax(100L).build(), defaultPageable());
 
       assertThat(result.getContent())
           .singleElement()
@@ -386,24 +383,32 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
     void allFiltersCombined() {
       var travelCategoryId = createCategory(ownerId, "Travel");
 
-      var match = save(ownerId, travelCategoryId, TODAY, TransactionType.EXPENSE, 150L, "Hotel in Paris");
+      var match =
+          save(ownerId, travelCategoryId, TODAY, TransactionType.EXPENSE, 150L, "Hotel in Paris");
       save(ownerId, travelCategoryId, TODAY, TransactionType.EXPENSE, 50L, "Hotel in Paris");
       save(ownerId, travelCategoryId, TODAY, TransactionType.EXPENSE, 150L, "Souvenir");
       save(ownerId, categoryId, TODAY, TransactionType.EXPENSE, 150L, "Hotel in Paris");
-      save(ownerId, travelCategoryId, TODAY.minusDays(10), TransactionType.EXPENSE, 150L, "Hotel in Paris");
+      save(
+          ownerId,
+          travelCategoryId,
+          TODAY.minusDays(10),
+          TransactionType.EXPENSE,
+          150L,
+          "Hotel in Paris");
       save(ownerId, travelCategoryId, TODAY, TransactionType.INCOME, 150L, "Hotel in Paris");
 
-      var result = transactionRepository.findAllByFilter(
-          filter()
-              .query("hotel")
-              .amountMin(100L)
-              .amountMax(200L)
-              .categoryId(travelCategoryId)
-              .start(TODAY.minusDays(1))
-              .end(TODAY.plusDays(1))
-              .type(TransactionType.EXPENSE)
-              .build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(
+              filter()
+                  .query("hotel")
+                  .amountMin(100L)
+                  .amountMax(200L)
+                  .categoryId(travelCategoryId)
+                  .start(TODAY.minusDays(1))
+                  .end(TODAY.plusDays(1))
+                  .type(TransactionType.EXPENSE)
+                  .build(),
+              defaultPageable());
 
       assertThat(result.getContent())
           .singleElement()
@@ -417,9 +422,9 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
       var otherOwnerTravel = createCategory(otherOwnerId, "Travel");
       save(otherOwnerId, otherOwnerTravel, TODAY, TransactionType.EXPENSE, 1L, "Hotel");
 
-      var result = transactionRepository.findAllByFilter(
-          filter().query("travel").build(),
-          defaultPageable());
+      var result =
+          transactionRepository.findAllByFilter(
+              filter().query("travel").build(), defaultPageable());
 
       assertThat(result.getContent()).isEmpty();
     }
@@ -438,7 +443,12 @@ class TransactionRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
   }
 
   private TransactionEntity save(
-      UUID owner, UUID category, LocalDate date, TransactionType type, long amount, String description) {
+      UUID owner,
+      UUID category,
+      LocalDate date,
+      TransactionType type,
+      long amount,
+      String description) {
     var entity = new TransactionEntity();
     entity.setOwnerId(owner);
     entity.setCategoryId(category);

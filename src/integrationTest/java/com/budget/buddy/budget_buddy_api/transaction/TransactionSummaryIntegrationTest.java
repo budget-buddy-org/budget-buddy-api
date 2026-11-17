@@ -45,24 +45,32 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
   // ── helpers ────────────────────────────────────────────────────────────────
 
   private UUID createCategory(String ownerId, String name) throws Exception {
-    var result = mvc.post().uri("/v1/categories")
-        .with(jwtForUser(ownerId))
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new CategoryWrite().name(name)))
-        .exchange();
+    var result =
+        mvc.post()
+            .uri("/v1/categories")
+            .with(jwtForUser(ownerId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json(new CategoryWrite().name(name)))
+            .exchange();
     return parseBody(result, Category.class).getId();
   }
 
   private void createTransaction(
-      String ownerId, UUID categoryId, long amount, TransactionType type, String currency, LocalDate date
-  ) {
-    var body = new TransactionWrite()
-        .categoryId(categoryId)
-        .amount(amount)
-        .type(type)
-        .currency(currency)
-        .date(date);
-    mvc.post().uri("/v1/transactions")
+      String ownerId,
+      UUID categoryId,
+      long amount,
+      TransactionType type,
+      String currency,
+      LocalDate date) {
+    var body =
+        new TransactionWrite()
+            .categoryId(categoryId)
+            .amount(amount)
+            .type(type)
+            .currency(currency)
+            .date(date);
+    mvc.post()
+        .uri("/v1/transactions")
         .with(jwtForUser(ownerId))
         .contentType(MediaType.APPLICATION_JSON)
         .content(json(body))
@@ -70,21 +78,31 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   private MonthlySummary getSummary(String ownerId) throws Exception {
-    var result = mvc.get().uri("/v1/transactions/summary?month={m}&currency={c}", TransactionSummaryIntegrationTest.MARCH, TransactionSummaryIntegrationTest.EUR)
-        .with(jwtForUser(ownerId))
-        .exchange();
+    var result =
+        mvc.get()
+            .uri(
+                "/v1/transactions/summary?month={m}&currency={c}",
+                TransactionSummaryIntegrationTest.MARCH,
+                TransactionSummaryIntegrationTest.EUR)
+            .with(jwtForUser(ownerId))
+            .exchange();
     assertThat(result).hasStatus(HttpStatus.OK);
     return parseBody(result, MonthlySummary.class);
   }
 
   private List<MonthlySummary> getTrend(String ownerId, String from) throws Exception {
-    var result = mvc.get().uri("/v1/transactions/summary/trend?from={f}&to={t}&currency={c}", from, TransactionSummaryIntegrationTest.MARCH, TransactionSummaryIntegrationTest.EUR)
-        .with(jwtForUser(ownerId))
-        .exchange();
+    var result =
+        mvc.get()
+            .uri(
+                "/v1/transactions/summary/trend?from={f}&to={t}&currency={c}",
+                from,
+                TransactionSummaryIntegrationTest.MARCH,
+                TransactionSummaryIntegrationTest.EUR)
+            .with(jwtForUser(ownerId))
+            .exchange();
     assertThat(result).hasStatus(HttpStatus.OK);
     return objectMapper.readValue(
-        result.getResponse().getContentAsString(),
-        new TypeReference<>() {});
+        result.getResponse().getContentAsString(), new TypeReference<>() {});
   }
 
   // ── tests ──────────────────────────────────────────────────────────────────
@@ -180,8 +198,10 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
       var myCat = createCategory(userId, "Mine");
       var otherCat = createCategory(otherUserId, "Other");
       createTransaction(userId, myCat, 1000L, EXPENSE, EUR, LocalDate.of(2026, Month.MARCH, 10));
-      createTransaction(otherUserId, otherCat, 9999L, EXPENSE, EUR, LocalDate.of(2026, Month.MARCH, 10));
-      createTransaction(otherUserId, otherCat, 8888L, INCOME, EUR, LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(
+          otherUserId, otherCat, 9999L, EXPENSE, EUR, LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(
+          otherUserId, otherCat, 8888L, INCOME, EUR, LocalDate.of(2026, Month.MARCH, 10));
 
       var summary = getSummary(userId);
 
@@ -205,9 +225,7 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("invalidSummaryRequests")
     void should_Return400_When_InvalidRequest(String uri) {
-      var result = mvc.get().uri(uri)
-          .with(jwtForUser(userId))
-          .exchange();
+      var result = mvc.get().uri(uri).with(jwtForUser(userId)).exchange();
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }
 
@@ -216,8 +234,7 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
           Named.of("Invalid month format", "/v1/transactions/summary?month=2026-13&currency=EUR"),
           Named.of("Currency too long", "/v1/transactions/summary?month=2026-03&currency=EURO"),
           Named.of("Missing month", "/v1/transactions/summary?currency=EUR"),
-          Named.of("Missing currency", "/v1/transactions/summary?month=2026-03")
-      );
+          Named.of("Missing currency", "/v1/transactions/summary?month=2026-03"));
     }
   }
 
@@ -234,11 +251,10 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
       var trend = getTrend(userId, "2026-01");
 
       assertThat(trend)
-          .extracting(MonthlySummary::getMonth, MonthlySummary::getIncome, MonthlySummary::getExpense)
+          .extracting(
+              MonthlySummary::getMonth, MonthlySummary::getIncome, MonthlySummary::getExpense)
           .containsExactly(
-              tuple("2026-01", 0L, 1000L),
-              tuple("2026-02", 2000L, 0L),
-              tuple(MARCH, 0L, 500L));
+              tuple("2026-01", 0L, 1000L), tuple("2026-02", 2000L, 0L), tuple(MARCH, 0L, 500L));
     }
 
     @Test
@@ -280,39 +296,43 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
       var myCat = createCategory(userId, "Mine");
       var otherCat = createCategory(otherUserId, "Other");
       createTransaction(userId, myCat, 1000L, EXPENSE, EUR, LocalDate.of(2026, Month.FEBRUARY, 10));
-      createTransaction(otherUserId, otherCat, 9999L, EXPENSE, EUR, LocalDate.of(2026, Month.FEBRUARY, 10));
+      createTransaction(
+          otherUserId, otherCat, 9999L, EXPENSE, EUR, LocalDate.of(2026, Month.FEBRUARY, 10));
 
       var trend = getTrend(userId, "2026-01");
 
       assertThat(trend)
           .extracting(MonthlySummary::getMonth, MonthlySummary::getExpense)
-          .containsExactly(
-              tuple("2026-01", 0L),
-              tuple("2026-02", 1000L),
-              tuple(MARCH, 0L));
+          .containsExactly(tuple("2026-01", 0L), tuple("2026-02", 1000L), tuple(MARCH, 0L));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("invalidTrendRequests")
     void should_Return400_When_InvalidRequest(String uri) {
-      var result = mvc.get().uri(uri)
-          .with(jwtForUser(userId))
-          .exchange();
+      var result = mvc.get().uri(uri).with(jwtForUser(userId)).exchange();
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }
 
     static Stream<Named<String>> invalidTrendRequests() {
       return Stream.of(
-          Named.of("From after to", "/v1/transactions/summary/trend?from=2026-05&to=2026-03&currency=EUR"),
-          Named.of("Range exceeds 24-month cap", "/v1/transactions/summary/trend?from=2024-01&to=2026-01&currency=EUR"),
-          Named.of("From malformed", "/v1/transactions/summary/trend?from=2026-13&to=2026-05&currency=EUR"),
-          Named.of("Missing from", "/v1/transactions/summary/trend?to=2026-05&currency=EUR")
-      );
+          Named.of(
+              "From after to",
+              "/v1/transactions/summary/trend?from=2026-05&to=2026-03&currency=EUR"),
+          Named.of(
+              "Range exceeds 24-month cap",
+              "/v1/transactions/summary/trend?from=2024-01&to=2026-01&currency=EUR"),
+          Named.of(
+              "From malformed",
+              "/v1/transactions/summary/trend?from=2026-13&to=2026-05&currency=EUR"),
+          Named.of("Missing from", "/v1/transactions/summary/trend?to=2026-05&currency=EUR"));
     }
 
     @Test
     void should_Return401_When_NotAuthenticated() {
-      var result = mvc.get().uri("/v1/transactions/summary/trend?from=2026-01&to=2026-03&currency=EUR").exchange();
+      var result =
+          mvc.get()
+              .uri("/v1/transactions/summary/trend?from=2026-01&to=2026-03&currency=EUR")
+              .exchange();
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
   }

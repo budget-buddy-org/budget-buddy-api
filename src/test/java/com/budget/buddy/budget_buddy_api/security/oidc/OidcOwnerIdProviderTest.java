@@ -3,6 +3,7 @@ package com.budget.buddy.budget_buddy_api.security.oidc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -32,7 +33,7 @@ class OidcOwnerIdProviderTest {
       // Given
       var userId = UUID.randomUUID();
       var auth = mock(LocalUserAuthentication.class);
-      org.mockito.Mockito.when(auth.getLocalUserId()).thenReturn(userId);
+      when(auth.getLocalUserId()).thenReturn(userId);
       SecurityContextHolder.getContext().setAuthentication(auth);
 
       // When
@@ -45,8 +46,9 @@ class OidcOwnerIdProviderTest {
     @Test
     void should_ThrowInvalidBearerTokenException_When_AuthenticationIsNotLocalUser() {
       // Given
-      var auth = new AnonymousAuthenticationToken(
-          "key", "anonymousUser", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
+      var auth =
+          new AnonymousAuthenticationToken(
+              "key", "anonymousUser", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
       SecurityContextHolder.getContext().setAuthentication(auth);
 
       // When / Then

@@ -24,18 +24,14 @@ public class UserPreferencesDefaultsProvider {
   private final HttpServletRequest request;
 
   public UserPreferences get() {
-    return resolveLocale()
-        .map(this::fromLocale)
-        .orElseGet(UserPreferences::new);
+    return resolveLocale().map(this::fromLocale).orElseGet(UserPreferences::new);
   }
 
   private UserPreferences fromLocale(Locale locale) {
     var preferences = new UserPreferences();
     preferences.setLanguage(locale.getLanguage());
 
-    resolveCurrency(locale)
-        .map(Currency::getCurrencyCode)
-        .ifPresent(preferences::setCurrency);
+    resolveCurrency(locale).map(Currency::getCurrencyCode).ifPresent(preferences::setCurrency);
 
     return preferences;
   }
@@ -60,5 +56,4 @@ public class UserPreferencesDefaultsProvider {
       return Optional.empty();
     }
   }
-
 }

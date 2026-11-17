@@ -6,9 +6,9 @@ import org.springframework.security.core.AuthenticationException;
 /**
  * Resolves the ID of the currently authenticated owner.
  *
- * <p>The production binding reads the user ID from the
- * {@link org.springframework.security.core.context.SecurityContextHolder}
- * — see {@code OidcOwnerIdProvider}.
+ * <p>The production binding reads the user ID from the {@link
+ * org.springframework.security.core.context.SecurityContextHolder} — see {@code
+ * OidcOwnerIdProvider}.
  *
  * @param <OWNER_ID> the owner identifier type
  */
@@ -23,5 +23,4 @@ public interface OwnerIdProvider<OWNER_ID> extends Supplier<OWNER_ID> {
    */
   @Override
   OWNER_ID get() throws AuthenticationException;
-
 }

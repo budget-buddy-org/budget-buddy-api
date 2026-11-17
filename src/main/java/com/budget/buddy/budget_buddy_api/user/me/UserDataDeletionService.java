@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <p>Deletion order is explicit and foreign-key-aware: {@code transactions.category_id} references
  * {@code categories} via a non-cascading FK, so transactions must be deleted before categories.
- * Each delete is scoped to the current owner by the underlying {@code OwnableEntityService}.
- * When a new ownable feature is added, add an explicit delete call here in FK-safe order.
+ * Each delete is scoped to the current owner by the underlying {@code OwnableEntityService}. When a
+ * new ownable feature is added, add an explicit delete call here in FK-safe order.
  */
 @Service
 @Transactional

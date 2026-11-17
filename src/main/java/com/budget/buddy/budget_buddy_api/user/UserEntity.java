@@ -8,9 +8,7 @@ import lombok.Setter;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-/**
- * User entity representing a local user mapped to an external OIDC identity.
- */
+/** User entity representing a local user mapped to an external OIDC identity. */
 @Table("users")
 @Getter
 @Setter
@@ -22,5 +20,4 @@ public class UserEntity extends BaseEntity<UUID> {
 
   @Column("oidc_issuer")
   private String oidcIssuer;
-
 }

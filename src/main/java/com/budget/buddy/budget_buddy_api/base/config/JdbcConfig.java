@@ -32,12 +32,12 @@ public class JdbcConfig {
 
   @Bean
   public JdbcCustomConversions jdbcCustomConversions() {
-    var converters = List.of(
-        new CustomConverters.CurrencyReadingConverter(),
-        new CustomConverters.CurrencyWritingConverter(),
-        new CustomConverters.TimestampToOffsetDateTimeConverter(),
-        new CustomConverters.TransactionTypeWritingConverter()
-    );
+    var converters =
+        List.of(
+            new CustomConverters.CurrencyReadingConverter(),
+            new CustomConverters.CurrencyWritingConverter(),
+            new CustomConverters.TimestampToOffsetDateTimeConverter(),
+            new CustomConverters.TransactionTypeWritingConverter());
 
     return new JdbcCustomConversions(converters);
   }
@@ -64,7 +64,8 @@ public class JdbcConfig {
     }
 
     @ReadingConverter
-    static class TimestampToOffsetDateTimeConverter implements Converter<Timestamp, OffsetDateTime> {
+    static class TimestampToOffsetDateTimeConverter
+        implements Converter<Timestamp, OffsetDateTime> {
 
       @Override
       public OffsetDateTime convert(Timestamp source) {
@@ -81,5 +82,4 @@ public class JdbcConfig {
       }
     }
   }
-
 }

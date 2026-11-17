@@ -7,11 +7,11 @@ import org.mapstruct.MappingTarget;
 /**
  * Base mapper interface for ownable entities.
  *
- * <p>Extends {@link BaseEntityMapper} with an additional {@code ownerId} ignore mapping so that
- * the owner-scoping field is never overwritten during create or update operations.
+ * <p>Extends {@link BaseEntityMapper} with an additional {@code ownerId} ignore mapping so that the
+ * owner-scoping field is never overwritten during create or update operations.
  *
- * <p>Type parameters match {@link BaseEntityMapper}; {@code E} is further constrained to
- * {@link OwnableEntity}.
+ * <p>Type parameters match {@link BaseEntityMapper}; {@code E} is further constrained to {@link
+ * OwnableEntity}.
  */
 public interface OwnableEntityMapper<E extends OwnableEntity<?>, C, R, U, L>
     extends BaseEntityMapper<E, C, R, U, L> {

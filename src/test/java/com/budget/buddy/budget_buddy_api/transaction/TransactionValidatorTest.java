@@ -1,7 +1,13 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
+
 import com.budget.buddy.budget_buddy_api.base.exception.ValidationException;
 import com.budget.buddy.budget_buddy_api.category.CategoryService;
+import java.util.Currency;
+import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,21 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Currency;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class TransactionValidatorTest {
 
-  @Mock
-  CategoryService categoryService;
+  @Mock CategoryService categoryService;
 
-  @InjectMocks
-  TransactionValidator validator;
+  @InjectMocks TransactionValidator validator;
 
   TransactionEntity validEntity(UUID categoryId) {
     var entity = new TransactionEntity();

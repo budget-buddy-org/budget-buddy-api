@@ -11,7 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserPreferencesService
-    extends OwnableEntityService<UserPreferencesEntity, UUID, UserPreferencesWrite, UserPreferences, UserPreferencesWrite, UserPreferences> {
+    extends OwnableEntityService<
+        UserPreferencesEntity,
+        UUID,
+        UserPreferencesWrite,
+        UserPreferences,
+        UserPreferencesWrite,
+        UserPreferences> {
 
   private final UserPreferencesDefaultsProvider defaultsProvider;
 
@@ -19,8 +25,7 @@ public class UserPreferencesService
       UserPreferencesRepository repository,
       UserPreferencesMapper mapper,
       OwnerIdProvider<UUID> ownerIdProvider,
-      UserPreferencesDefaultsProvider defaultsProvider
-  ) {
+      UserPreferencesDefaultsProvider defaultsProvider) {
     super(repository, mapper, Collections.emptySet(), ownerIdProvider);
     this.defaultsProvider = defaultsProvider;
   }
@@ -41,13 +46,14 @@ public class UserPreferencesService
   public UserPreferences update(UserPreferencesWrite write) {
     var ownerId = getOwnerIdProvider().get();
 
-    var entity = getRepository()
-        .findByOwnerId(ownerId)
-        .orElseGet(() -> {
-          var fresh = getMapper().toEntity(write);
-          fresh.setOwnerId(ownerId);
-          return fresh;
-        });
+    var entity =
+        getRepository()
+            .findByOwnerId(ownerId)
+            .orElseGet(() -> {
+              var fresh = getMapper().toEntity(write);
+              fresh.setOwnerId(ownerId);
+              return fresh;
+            });
 
     getMapper().updateEntity(write, entity);
     return getMapper().toModel(getRepository().save(entity));

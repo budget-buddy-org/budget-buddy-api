@@ -36,5 +36,4 @@ public class TransactionEntity extends OwnableEntity<UUID> {
 
   @Column("description")
   private String description;
-
 }

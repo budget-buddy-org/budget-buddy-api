@@ -26,11 +26,13 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
   private UUID otherUserCategoryId;
 
   private UUID createCategory(String ownerId, String name) throws Exception {
-    var result = mvc.post().uri("/v1/categories")
-        .with(jwtForUser(ownerId))
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new CategoryWrite().name(name)))
-        .exchange();
+    var result =
+        mvc.post()
+            .uri("/v1/categories")
+            .with(jwtForUser(ownerId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json(new CategoryWrite().name(name)))
+            .exchange();
 
     return parseBody(result, Category.class).getId();
   }
@@ -39,30 +41,31 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     return createTransaction(ownerId, categoryId, null);
   }
 
-  private Transaction createTransaction(String ownerId, UUID categoryId, String description) throws Exception {
-    return createTransaction(ownerId, categoryId, description, 1000L, LocalDate.of(2026, Month.MARCH, 1));
+  private Transaction createTransaction(String ownerId, UUID categoryId, String description)
+      throws Exception {
+    return createTransaction(
+        ownerId, categoryId, description, 1000L, LocalDate.of(2026, Month.MARCH, 1));
   }
 
   private Transaction createTransaction(
-      String ownerId,
-      UUID categoryId,
-      String description,
-      long amount,
-      LocalDate date
-  ) throws Exception {
-    var body = new TransactionWrite()
-        .categoryId(categoryId)
-        .amount(amount)
-        .type(TransactionType.EXPENSE)
-        .currency("EUR")
-        .date(date)
-        .description(description);
+      String ownerId, UUID categoryId, String description, long amount, LocalDate date)
+      throws Exception {
+    var body =
+        new TransactionWrite()
+            .categoryId(categoryId)
+            .amount(amount)
+            .type(TransactionType.EXPENSE)
+            .currency("EUR")
+            .date(date)
+            .description(description);
 
-    var result = mvc.post().uri("/v1/transactions")
-        .with(jwtForUser(ownerId))
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(body))
-        .exchange();
+    var result =
+        mvc.post()
+            .uri("/v1/transactions")
+            .with(jwtForUser(ownerId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json(body))
+            .exchange();
 
     return parseBody(result, Transaction.class);
   }
@@ -92,65 +95,79 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_ReturnLocationHeader_When_Created() {
-      var result = mvc.post().uri("/v1/transactions")
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionWrite()
-              .categoryId(userCategoryId)
-              .amount(500L)
-              .type(TransactionType.INCOME)
-              .currency("EUR")
-              .date(LocalDate.of(2026, Month.MARCH, 1))))
-          .exchange();
+      var result =
+          mvc.post()
+              .uri("/v1/transactions")
+              .with(jwtForUser(userId))
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(
+                  json(
+                      new TransactionWrite()
+                          .categoryId(userCategoryId)
+                          .amount(500L)
+                          .type(TransactionType.INCOME)
+                          .currency("EUR")
+                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+              .exchange();
 
-      assertThat(result)
-          .hasStatus(HttpStatus.CREATED)
-          .containsHeader("Location");
+      assertThat(result).hasStatus(HttpStatus.CREATED).containsHeader("Location");
     }
 
     @Test
     void should_Return400_When_CategoryBelongsToOtherUser() {
-      var result = mvc.post().uri("/v1/transactions")
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionWrite()
-              .categoryId(otherUserCategoryId)
-              .amount(1000L)
-              .type(TransactionType.EXPENSE)
-              .currency("EUR")
-              .date(LocalDate.of(2026, Month.MARCH, 1))))
-          .exchange();
+      var result =
+          mvc.post()
+              .uri("/v1/transactions")
+              .with(jwtForUser(userId))
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(
+                  json(
+                      new TransactionWrite()
+                          .categoryId(otherUserCategoryId)
+                          .amount(1000L)
+                          .type(TransactionType.EXPENSE)
+                          .currency("EUR")
+                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }
 
     @Test
     void should_Return400_When_CategoryDoesNotExist() {
-      var result = mvc.post().uri("/v1/transactions")
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionWrite()
-              .categoryId(UUID.randomUUID())
-              .amount(1000L)
-              .type(TransactionType.EXPENSE)
-              .currency("EUR")
-              .date(LocalDate.of(2026, Month.MARCH, 1))))
-          .exchange();
+      var result =
+          mvc.post()
+              .uri("/v1/transactions")
+              .with(jwtForUser(userId))
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(
+                  json(
+                      new TransactionWrite()
+                          .categoryId(UUID.randomUUID())
+                          .amount(1000L)
+                          .type(TransactionType.EXPENSE)
+                          .currency("EUR")
+                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }
 
     @Test
     void should_Return401_When_NotAuthenticated() {
-      var result = mvc.post().uri("/v1/transactions")
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionWrite()
-              .categoryId(userCategoryId)
-              .amount(1000L)
-              .type(TransactionType.EXPENSE)
-              .currency("EUR")
-              .date(LocalDate.of(2026, Month.MARCH, 1))))
-          .exchange();
+      var result =
+          mvc.post()
+              .uri("/v1/transactions")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(
+                  json(
+                      new TransactionWrite()
+                          .categoryId(userCategoryId)
+                          .amount(1000L)
+                          .type(TransactionType.EXPENSE)
+                          .currency("EUR")
+                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
@@ -163,9 +180,11 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_ReturnTransaction_When_Owner() throws Exception {
       var created = createTransaction(userId, userCategoryId);
 
-      var result = mvc.get().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get()
+              .uri("/v1/transactions/{id}", created.getId())
+              .with(jwtForUser(userId))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var transaction = parseBody(result, Transaction.class);
@@ -177,18 +196,22 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return404_When_TransactionBelongsToOtherUser() throws Exception {
       var created = createTransaction(otherUserId, otherUserCategoryId);
 
-      var result = mvc.get().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get()
+              .uri("/v1/transactions/{id}", created.getId())
+              .with(jwtForUser(userId))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
     }
 
     @Test
     void should_Return404_When_TransactionNotFound() {
-      var result = mvc.get().uri("/v1/transactions/{id}", UUID.randomUUID())
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get()
+              .uri("/v1/transactions/{id}", UUID.randomUUID())
+              .with(jwtForUser(userId))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
     }
@@ -197,8 +220,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return401_When_NotAuthenticated() throws Exception {
       var created = createTransaction(userId, userCategoryId);
 
-      var result = mvc.get().uri("/v1/transactions/{id}", created.getId())
-          .exchange();
+      var result = mvc.get().uri("/v1/transactions/{id}", created.getId()).exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
@@ -211,18 +233,21 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_UpdateTransaction_When_Owner() throws Exception {
       var created = createTransaction(userId, userCategoryId, "original");
 
-      var updateBody = new TransactionWrite()
-          .categoryId(userCategoryId)
-          .amount(5000L)
-          .type(TransactionType.INCOME)
-          .currency("USD")
-          .date(LocalDate.of(2026, Month.JUNE, 1));
+      var updateBody =
+          new TransactionWrite()
+              .categoryId(userCategoryId)
+              .amount(5000L)
+              .type(TransactionType.INCOME)
+              .currency("USD")
+              .date(LocalDate.of(2026, Month.JUNE, 1));
 
-      var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(updateBody))
-          .exchange();
+      var result =
+          mvc.put()
+              .uri("/v1/transactions/{id}", created.getId())
+              .with(jwtForUser(userId))
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(json(updateBody))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var updated = parseBody(result, Transaction.class);
@@ -240,16 +265,20 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return400_When_UpdateWithOtherUserCategory() throws Exception {
       var created = createTransaction(userId, userCategoryId);
 
-      var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionWrite()
-              .categoryId(otherUserCategoryId)
-              .amount(1000L)
-              .type(TransactionType.EXPENSE)
-              .currency("EUR")
-              .date(LocalDate.of(2026, Month.MARCH, 1))))
-          .exchange();
+      var result =
+          mvc.put()
+              .uri("/v1/transactions/{id}", created.getId())
+              .with(jwtForUser(userId))
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(
+                  json(
+                      new TransactionWrite()
+                          .categoryId(otherUserCategoryId)
+                          .amount(1000L)
+                          .type(TransactionType.EXPENSE)
+                          .currency("EUR")
+                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }
@@ -258,16 +287,20 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return404_When_TransactionBelongsToOtherUser() throws Exception {
       var created = createTransaction(otherUserId, otherUserCategoryId);
 
-      var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionWrite()
-              .categoryId(userCategoryId)
-              .amount(1000L)
-              .type(TransactionType.EXPENSE)
-              .currency("EUR")
-              .date(LocalDate.of(2026, Month.MARCH, 1))))
-          .exchange();
+      var result =
+          mvc.put()
+              .uri("/v1/transactions/{id}", created.getId())
+              .with(jwtForUser(userId))
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(
+                  json(
+                      new TransactionWrite()
+                          .categoryId(userCategoryId)
+                          .amount(1000L)
+                          .type(TransactionType.EXPENSE)
+                          .currency("EUR")
+                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
     }
@@ -276,15 +309,19 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return401_When_NotAuthenticated() throws Exception {
       var created = createTransaction(userId, userCategoryId);
 
-      var result = mvc.put().uri("/v1/transactions/{id}", created.getId())
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionWrite()
-              .categoryId(userCategoryId)
-              .amount(1000L)
-              .type(TransactionType.EXPENSE)
-              .currency("EUR")
-              .date(LocalDate.of(2026, Month.MARCH, 1))))
-          .exchange();
+      var result =
+          mvc.put()
+              .uri("/v1/transactions/{id}", created.getId())
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(
+                  json(
+                      new TransactionWrite()
+                          .categoryId(userCategoryId)
+                          .amount(1000L)
+                          .type(TransactionType.EXPENSE)
+                          .currency("EUR")
+                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
@@ -297,15 +334,19 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_DeleteTransaction_When_Owner() throws Exception {
       var created = createTransaction(userId, userCategoryId);
 
-      var deleteResult = mvc.delete().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .exchange();
+      var deleteResult =
+          mvc.delete()
+              .uri("/v1/transactions/{id}", created.getId())
+              .with(jwtForUser(userId))
+              .exchange();
 
       assertThat(deleteResult).hasStatus(HttpStatus.NO_CONTENT);
 
-      var getResult = mvc.get().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .exchange();
+      var getResult =
+          mvc.get()
+              .uri("/v1/transactions/{id}", created.getId())
+              .with(jwtForUser(userId))
+              .exchange();
 
       assertThat(getResult).hasStatus(HttpStatus.NOT_FOUND);
     }
@@ -314,9 +355,11 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return404_When_TransactionBelongsToOtherUser() throws Exception {
       var created = createTransaction(otherUserId, otherUserCategoryId);
 
-      var result = mvc.delete().uri("/v1/transactions/{id}", created.getId())
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.delete()
+              .uri("/v1/transactions/{id}", created.getId())
+              .with(jwtForUser(userId))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
     }
@@ -325,8 +368,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return401_When_NotAuthenticated() throws Exception {
       var created = createTransaction(userId, userCategoryId);
 
-      var result = mvc.delete().uri("/v1/transactions/{id}", created.getId())
-          .exchange();
+      var result = mvc.delete().uri("/v1/transactions/{id}", created.getId()).exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
@@ -341,9 +383,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var txn2 = createTransaction(userId, userCategoryId);
       createTransaction(otherUserId, otherUserCategoryId);
 
-      var result = mvc.get().uri("/v1/transactions")
-          .with(jwtForUser(userId))
-          .exchange();
+      var result = mvc.get().uri("/v1/transactions").with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
@@ -359,9 +399,11 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       createTransaction(userId, userCategoryId);
       createTransaction(userId, otherCategoryId);
 
-      var result = mvc.get().uri("/v1/transactions?categoryId={categoryId}", userCategoryId)
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get()
+              .uri("/v1/transactions?categoryId={categoryId}", userCategoryId)
+              .with(jwtForUser(userId))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
@@ -373,45 +415,48 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_FilterByDateRange() throws Exception {
-      mvc.post().uri("/v1/transactions")
+      mvc.post()
+          .uri("/v1/transactions")
           .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionWrite()
-              .categoryId(userCategoryId)
-              .amount(100L)
-              .type(TransactionType.EXPENSE)
-              .currency("EUR")
-              .date(LocalDate.of(2026, Month.JANUARY, 1))))
+          .content(
+              json(
+                  new TransactionWrite()
+                      .categoryId(userCategoryId)
+                      .amount(100L)
+                      .type(TransactionType.EXPENSE)
+                      .currency("EUR")
+                      .date(LocalDate.of(2026, Month.JANUARY, 1))))
           .exchange();
 
-      mvc.post().uri("/v1/transactions")
+      mvc.post()
+          .uri("/v1/transactions")
           .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new TransactionWrite()
-              .categoryId(userCategoryId)
-              .amount(200L)
-              .type(TransactionType.EXPENSE)
-              .currency("EUR")
-              .date(LocalDate.of(2026, Month.JUNE, 1))))
+          .content(
+              json(
+                  new TransactionWrite()
+                      .categoryId(userCategoryId)
+                      .amount(200L)
+                      .type(TransactionType.EXPENSE)
+                      .currency("EUR")
+                      .date(LocalDate.of(2026, Month.JUNE, 1))))
           .exchange();
 
-      var result = mvc.get().uri("/v1/transactions?start=2026-01-01&end=2026-03-31")
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get()
+              .uri("/v1/transactions?start=2026-01-01&end=2026-03-31")
+              .with(jwtForUser(userId))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems())
-          .hasSize(1)
-          .first()
-          .returns(100L, Transaction::getAmount);
+      assertThat(page.getItems()).hasSize(1).first().returns(100L, Transaction::getAmount);
     }
 
     @Test
     void should_ReturnEmptyList_When_NoTransactions() throws Exception {
-      var result = mvc.get().uri("/v1/transactions")
-          .with(jwtForUser(userId))
-          .exchange();
+      var result = mvc.get().uri("/v1/transactions").with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
@@ -421,8 +466,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return401_When_NotAuthenticated() {
-      var result = mvc.get().uri("/v1/transactions")
-          .exchange();
+      var result = mvc.get().uri("/v1/transactions").exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
@@ -432,15 +476,12 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var match = createTransaction(userId, userCategoryId, "Morning Coffee");
       createTransaction(userId, userCategoryId, "Lunch");
 
-      var result = mvc.get().uri("/v1/transactions?query={q}", "coffee")
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get().uri("/v1/transactions?query={q}", "coffee").with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems())
-          .singleElement()
-          .returns(match.getId(), Transaction::getId);
+      assertThat(page.getItems()).singleElement().returns(match.getId(), Transaction::getId);
     }
 
     @Test
@@ -449,28 +490,34 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var match = createTransaction(userId, travelCategoryId, "Hotel");
       createTransaction(userId, userCategoryId, "Groceries");
 
-      var result = mvc.get().uri("/v1/transactions?query={q}", "TRAV")
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get().uri("/v1/transactions?query={q}", "TRAV").with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems())
-          .singleElement()
-          .returns(match.getId(), Transaction::getId);
+      assertThat(page.getItems()).singleElement().returns(match.getId(), Transaction::getId);
     }
 
     @Test
     void should_FilterByAmountRange_Inclusive() throws Exception {
-      var low = createTransaction(userId, userCategoryId, "low", 100L, LocalDate.of(2026, Month.MARCH, 1));
-      var mid = createTransaction(userId, userCategoryId, "mid", 500L, LocalDate.of(2026, Month.MARCH, 1));
-      var high = createTransaction(userId, userCategoryId, "high", 1000L, LocalDate.of(2026, Month.MARCH, 1));
+      var low =
+          createTransaction(
+              userId, userCategoryId, "low", 100L, LocalDate.of(2026, Month.MARCH, 1));
+      var mid =
+          createTransaction(
+              userId, userCategoryId, "mid", 500L, LocalDate.of(2026, Month.MARCH, 1));
+      var high =
+          createTransaction(
+              userId, userCategoryId, "high", 1000L, LocalDate.of(2026, Month.MARCH, 1));
       createTransaction(userId, userCategoryId, "tooLow", 99L, LocalDate.of(2026, Month.MARCH, 1));
-      createTransaction(userId, userCategoryId, "tooHigh", 1001L, LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(
+          userId, userCategoryId, "tooHigh", 1001L, LocalDate.of(2026, Month.MARCH, 1));
 
-      var result = mvc.get().uri("/v1/transactions?amountMin=100&amountMax=1000")
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get()
+              .uri("/v1/transactions?amountMin=100&amountMax=1000")
+              .with(jwtForUser(userId))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
@@ -481,46 +528,54 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_FilterByAmount_Exact_When_MinEqualsMax() throws Exception {
-      var exact = createTransaction(userId, userCategoryId, "exact", 250L, LocalDate.of(2026, Month.MARCH, 1));
-      createTransaction(userId, userCategoryId, "off-by-one", 251L, LocalDate.of(2026, Month.MARCH, 1));
+      var exact =
+          createTransaction(
+              userId, userCategoryId, "exact", 250L, LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(
+          userId, userCategoryId, "off-by-one", 251L, LocalDate.of(2026, Month.MARCH, 1));
 
-      var result = mvc.get().uri("/v1/transactions?amountMin=250&amountMax=250")
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get()
+              .uri("/v1/transactions?amountMin=250&amountMax=250")
+              .with(jwtForUser(userId))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems())
-          .singleElement()
-          .returns(exact.getId(), Transaction::getId);
+      assertThat(page.getItems()).singleElement().returns(exact.getId(), Transaction::getId);
     }
 
     @Test
     void should_CombineQueryAndAmount_AndCategory() throws Exception {
       var travelCategoryId = createCategory(userId, "Travel");
-      var match = createTransaction(userId, travelCategoryId, "Hotel in Paris", 500L, LocalDate.of(2026, Month.MARCH, 1));
-      createTransaction(userId, travelCategoryId, "Hotel in Paris", 50L, LocalDate.of(2026, Month.MARCH, 1));
-      createTransaction(userId, userCategoryId, "Hotel in Paris", 500L, LocalDate.of(2026, Month.MARCH, 1));
-      createTransaction(userId, travelCategoryId, "Souvenir", 500L, LocalDate.of(2026, Month.MARCH, 1));
+      var match =
+          createTransaction(
+              userId, travelCategoryId, "Hotel in Paris", 500L, LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(
+          userId, travelCategoryId, "Hotel in Paris", 50L, LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(
+          userId, userCategoryId, "Hotel in Paris", 500L, LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(
+          userId, travelCategoryId, "Souvenir", 500L, LocalDate.of(2026, Month.MARCH, 1));
 
-      var result = mvc.get().uri(
-              "/v1/transactions?query={q}&amountMin=100&amountMax=1000&categoryId={c}",
-              "hotel", travelCategoryId)
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get()
+              .uri(
+                  "/v1/transactions?query={q}&amountMin=100&amountMax=1000&categoryId={c}",
+                  "hotel",
+                  travelCategoryId)
+              .with(jwtForUser(userId))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems())
-          .singleElement()
-          .returns(match.getId(), Transaction::getId);
+      assertThat(page.getItems()).singleElement().returns(match.getId(), Transaction::getId);
     }
 
     @Test
     void should_Return400_When_AmountMinBelowOne() {
-      var result = mvc.get().uri("/v1/transactions?amountMin=0")
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get().uri("/v1/transactions?amountMin=0").with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }
@@ -529,9 +584,8 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return400_When_QueryExceedsMaxLength() {
       var tooLong = "x".repeat(256);
 
-      var result = mvc.get().uri("/v1/transactions?query={q}", tooLong)
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get().uri("/v1/transactions?query={q}", tooLong).with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }

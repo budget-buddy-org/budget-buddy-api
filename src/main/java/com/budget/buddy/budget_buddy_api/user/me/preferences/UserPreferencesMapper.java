@@ -10,11 +10,16 @@ import org.springframework.data.domain.Page;
 
 @Mapper(config = MapstructConfig.class, uses = CurrencyMapper.class)
 public interface UserPreferencesMapper
-    extends OwnableEntityMapper<UserPreferencesEntity, UserPreferencesWrite, UserPreferences, UserPreferencesWrite, UserPreferences> {
+    extends OwnableEntityMapper<
+        UserPreferencesEntity,
+        UserPreferencesWrite,
+        UserPreferences,
+        UserPreferencesWrite,
+        UserPreferences> {
 
   @Override
   default UserPreferences toPage(Page<UserPreferencesEntity> page) {
-    throw new UnsupportedOperationException("UserPreferences is a singleton resource — paged list is not supported");
+    throw new UnsupportedOperationException(
+        "UserPreferences is a singleton resource — paged list is not supported");
   }
-
 }

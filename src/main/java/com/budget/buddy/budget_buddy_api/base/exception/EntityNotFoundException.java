@@ -7,5 +7,4 @@ public class EntityNotFoundException extends NoSuchElementException {
   public EntityNotFoundException(String message) {
     super(message);
   }
-
 }

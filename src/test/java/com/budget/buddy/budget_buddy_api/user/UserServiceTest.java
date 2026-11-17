@@ -16,14 +16,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-  @Mock
-  private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-  @Mock
-  private Supplier<UUID> idGenerator;
+  @Mock private Supplier<UUID> idGenerator;
 
-  @Mock
-  private OwnerIdProvider<UUID> ownerIdProvider;
+  @Mock private OwnerIdProvider<UUID> ownerIdProvider;
 
   private UserService userService;
 
@@ -58,5 +55,4 @@ class UserServiceTest {
     // Then
     assertThat(actual).isEqualTo(existingId);
   }
-
 }

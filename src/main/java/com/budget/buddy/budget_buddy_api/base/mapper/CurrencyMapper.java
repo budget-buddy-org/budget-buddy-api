@@ -23,5 +23,4 @@ public interface CurrencyMapper {
 
     return currency.getCurrencyCode();
   }
-
 }

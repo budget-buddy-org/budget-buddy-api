@@ -1,10 +1,8 @@
 package com.budget.buddy.budget_buddy_api.user;
 
-import com.budget.buddy.budget_buddy_api.BaseIntegrationTest;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import com.budget.buddy.budget_buddy_api.BaseIntegrationTest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -13,14 +11,14 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @DisplayName("UserRepository Integration Tests")
 class UserRepositoryIntegrationTest extends BaseIntegrationTest {
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
   @Test
   void upsert_Should_InsertAndReturnId_When_NoUserWithSameSubject() {
@@ -33,9 +31,7 @@ class UserRepositoryIntegrationTest extends BaseIntegrationTest {
     UUID actual = userRepository.upsert(newId, subject, issuer);
 
     // Then
-    assertThat(actual)
-        .as("Returned ID should be equal to new ID")
-        .isEqualTo(newId);
+    assertThat(actual).as("Returned ID should be equal to new ID").isEqualTo(newId);
   }
 
   @Test
@@ -53,9 +49,7 @@ class UserRepositoryIntegrationTest extends BaseIntegrationTest {
     UUID actual = userRepository.upsert(newId, subject, issuer);
 
     // Then
-    assertThat(actual)
-        .as("Returned ID should be equal to old ID")
-        .isEqualTo(oldId);
+    assertThat(actual).as("Returned ID should be equal to old ID").isEqualTo(oldId);
   }
 
   @Test

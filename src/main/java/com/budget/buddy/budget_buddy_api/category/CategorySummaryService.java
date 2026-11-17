@@ -2,13 +2,12 @@ package com.budget.buddy.budget_buddy_api.category;
 
 import com.budget.buddy.budget_buddy_api.base.crudl.ownable.OwnerIdProvider;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategorySpendingSummary;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +26,8 @@ public class CategorySummaryService {
     var end = yearMonth.atEndOfMonth();
     var ownerId = ownerIdProvider.get();
 
-    var rows = repository.getSummary(ownerId, start, end, currency)
-        .stream()
-        .map(mapper::toModel)
-        .toList();
+    var rows =
+        repository.getSummary(ownerId, start, end, currency).stream().map(mapper::toModel).toList();
     return new CategorySpendingSummary(month, currency, rows);
   }
-
 }

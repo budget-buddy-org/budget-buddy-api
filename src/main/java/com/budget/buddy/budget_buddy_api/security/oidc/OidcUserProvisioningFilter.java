@@ -16,15 +16,14 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Upgrades the post-authentication {@link JwtAuthenticationToken} to a
- * {@link LocalUserAuthentication} carrying the resolved local user UUID.
+ * Upgrades the post-authentication {@link JwtAuthenticationToken} to a {@link
+ * LocalUserAuthentication} carrying the resolved local user UUID.
  *
- * <p>On the first request from a new OIDC user, a local row is provisioned
- * automatically (JIT provisioning) — subsequent requests are served from the
- * in-process cache in {@link UserService}.
+ * <p>On the first request from a new OIDC user, a local row is provisioned automatically (JIT
+ * provisioning) — subsequent requests are served from the in-process cache in {@link UserService}.
  *
- * <p>If the principal is already a {@link LocalUserAuthentication} (e.g. the
- * upgrade has run earlier in the chain), the filter is a no-op.
+ * <p>If the principal is already a {@link LocalUserAuthentication} (e.g. the upgrade has run
+ * earlier in the chain), the filter is a no-op.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -36,10 +35,8 @@ public class OidcUserProvisioningFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      FilterChain filterChain
-  ) throws ServletException, IOException {
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
     var context = SecurityContextHolder.getContext();
     var authentication = context.getAuthentication();
 
@@ -56,7 +53,8 @@ public class OidcUserProvisioningFilter extends OncePerRequestFilter {
       log.debug("Upgrading JWT authentication: issuer={}", oidcIssuer);
       var localUserId = userService.findOrCreateByOidcSubject(oidcSubject, oidcIssuer.toString());
       MDC.put(USER_ID_MDC_KEY, localUserId.toString());
-      context.setAuthentication(new LocalUserAuthentication(jwt, jwtAuth.getAuthorities(), localUserId));
+      context.setAuthentication(
+          new LocalUserAuthentication(jwt, jwtAuth.getAuthorities(), localUserId));
     }
 
     try {

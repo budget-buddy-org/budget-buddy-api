@@ -18,9 +18,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
- * Security configuration for the application.
- * The API is a stateless OIDC resource server — all authentication is handled
- * by the external OIDC provider. JWTs are validated against the configured issuer.
+ * Security configuration for the application. The API is a stateless OIDC resource server — all
+ * authentication is handled by the external OIDC provider. JWTs are validated against the
+ * configured issuer.
  */
 @Configuration
 @EnableWebSecurity
@@ -28,19 +28,19 @@ public class SecurityConfig {
 
   @Bean
   SecurityFilterChain securityFilterChain(
-      HttpSecurity http,
-      CorsConfigurationSource corsConfigurationSource,
-      UserService userService
-  ) {
-    http
-        .cors(cors -> cors.configurationSource(corsConfigurationSource))
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/actuator/health", "/actuator/health/liveness", "/actuator/health/readiness").permitAll()
-            .anyRequest().authenticated()
-        )
+      HttpSecurity http, CorsConfigurationSource corsConfigurationSource, UserService userService) {
+    http.cors(cors -> cors.configurationSource(corsConfigurationSource))
+        .authorizeHttpRequests(auth ->
+            auth.requestMatchers(
+                    "/actuator/health", "/actuator/health/liveness", "/actuator/health/readiness")
+                .permitAll()
+                .anyRequest()
+                .authenticated())
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-        .addFilterAfter(new OidcUserProvisioningFilter(userService), BearerTokenAuthenticationFilter.class)
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .addFilterAfter(
+            new OidcUserProvisioningFilter(userService), BearerTokenAuthenticationFilter.class)
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .httpBasic(AbstractHttpConfigurer::disable)
         .csrf(csrf -> csrf.ignoringRequestMatchers("/v1/**", "/actuator/**"))
         .formLogin(AbstractHttpConfigurer::disable);
@@ -48,11 +48,12 @@ public class SecurityConfig {
     return http.build();
   }
 
-  /** Attaches the {@link CacheConfig#JWKS} cache to the auto-configured {@code NimbusJwtDecoder}. */
+  /**
+   * Attaches the {@link CacheConfig#JWKS} cache to the auto-configured {@code NimbusJwtDecoder}.
+   */
   @Bean
   JwkSetUriJwtDecoderBuilderCustomizer jwkSetUriJwtDecoderBuilderCustomizer(
-      CacheManager cacheManager
-  ) {
+      CacheManager cacheManager) {
     var cache = Objects.requireNonNull(cacheManager.getCache(CacheConfig.JWKS));
     return builder -> builder.cache(cache);
   }

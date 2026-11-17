@@ -13,28 +13,26 @@ import org.springframework.core.env.Environment;
 
 /**
  * Verifies that JWT validation properties are correctly loaded.
- * <p>
- * Note: MockMvc's {@code jwt()} post-processor bypasses the real {@code JwtDecoder},
- * so audience/issuer rejection cannot be tested at the HTTP level with mock JWTs.
- * These tests verify the configuration is present so that Spring Boot's auto-configured
- * audience validator is active at runtime.
+ *
+ * <p>Note: MockMvc's {@code jwt()} post-processor bypasses the real {@code JwtDecoder}, so
+ * audience/issuer rejection cannot be tested at the HTTP level with mock JWTs. These tests verify
+ * the configuration is present so that Spring Boot's auto-configured audience validator is active
+ * at runtime.
  */
 @DisplayName("JWT Validation Configuration Tests")
 class JwtValidationConfigIntegrationTest extends BaseIntegrationTest {
 
-  @Autowired
-  private Environment environment;
+  @Autowired private Environment environment;
 
-  @Autowired
-  private CacheManager cacheManager;
+  @Autowired private CacheManager cacheManager;
 
-  @Autowired
-  private JwkSetUriJwtDecoderBuilderCustomizer jwkSetUriJwtDecoderBuilderCustomizer;
+  @Autowired private JwkSetUriJwtDecoderBuilderCustomizer jwkSetUriJwtDecoderBuilderCustomizer;
 
   @Test
   @DisplayName("should have audience validation configured")
   void shouldHaveAudienceValidationConfigured() {
-    var audience = environment.getProperty("spring.security.oauth2.resourceserver.jwt.audiences[0]");
+    var audience =
+        environment.getProperty("spring.security.oauth2.resourceserver.jwt.audiences[0]");
     assertThat(audience)
         .as("audiences property must be set for Spring Boot to auto-configure audience validation")
         .isEqualTo("budget-buddy-api");
@@ -61,7 +59,8 @@ class JwtValidationConfigIntegrationTest extends BaseIntegrationTest {
   @DisplayName("should expose a JwkSetUriJwtDecoderBuilderCustomizer that attaches the jwks cache")
   void shouldExposeJwkSetUriJwtDecoderBuilderCustomizer() {
     assertThat(jwkSetUriJwtDecoderBuilderCustomizer)
-        .as("the cache customizer bean must be present so Spring Boot applies it when building the NimbusJwtDecoder")
+        .as(
+            "the cache customizer bean must be present so Spring Boot applies it when building the NimbusJwtDecoder")
         .isNotNull();
   }
 }

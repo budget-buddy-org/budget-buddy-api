@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Implements the user self-management endpoints.
- * <p>
- * Operations that are not yet implemented throw {@link UnsupportedOperationException}, which the
+ *
+ * <p>Operations that are not yet implemented throw {@link UnsupportedOperationException}, which the
  * {@code GlobalExceptionHandler} maps to a {@code 501 Not Implemented} Problem response. Replace
  * each remaining stub with a real implementation as the feature is built.
  */
@@ -66,7 +66,8 @@ public class MeController implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<ClientSettings> upsertCurrentUserClientSettings(String clientId, ClientSettingsWrite body) {
+  public ResponseEntity<ClientSettings> upsertCurrentUserClientSettings(
+      String clientId, ClientSettingsWrite body) {
     throw notImplemented("upsertCurrentUserClientSettings");
   }
 
