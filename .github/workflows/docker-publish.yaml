@@ -69,17 +69,11 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
           ARCH: ${{ matrix.arch }}
         run: |
-          tag="$IMAGE:ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-$ARCH"
-          ./gradlew bootBuildImage -x test --imagePlatform="$PLATFORM" --imageName="$tag"
-          docker push "$tag"
-          ref=$(docker image inspect "$tag" --format '{{index .RepoDigests 0}}')
-          # Buildpacks emit Docker media types; export OCI before the shared
-          # publisher adds source/version annotations to the final index.
-          docker buildx build --platform "$PLATFORM" \
-            --output "type=image,name=$tag,push=true,oci-mediatypes=true" \
-            --metadata-file "$RUNNER_TEMP/image.json" - <<EOF
-          FROM $ref
-          EOF
+          ./gradlew bootJar -x test
+          docker buildx build --pull --platform "$PLATFORM" \
+            --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            --output "type=image,name=$IMAGE,push-by-digest=true,name-canonical=true,push=true,oci-mediatypes=true" \
+            --metadata-file "$RUNNER_TEMP/image.json" .
           digest=$(jq -r '.["containerimage.digest"]' "$RUNNER_TEMP/image.json")
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
       - uses: budget-buddy-org/ci-workflows/.github/actions/image-record@0b05bd0245bda46e60f8998361a8ed05772368ff
