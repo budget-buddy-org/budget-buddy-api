@@ -14,10 +14,6 @@ on:
       - '.github/workflows/**'
       - 'gradle.properties'
       - 'docker-compose*.yaml'
-      - '.releaserc.cjs'
-      - 'release-notes-preset.mjs'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
   pull_request:
     types: [ opened, synchronize, reopened ]
     paths:
@@ -30,10 +26,6 @@ on:
       - '.github/workflows/**'
       - 'gradle.properties'
       - 'docker-compose*.yaml'
-      - '.releaserc.cjs'
-      - 'release-notes-preset.mjs'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
     inputs:
       dry-run-release:
@@ -47,15 +39,16 @@ permissions:
 
 jobs:
   ci:
-    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-ci.yml@0b05bd0245bda46e60f8998361a8ed05772368ff
+    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-ci.yml@24c274c00d122d32765bf3248ed84fe824274912
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   release:
     needs: ci
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.dry-run-release)
-    uses: budget-buddy-org/ci-workflows/.github/workflows/release.yml@0b05bd0245bda46e60f8998361a8ed05772368ff
+    uses: budget-buddy-org/ci-workflows/.github/workflows/release.yml@24c274c00d122d32765bf3248ed84fe824274912
     with:
+      profile: gradle-app
       dry-run: ${{ github.event_name == 'workflow_dispatch' }}
     secrets:
       RELEASE_BOT_ID: ${{ secrets.RELEASE_BOT_ID }}
