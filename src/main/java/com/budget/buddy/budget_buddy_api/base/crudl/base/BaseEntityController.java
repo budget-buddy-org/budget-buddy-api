@@ -5,7 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 /**
- * Base controller class providing common internal methods for CRUD operations. Designed to be extended by controllers that implement generated API interfaces.
+ * Base controller class providing common internal methods for CRUD operations. Designed to be
+ * extended by controllers that implement generated API interfaces.
  *
  * @param <ID> the identifier type
  * @param <C> the create request type (DTO)
@@ -29,9 +30,7 @@ public abstract class BaseEntityController<ID, C, R, U, L> {
    */
   public ResponseEntity<R> createInternal(C createRequest) {
     var created = service.create(createRequest);
-    return ResponseEntity
-        .created(createdURI(created))
-        .body(created);
+    return ResponseEntity.created(createdURI(created)).body(created);
   }
 
   /**

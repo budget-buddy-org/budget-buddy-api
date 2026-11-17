@@ -11,15 +11,15 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CategoryService extends OwnableEntityService<CategoryEntity, UUID, CategoryWrite, Category, CategoryWrite, PaginatedCategories> {
+public class CategoryService
+    extends OwnableEntityService<
+        CategoryEntity, UUID, CategoryWrite, Category, CategoryWrite, PaginatedCategories> {
 
   public CategoryService(
       CategoryRepository repository,
       CategoryMapper mapper,
       Set<BaseEntityValidator<CategoryEntity>> validators,
-      OwnerIdProvider<UUID> ownerIdProvider
-  ) {
+      OwnerIdProvider<UUID> ownerIdProvider) {
     super(repository, mapper, validators, ownerIdProvider);
   }
-
 }

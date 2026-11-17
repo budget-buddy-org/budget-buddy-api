@@ -17,8 +17,7 @@ import org.springframework.http.HttpHeaders;
 @DisplayName("UserPreferencesDefaultsProvider Unit Tests")
 class UserPreferencesDefaultsProviderTest {
 
-  @Mock
-  private HttpServletRequest request;
+  @Mock private HttpServletRequest request;
 
   private UserPreferencesDefaultsProvider provider;
 

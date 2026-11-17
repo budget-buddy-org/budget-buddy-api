@@ -9,6 +9,4 @@ import org.springframework.transaction.annotation.Transactional;
 @ActiveProfiles("test")
 @SpringBootTest
 @Transactional
-public abstract class BaseIntegrationTest {
-
-}
+public abstract class BaseIntegrationTest {}

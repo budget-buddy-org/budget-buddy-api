@@ -15,10 +15,8 @@ import org.junit.jupiter.api.Test;
 
 class CategoryMapperTest {
 
-  private static final Clock FIXED_CLOCK = Clock.fixed(
-      Instant.parse("2026-06-13T10:00:00Z"),
-      ZoneOffset.UTC
-  );
+  private static final Clock FIXED_CLOCK =
+      Clock.fixed(Instant.parse("2026-06-13T10:00:00Z"), ZoneOffset.UTC);
 
   private final CategoryMapper categoryMapper = new CategoryMapperImpl();
 
@@ -28,9 +26,7 @@ class CategoryMapperTest {
     @Test
     void should_MapCategoryWriteToCategoryEntity() {
       // Given
-      var create = new CategoryWrite()
-          .name("Groceries")
-          .monthlyBudget(50000L);
+      var create = new CategoryWrite().name("Groceries").monthlyBudget(50000L);
 
       // When
       var entity = categoryMapper.toEntity(create);
@@ -47,8 +43,7 @@ class CategoryMapperTest {
     @Test
     void should_MapNullMonthlyBudget_When_Cleared() {
       // Given
-      var create = new CategoryWrite()
-          .name("Groceries");
+      var create = new CategoryWrite().name("Groceries");
 
       // When
       var entity = categoryMapper.toEntity(create);
@@ -104,9 +99,7 @@ class CategoryMapperTest {
       var models = categoryMapper.toModelList(List.of(entity1, entity2));
 
       // Then
-      assertThat(models)
-          .as("Mapped model list should have correct size and elements")
-          .hasSize(2);
+      assertThat(models).as("Mapped model list should have correct size and elements").hasSize(2);
 
       assertThat(models.get(0))
           .as("First model should match first entity")
@@ -140,8 +133,7 @@ class CategoryMapperTest {
       entity.setUpdatedAt(originalUpdatedAt);
       entity.setVersion(originalVersion);
 
-      var update = new CategoryWrite()
-          .name("New Name");
+      var update = new CategoryWrite().name("New Name");
 
       // When
       categoryMapper.updateEntity(update, entity);

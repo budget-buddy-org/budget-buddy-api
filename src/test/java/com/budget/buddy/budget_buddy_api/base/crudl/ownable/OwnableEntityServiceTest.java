@@ -28,11 +28,9 @@ import org.springframework.data.domain.PageRequest;
 @DisplayName("OwnableEntityService Unit Tests")
 class OwnableEntityServiceTest {
 
-  @Mock
-  private OwnableEntityRepository<DummyOwnableEntity, String> repository;
+  @Mock private OwnableEntityRepository<DummyOwnableEntity, String> repository;
 
-  @Mock
-  private BaseEntityMapper<DummyOwnableEntity, Object, Object, Object, Object> mapper;
+  @Mock private BaseEntityMapper<DummyOwnableEntity, Object, Object, Object, Object> mapper;
 
   private DummyOwnableService service;
 
@@ -94,7 +92,8 @@ class OwnableEntityServiceTest {
 
       // When & Then
       assertThatThrownBy(() -> service.readInternal(id))
-          .as("Should throw EntityNotFoundException when entity is not found or not owned by the current user")
+          .as(
+              "Should throw EntityNotFoundException when entity is not found or not owned by the current user")
           .isInstanceOf(EntityNotFoundException.class)
           .hasMessageContaining("Entity not found with id: " + id);
     }
@@ -136,9 +135,7 @@ class OwnableEntityServiceTest {
       var result = service.updateInternal(id, updateRequest);
 
       // Then
-      assertThat(result)
-          .as("Result should be the updated entity")
-          .isEqualTo(existingEntity);
+      assertThat(result).as("Result should be the updated entity").isEqualTo(existingEntity);
       verify(mapper).updateEntity(updateRequest, existingEntity);
       verify(repository).save(existingEntity);
     }
@@ -152,7 +149,8 @@ class OwnableEntityServiceTest {
 
       // When & Then
       assertThatThrownBy(() -> service.updateInternal(id, updateRequest))
-          .as("Should throw EntityNotFoundException when entity is not found or not owned by the current user")
+          .as(
+              "Should throw EntityNotFoundException when entity is not found or not owned by the current user")
           .isInstanceOf(EntityNotFoundException.class)
           .hasMessageContaining("Entity not found with id: " + id);
     }
@@ -233,17 +231,16 @@ class OwnableEntityServiceTest {
 
   @Getter
   @Setter
-  static class DummyOwnableEntity extends OwnableEntity<String> {
-  }
+  static class DummyOwnableEntity extends OwnableEntity<String> {}
 
-  static class DummyOwnableService extends OwnableEntityService<DummyOwnableEntity, String, Object, Object, Object, Object> {
+  static class DummyOwnableService
+      extends OwnableEntityService<DummyOwnableEntity, String, Object, Object, Object, Object> {
 
     protected DummyOwnableService(
         OwnableEntityRepository<DummyOwnableEntity, String> repository,
         BaseEntityMapper<DummyOwnableEntity, Object, Object, Object, Object> mapper,
         Iterable<BaseEntityValidator<DummyOwnableEntity>> entityValidators,
-        OwnerIdProvider<String> ownerIdProvider
-    ) {
+        OwnerIdProvider<String> ownerIdProvider) {
       super(repository, mapper, entityValidators, ownerIdProvider);
     }
 

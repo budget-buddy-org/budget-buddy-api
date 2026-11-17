@@ -15,17 +15,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class UserDataDeletionServiceTest {
 
-  @Mock
-  private TransactionService transactionService;
+  @Mock private TransactionService transactionService;
 
-  @Mock
-  private CategoryService categoryService;
+  @Mock private CategoryService categoryService;
 
-  @Mock
-  private UserPreferencesService userPreferencesService;
+  @Mock private UserPreferencesService userPreferencesService;
 
-  @InjectMocks
-  private UserDataDeletionService userDataDeletionService;
+  @InjectMocks private UserDataDeletionService userDataDeletionService;
 
   @Test
   void deleteUserData_Should_DeleteInForeignKeySafeOrder() {

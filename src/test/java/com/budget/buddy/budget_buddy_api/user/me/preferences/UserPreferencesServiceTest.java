@@ -23,12 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("UserPreferencesService Unit Tests")
 class UserPreferencesServiceTest {
 
-  @Mock
-  private UserPreferencesRepository repository;
-  @Mock
-  private UserPreferencesMapper mapper;
-  @Mock
-  private UserPreferencesDefaultsProvider defaultsProvider;
+  @Mock private UserPreferencesRepository repository;
+  @Mock private UserPreferencesMapper mapper;
+  @Mock private UserPreferencesDefaultsProvider defaultsProvider;
 
   private final UUID userId = UUID.randomUUID();
 
@@ -58,7 +55,8 @@ class UserPreferencesServiceTest {
     @Test
     void should_ReturnHttpDerivedDefaults_When_NoRowExists() {
       // Given
-      var defaults = new UserPreferences().language("en").currency("USD").timezone("America/New_York");
+      var defaults =
+          new UserPreferences().language("en").currency("USD").timezone("America/New_York");
       when(repository.findByOwnerId(userId)).thenReturn(Optional.empty());
       when(defaultsProvider.get()).thenReturn(defaults);
 
@@ -74,7 +72,8 @@ class UserPreferencesServiceTest {
     @Test
     void should_CreateRowScopedToCurrentUser_When_NoneExists() {
       // Given
-      var write = new UserPreferencesWrite().language("de").currency("USD").timezone("Europe/Berlin");
+      var write =
+          new UserPreferencesWrite().language("de").currency("USD").timezone("Europe/Berlin");
       var model = new UserPreferences();
       var fresh = new UserPreferencesEntity();
       when(repository.findByOwnerId(userId)).thenReturn(Optional.empty());
@@ -98,7 +97,8 @@ class UserPreferencesServiceTest {
     @Test
     void should_UpdateExistingRow_When_AlreadyStored() {
       // Given
-      var write = new UserPreferencesWrite().language("de").currency("USD").timezone("Europe/Berlin");
+      var write =
+          new UserPreferencesWrite().language("de").currency("USD").timezone("Europe/Berlin");
       var existing = new UserPreferencesEntity();
       existing.setOwnerId(userId);
       when(repository.findByOwnerId(userId)).thenReturn(Optional.of(existing));

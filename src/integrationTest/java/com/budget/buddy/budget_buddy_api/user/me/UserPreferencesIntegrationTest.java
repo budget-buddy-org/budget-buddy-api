@@ -33,10 +33,8 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_ReturnHttpDerivedDefaults_When_NeverStored() throws Exception {
-      var result = mvc.get().uri(URI)
-          .header("Accept-Language", "en-US")
-          .with(jwtForUser(userId))
-          .exchange();
+      var result =
+          mvc.get().uri(URI).header("Accept-Language", "en-US").with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var body = parseBody(result, UserPreferences.class);
@@ -68,11 +66,13 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_StoreAndReturnPreferences() throws Exception {
-      var result = mvc.put().uri(URI)
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(validPreferences()))
-          .exchange();
+      var result =
+          mvc.put()
+              .uri(URI)
+              .with(jwtForUser(userId))
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(json(validPreferences()))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       assertThat(parseBody(result, UserPreferences.class))
@@ -83,7 +83,8 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_PersistAcrossReads() throws Exception {
-      mvc.put().uri(URI)
+      mvc.put()
+          .uri(URI)
           .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
           .content(json(validPreferences()))
@@ -98,11 +99,23 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_ReplaceOnSecondCall() throws Exception {
-      mvc.put().uri(URI).with(jwtForUser(userId)).contentType(MediaType.APPLICATION_JSON)
-          .content(json(validPreferences())).exchange();
+      mvc.put()
+          .uri(URI)
+          .with(jwtForUser(userId))
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(json(validPreferences()))
+          .exchange();
 
-      mvc.put().uri(URI).with(jwtForUser(userId)).contentType(MediaType.APPLICATION_JSON)
-          .content(json(new UserPreferencesWrite().language("de").currency("USD").timezone("Europe/Berlin")))
+      mvc.put()
+          .uri(URI)
+          .with(jwtForUser(userId))
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(
+              json(
+                  new UserPreferencesWrite()
+                      .language("de")
+                      .currency("USD")
+                      .timezone("Europe/Berlin")))
           .exchange();
 
       var result = mvc.get().uri(URI).with(jwtForUser(userId)).exchange();
@@ -114,19 +127,30 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return400_When_CurrencyMalformed() throws Exception {
-      var result = mvc.put().uri(URI)
-          .with(jwtForUser(userId))
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(new UserPreferencesWrite().language("en").currency("euro").timezone("Europe/Tallinn")))
-          .exchange();
+      var result =
+          mvc.put()
+              .uri(URI)
+              .with(jwtForUser(userId))
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(
+                  json(
+                      new UserPreferencesWrite()
+                          .language("en")
+                          .currency("euro")
+                          .timezone("Europe/Tallinn")))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }
 
     @Test
     void should_NotLeakToOtherUser() throws Exception {
-      mvc.put().uri(URI).with(jwtForUser(userId)).contentType(MediaType.APPLICATION_JSON)
-          .content(json(validPreferences())).exchange();
+      mvc.put()
+          .uri(URI)
+          .with(jwtForUser(userId))
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(json(validPreferences()))
+          .exchange();
 
       var result = mvc.get().uri(URI).with(jwtForUser(otherUserId)).exchange();
 
@@ -137,10 +161,12 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return401_When_NotAuthenticated() {
-      var result = mvc.put().uri(URI)
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(json(validPreferences()))
-          .exchange();
+      var result =
+          mvc.put()
+              .uri(URI)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(json(validPreferences()))
+              .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }

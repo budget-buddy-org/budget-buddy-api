@@ -1,11 +1,10 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
+import java.time.LocalDate;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.With;
 import org.jspecify.annotations.Nullable;
-
-import java.time.LocalDate;
-import java.util.UUID;
 
 @With
 @Builder
@@ -17,5 +16,4 @@ public record TransactionFilter(
     @Nullable TransactionType type,
     @Nullable String query,
     @Nullable Long amountMin,
-    @Nullable Long amountMax
-) {}
+    @Nullable Long amountMax) {}

@@ -52,7 +52,8 @@ public class CategoryController
   }
 
   @Override
-  public ResponseEntity<CategorySpendingSummary> getCategoriesSummary(String month, String currency) {
+  public ResponseEntity<CategorySpendingSummary> getCategoriesSummary(
+      String month, String currency) {
     return ResponseEntity.ok(summaryService.getSummary(month, currency));
   }
 
@@ -60,5 +61,4 @@ public class CategoryController
   protected URI createdURI(Category created) {
     return URI.create("/v1/categories/" + created.getId());
   }
-
 }

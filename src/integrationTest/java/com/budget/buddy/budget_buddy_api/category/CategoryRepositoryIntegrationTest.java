@@ -1,21 +1,19 @@
 package com.budget.buddy.budget_buddy_api.category;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.budget.buddy.budget_buddy_api.BaseOwnableIntegrationTest;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @DisplayName("CategoryRepository Integration Tests")
 class CategoryRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
 
-  @Autowired
-  private CategoryRepository categoryRepository;
+  @Autowired private CategoryRepository categoryRepository;
 
   private UUID ownerId;
 
@@ -68,7 +66,9 @@ class CategoryRepositoryIntegrationTest extends BaseOwnableIntegrationTest {
 
     // Then
     assertThat(page.getContent()).hasSize(2);
-    assertThat(page.getContent()).extracting(CategoryEntity::getName).containsExactlyInAnyOrder("Food", "Rent");
+    assertThat(page.getContent())
+        .extracting(CategoryEntity::getName)
+        .containsExactlyInAnyOrder("Food", "Rent");
   }
 
   @Test

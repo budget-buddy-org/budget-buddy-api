@@ -2,6 +2,7 @@ plugins {
   java
   `jvm-test-suite`
   jacoco
+  id("com.diffplug.spotless") version "8.11.0"
   id("org.springframework.boot") version "4.1.2"
   id("io.spring.dependency-management") version "1.1.7"
   id("org.sonarqube") version "7.6.0.18749"
@@ -9,6 +10,15 @@ plugins {
 
 group = "com.budget.buddy"
 description = "API for Budget Buddy App"
+
+spotless {
+  java {
+    importOrder()
+    removeUnusedImports()
+    shortenFullyQualifiedTypes()
+    googleJavaFormat()
+  }
+}
 
 java {
   toolchain {

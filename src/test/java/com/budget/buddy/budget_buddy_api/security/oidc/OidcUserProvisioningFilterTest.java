@@ -33,16 +33,12 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 @ExtendWith(MockitoExtension.class)
 class OidcUserProvisioningFilterTest {
 
-  private static final Clock FIXED_CLOCK = Clock.fixed(
-      Instant.parse("2026-06-13T10:00:00Z"),
-      ZoneOffset.UTC
-  );
+  private static final Clock FIXED_CLOCK =
+      Clock.fixed(Instant.parse("2026-06-13T10:00:00Z"), ZoneOffset.UTC);
 
-  @Mock
-  private UserService userService;
+  @Mock private UserService userService;
 
-  @Mock
-  private FilterChain filterChain;
+  @Mock private FilterChain filterChain;
 
   private OidcUserProvisioningFilter filter;
   private MockHttpServletRequest request;
@@ -124,8 +120,9 @@ class OidcUserProvisioningFilterTest {
   @Test
   @DisplayName("should continue filter chain without upgrading for non-JWT authentication")
   void shouldContinueChainForNonJwtAuthentication() throws ServletException, IOException {
-    var anonymousAuth = new AnonymousAuthenticationToken(
-        "key", "anonymous", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
+    var anonymousAuth =
+        new AnonymousAuthenticationToken(
+            "key", "anonymous", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
     SecurityContextHolder.getContext().setAuthentication(anonymousAuth);
 
     filter.doFilterInternal(request, response, filterChain);
@@ -146,17 +143,19 @@ class OidcUserProvisioningFilterTest {
   }
 
   private void setJwtAuthentication(String subject, String issuer) {
-    SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(buildJwt(subject, issuer)));
+    SecurityContextHolder.getContext()
+        .setAuthentication(new JwtAuthenticationToken(buildJwt(subject, issuer)));
   }
 
   private void setJwtAuthenticationWithoutIssuer() {
-    var jwt = Jwt.withTokenValue("mock-token")
-        .header("alg", "RS256")
-        .subject("user-123")
-        .claim("custom", "value")
-        .issuedAt(Instant.now(FIXED_CLOCK))
-        .expiresAt(Instant.now(FIXED_CLOCK).plusSeconds(300))
-        .build();
+    var jwt =
+        Jwt.withTokenValue("mock-token")
+            .header("alg", "RS256")
+            .subject("user-123")
+            .claim("custom", "value")
+            .issuedAt(Instant.now(FIXED_CLOCK))
+            .expiresAt(Instant.now(FIXED_CLOCK).plusSeconds(300))
+            .build();
     SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
   }
 }

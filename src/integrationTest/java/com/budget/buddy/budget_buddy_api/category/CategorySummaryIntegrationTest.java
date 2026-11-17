@@ -34,24 +34,33 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
 
   private UUID createCategory(String ownerId, String name, Long monthlyBudget) throws Exception {
     var body = new CategoryWrite().name(name).monthlyBudget(monthlyBudget);
-    var result = mvc.post().uri("/v1/categories")
-        .with(jwtForUser(ownerId))
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(body))
-        .exchange();
-    return parseBody(result, com.budget.buddy.budget_buddy_contracts.generated.model.Category.class).getId();
+    var result =
+        mvc.post()
+            .uri("/v1/categories")
+            .with(jwtForUser(ownerId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json(body))
+            .exchange();
+    return parseBody(result, com.budget.buddy.budget_buddy_contracts.generated.model.Category.class)
+        .getId();
   }
 
   private void createTransaction(
-      String ownerId, UUID categoryId, long amount, TransactionType type, String currency, LocalDate date
-  ) {
-    var body = new TransactionWrite()
-        .categoryId(categoryId)
-        .amount(amount)
-        .type(type)
-        .currency(currency)
-        .date(date);
-    mvc.post().uri("/v1/transactions")
+      String ownerId,
+      UUID categoryId,
+      long amount,
+      TransactionType type,
+      String currency,
+      LocalDate date) {
+    var body =
+        new TransactionWrite()
+            .categoryId(categoryId)
+            .amount(amount)
+            .type(type)
+            .currency(currency)
+            .date(date);
+    mvc.post()
+        .uri("/v1/transactions")
         .with(jwtForUser(ownerId))
         .contentType(MediaType.APPLICATION_JSON)
         .content(json(body))
@@ -59,9 +68,11 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   private CategorySpendingSummary getSummary(String ownerId) throws Exception {
-    var result = mvc.get().uri("/v1/categories/summary?month={m}&currency={c}", "2026-03", "EUR")
-        .with(jwtForUser(ownerId))
-        .exchange();
+    var result =
+        mvc.get()
+            .uri("/v1/categories/summary?month={m}&currency={c}", "2026-03", "EUR")
+            .with(jwtForUser(ownerId))
+            .exchange();
     assertThat(result).hasStatus(HttpStatus.OK);
     return parseBody(result, CategorySpendingSummary.class);
   }
@@ -101,8 +112,15 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_SumOnlyExpenses_When_MixedTypes() throws Exception {
       var catId = createCategory(userId, "Food");
-      createTransaction(userId, catId, 1000L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 15));
-      createTransaction(userId, catId, 5000L, TransactionType.INCOME, "EUR", LocalDate.of(2026, Month.MARCH, 15));
+      createTransaction(
+          userId,
+          catId,
+          1000L,
+          TransactionType.EXPENSE,
+          "EUR",
+          LocalDate.of(2026, Month.MARCH, 15));
+      createTransaction(
+          userId, catId, 5000L, TransactionType.INCOME, "EUR", LocalDate.of(2026, Month.MARCH, 15));
 
       var summary = getSummary(userId);
 
@@ -118,9 +136,22 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_SumMatchingCurrency_And_CountOthersAsExcluded() throws Exception {
       var catId = createCategory(userId, "Travel");
-      createTransaction(userId, catId, 2000L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 10));
-      createTransaction(userId, catId, 3000L, TransactionType.EXPENSE, "USD", LocalDate.of(2026, Month.MARCH, 10));
-      createTransaction(userId, catId, 500L, TransactionType.EXPENSE, "USD", LocalDate.of(2026, Month.MARCH, 11));
+      createTransaction(
+          userId,
+          catId,
+          2000L,
+          TransactionType.EXPENSE,
+          "EUR",
+          LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(
+          userId,
+          catId,
+          3000L,
+          TransactionType.EXPENSE,
+          "USD",
+          LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(
+          userId, catId, 500L, TransactionType.EXPENSE, "USD", LocalDate.of(2026, Month.MARCH, 11));
 
       var summary = getSummary(userId);
 
@@ -171,10 +202,19 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
     @Test
     void should_IncludeBoundaryTransactions_When_OnFirstAndLastDayOfMonth() throws Exception {
       var catId = createCategory(userId, "Bills");
-      createTransaction(userId, catId, 100L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 1));
-      createTransaction(userId, catId, 200L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 31));
-      createTransaction(userId, catId, 999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.FEBRUARY, 28));
-      createTransaction(userId, catId, 999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.APRIL, 1));
+      createTransaction(
+          userId, catId, 100L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 1));
+      createTransaction(
+          userId, catId, 200L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 31));
+      createTransaction(
+          userId,
+          catId,
+          999L,
+          TransactionType.EXPENSE,
+          "EUR",
+          LocalDate.of(2026, Month.FEBRUARY, 28));
+      createTransaction(
+          userId, catId, 999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.APRIL, 1));
 
       var summary = getSummary(userId);
 
@@ -202,8 +242,20 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
     void should_NotCountOtherUsersTransactions() throws Exception {
       var catId = createCategory(userId, "Shared name");
       var otherCatId = createCategory(otherUserId, "Shared name");
-      createTransaction(userId, catId, 1000L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 10));
-      createTransaction(otherUserId, otherCatId, 9999L, TransactionType.EXPENSE, "EUR", LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(
+          userId,
+          catId,
+          1000L,
+          TransactionType.EXPENSE,
+          "EUR",
+          LocalDate.of(2026, Month.MARCH, 10));
+      createTransaction(
+          otherUserId,
+          otherCatId,
+          9999L,
+          TransactionType.EXPENSE,
+          "EUR",
+          LocalDate.of(2026, Month.MARCH, 10));
 
       var summary = getSummary(userId);
 
@@ -217,17 +269,14 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_Return401_When_NotAuthenticated() {
-      var result = mvc.get().uri("/v1/categories/summary?month=2026-03&currency=EUR")
-          .exchange();
+      var result = mvc.get().uri("/v1/categories/summary?month=2026-03&currency=EUR").exchange();
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("validationArguments")
     void should_Return400_When_InvalidRequest(String uriTemplate) {
-      var result = mvc.get().uri(uriTemplate)
-          .with(jwtForUser(userId))
-          .exchange();
+      var result = mvc.get().uri(uriTemplate).with(jwtForUser(userId)).exchange();
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
     }
 
@@ -236,8 +285,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
           Named.of("Invalid Month format", "/v1/categories/summary?month=2026-13&currency=EUR"),
           Named.of("Missing Month", "/v1/categories/summary?currency=EUR"),
           Named.of("Currency too long", "/v1/categories/summary?month=2026-03&currency=EURO"),
-          Named.of("Missing Currency", "/v1/categories/summary?month=2026-03")
-      );
+          Named.of("Missing Currency", "/v1/categories/summary?month=2026-03"));
     }
   }
 
@@ -249,5 +297,4 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
         .findFirst()
         .orElseThrow(() -> new AssertionError("Category " + categoryId + " not found in summary"));
   }
-
 }

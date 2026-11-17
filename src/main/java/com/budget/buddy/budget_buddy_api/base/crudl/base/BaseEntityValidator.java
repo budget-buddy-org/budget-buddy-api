@@ -15,5 +15,4 @@ public interface BaseEntityValidator<E extends BaseEntity<?>> {
    * @throws RuntimeException if validation fails
    */
   void validate(E entity);
-
 }

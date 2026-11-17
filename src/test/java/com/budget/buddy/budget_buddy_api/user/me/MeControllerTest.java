@@ -23,12 +23,9 @@ import org.springframework.http.HttpStatus;
 @DisplayName("MeController Unit Tests")
 class MeControllerTest {
 
-  @Mock
-  private UserDataDeletionService deletionService;
-  @Mock
-  private UserPreferencesService preferencesService;
-  @Mock
-  private UserService userService;
+  @Mock private UserDataDeletionService deletionService;
+  @Mock private UserPreferencesService preferencesService;
+  @Mock private UserService userService;
 
   private MeController controller;
 
@@ -121,7 +118,8 @@ class MeControllerTest {
 
     @Test
     void should_DelegateUpdateAndReturn200() {
-      var write = new UserPreferencesWrite().language("de").currency("EUR").timezone("Europe/Berlin");
+      var write =
+          new UserPreferencesWrite().language("de").currency("EUR").timezone("Europe/Berlin");
       var updated = new UserPreferences().language("de");
       when(preferencesService.update(write)).thenReturn(updated);
 

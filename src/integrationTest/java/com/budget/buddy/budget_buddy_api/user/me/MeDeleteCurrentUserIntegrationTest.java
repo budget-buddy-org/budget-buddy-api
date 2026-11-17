@@ -28,32 +28,43 @@ class MeDeleteCurrentUserIntegrationTest extends BaseMvcIntegrationTest {
   private String otherUserId;
 
   private UUID createCategory(String ownerId, String name) throws Exception {
-    var result = mvc.post().uri("/v1/categories")
-        .with(jwtForUser(ownerId))
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new CategoryWrite().name(name)))
-        .exchange();
+    var result =
+        mvc.post()
+            .uri("/v1/categories")
+            .with(jwtForUser(ownerId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json(new CategoryWrite().name(name)))
+            .exchange();
     return parseBody(result, Category.class).getId();
   }
 
   private void createTransaction(String ownerId, UUID categoryId) {
-    mvc.post().uri("/v1/transactions")
+    mvc.post()
+        .uri("/v1/transactions")
         .with(jwtForUser(ownerId))
         .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new TransactionWrite()
-            .categoryId(categoryId)
-            .amount(500L)
-            .type(TransactionType.EXPENSE)
-            .currency("EUR")
-            .date(LocalDate.of(2026, 1, 1))))
+        .content(
+            json(
+                new TransactionWrite()
+                    .categoryId(categoryId)
+                    .amount(500L)
+                    .type(TransactionType.EXPENSE)
+                    .currency("EUR")
+                    .date(LocalDate.of(2026, 1, 1))))
         .exchange();
   }
 
   private void storePreferences(String ownerId) {
-    mvc.put().uri(PREFERENCES_URI)
+    mvc.put()
+        .uri(PREFERENCES_URI)
         .with(jwtForUser(ownerId))
         .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new UserPreferencesWrite().language("en").currency("EUR").timezone("Europe/Tallinn")))
+        .content(
+            json(
+                new UserPreferencesWrite()
+                    .language("en")
+                    .currency("EUR")
+                    .timezone("Europe/Tallinn")))
         .exchange();
   }
 
@@ -98,9 +109,10 @@ class MeDeleteCurrentUserIntegrationTest extends BaseMvcIntegrationTest {
       // The deleted user's JWT re-provisions a fresh account — expect empty data
       assertThat(transactionCount(userId)).as("transactions are gone").isZero();
       assertThat(categoryCount(userId)).as("categories are gone").isZero();
-      var prefs = parseBody(
-          mvc.get().uri(PREFERENCES_URI).with(jwtForUser(userId)).exchange(),
-          UserPreferences.class);
+      var prefs =
+          parseBody(
+              mvc.get().uri(PREFERENCES_URI).with(jwtForUser(userId)).exchange(),
+              UserPreferences.class);
       assertThat(prefs.getCurrency()).as("preferences are gone").isNull();
     }
 
@@ -108,11 +120,14 @@ class MeDeleteCurrentUserIntegrationTest extends BaseMvcIntegrationTest {
     void should_LeaveOtherUsersDataIntact() throws Exception {
       mvc.delete().uri(ME_URI).with(jwtForUser(userId)).exchange();
 
-      assertThat(transactionCount(otherUserId)).as("other user's transactions untouched").isEqualTo(1);
+      assertThat(transactionCount(otherUserId))
+          .as("other user's transactions untouched")
+          .isEqualTo(1);
       assertThat(categoryCount(otherUserId)).as("other user's categories untouched").isEqualTo(1);
-      var prefs = parseBody(
-          mvc.get().uri(PREFERENCES_URI).with(jwtForUser(otherUserId)).exchange(),
-          UserPreferences.class);
+      var prefs =
+          parseBody(
+              mvc.get().uri(PREFERENCES_URI).with(jwtForUser(otherUserId)).exchange(),
+              UserPreferences.class);
       assertThat(prefs.getCurrency()).as("other user's preferences untouched").isEqualTo("EUR");
     }
 

@@ -28,25 +28,30 @@ class MeDataDeletionIntegrationTest extends BaseMvcIntegrationTest {
   // ── helpers ────────────────────────────────────────────────────────────────
 
   private UUID createCategory(String ownerId, String name) throws Exception {
-    var result = mvc.post().uri("/v1/categories")
-        .with(jwtForUser(ownerId))
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new CategoryWrite().name(name)))
-        .exchange();
+    var result =
+        mvc.post()
+            .uri("/v1/categories")
+            .with(jwtForUser(ownerId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json(new CategoryWrite().name(name)))
+            .exchange();
 
     return parseBody(result, Category.class).getId();
   }
 
   private void createTransaction(String ownerId, UUID categoryId) {
-    mvc.post().uri("/v1/transactions")
+    mvc.post()
+        .uri("/v1/transactions")
         .with(jwtForUser(ownerId))
         .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new TransactionWrite()
-            .categoryId(categoryId)
-            .amount(1000L)
-            .type(TransactionType.EXPENSE)
-            .currency("EUR")
-            .date(LocalDate.of(2026, Month.MARCH, 1))))
+        .content(
+            json(
+                new TransactionWrite()
+                    .categoryId(categoryId)
+                    .amount(1000L)
+                    .type(TransactionType.EXPENSE)
+                    .currency("EUR")
+                    .date(LocalDate.of(2026, Month.MARCH, 1))))
         .exchange();
   }
 
@@ -89,8 +94,12 @@ class MeDataDeletionIntegrationTest extends BaseMvcIntegrationTest {
     void should_LeaveDataIntact_When_BelongsToOtherUser() throws Exception {
       mvc.delete().uri(DATA_URI).with(jwtForUser(userId)).exchange();
 
-      assertThat(transactionCount(otherUserId)).as("other user's transactions are untouched").isEqualTo(1);
-      assertThat(categoryCount(otherUserId)).as("other user's categories are untouched").isEqualTo(1);
+      assertThat(transactionCount(otherUserId))
+          .as("other user's transactions are untouched")
+          .isEqualTo(1);
+      assertThat(categoryCount(otherUserId))
+          .as("other user's categories are untouched")
+          .isEqualTo(1);
     }
 
     @Test
@@ -99,7 +108,9 @@ class MeDataDeletionIntegrationTest extends BaseMvcIntegrationTest {
 
       var second = mvc.delete().uri(DATA_URI).with(jwtForUser(userId)).exchange();
 
-      assertThat(second).as("clearing an already-empty account is idempotent").hasStatus(HttpStatus.NO_CONTENT);
+      assertThat(second)
+          .as("clearing an already-empty account is idempotent")
+          .hasStatus(HttpStatus.NO_CONTENT);
     }
 
     @Test

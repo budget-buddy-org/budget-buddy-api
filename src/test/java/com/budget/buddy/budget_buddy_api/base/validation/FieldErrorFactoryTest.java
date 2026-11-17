@@ -1,5 +1,9 @@
 package com.budget.buddy.budget_buddy_api.base.validation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
+
 import com.budget.buddy.budget_buddy_contracts.generated.model.FieldError;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
@@ -10,10 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 @DisplayName("FieldErrorFactory Tests")
 class FieldErrorFactoryTest {
@@ -22,11 +22,9 @@ class FieldErrorFactoryTest {
   @DisplayName("from(ConstraintViolation)")
   class ConstraintViolationTests {
 
-    @Mock
-    private ConstraintViolation<?> violation;
+    @Mock private ConstraintViolation<?> violation;
 
-    @Mock
-    private Path propertyPath;
+    @Mock private Path propertyPath;
 
     @Test
     @DisplayName("should map ConstraintViolation with property path to FieldError")
@@ -77,9 +75,8 @@ class FieldErrorFactoryTest {
     @DisplayName("should map Spring FieldError to contract FieldError")
     void shouldMapSpringFieldError() {
       // Given
-      var springFieldError = new org.springframework.validation.FieldError(
-          "user", "email", "invalid format"
-      );
+      var springFieldError =
+          new org.springframework.validation.FieldError("user", "email", "invalid format");
 
       // When
       FieldError result = FieldErrorFactory.from(springFieldError);
@@ -94,9 +91,7 @@ class FieldErrorFactoryTest {
     @DisplayName("should fall back to 'Invalid value' when defaultMessage is null")
     void shouldFallBackToDefaultMessageWhenNull() {
       // Given — Spring allows null defaultMessage via the 3-arg constructor
-      var springFieldError = new org.springframework.validation.FieldError(
-          "user", "email", null
-      );
+      var springFieldError = new org.springframework.validation.FieldError("user", "email", null);
 
       // When
       FieldError result = FieldErrorFactory.from(springFieldError);
@@ -110,7 +105,8 @@ class FieldErrorFactoryTest {
     @Test
     @DisplayName("should throw NullPointerException when fieldError is null")
     void shouldThrowNpe() {
-      assertThatThrownBy(() -> FieldErrorFactory.from((org.springframework.validation.FieldError) null))
+      assertThatThrownBy(
+              () -> FieldErrorFactory.from((org.springframework.validation.FieldError) null))
           .isExactlyInstanceOf(NullPointerException.class);
     }
   }

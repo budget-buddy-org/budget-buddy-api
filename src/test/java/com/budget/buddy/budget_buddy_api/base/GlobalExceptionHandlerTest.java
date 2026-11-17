@@ -1,5 +1,11 @@
 package com.budget.buddy.budget_buddy_api.base;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
+
 import com.budget.buddy.budget_buddy_api.base.exception.ValidationException;
 import com.budget.buddy.budget_buddy_contracts.generated.model.FieldError;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Problem;
@@ -7,6 +13,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
+import java.net.URI;
+import java.time.format.DateTimeParseException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
@@ -32,31 +46,14 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.databind.exc.UnrecognizedPropertyException;
 
-import java.net.URI;
-import java.time.format.DateTimeParseException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
-
-
 @ExtendWith(MockitoExtension.class)
 @DisplayName("GlobalExceptionHandler Tests")
 class GlobalExceptionHandlerTest {
 
   private static final String REQUEST_URI = "/test";
   private static final URI PROBLEM_TYPE = URI.create("about:blank");
-  @Mock
-  private ServletWebRequest webRequest;
-  @Mock
-  private HttpServletRequest httpServletRequest;
+  @Mock private ServletWebRequest webRequest;
+  @Mock private HttpServletRequest httpServletRequest;
   private GlobalExceptionHandler handler;
 
   private static void assertProblemResponse(ResponseEntity<Problem> response) {
@@ -110,9 +107,7 @@ class GlobalExceptionHandlerTest {
           .returns("One or more fields are invalid", Problem::getDetail)
           .returns(PROBLEM_TYPE, Problem::getType);
 
-      assertThat(response.getBody())
-          .extracting(Problem::getErrors)
-          .isNotNull();
+      assertThat(response.getBody()).extracting(Problem::getErrors).isNotNull();
     }
 
     @Test
@@ -120,7 +115,7 @@ class GlobalExceptionHandlerTest {
     void shouldHandleSingleFieldError() {
       // Given
       var exception = mock(MethodArgumentNotValidException.class);
-      var bindingResult = mock(org.springframework.validation.BindingResult.class);
+      var bindingResult = mock(BindingResult.class);
       var fieldError = new org.springframework.validation.FieldError("object", "field", "message");
       when(bindingResult.getFieldErrors()).thenReturn(Collections.singletonList(fieldError));
       when(exception.getBindingResult()).thenReturn(bindingResult);
@@ -150,9 +145,7 @@ class GlobalExceptionHandlerTest {
           .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::getTitle)
           .returns("Constraint violations", Problem::getDetail);
 
-      assertThat(response.getBody())
-          .extracting(Problem::getErrors)
-          .isNotNull();
+      assertThat(response.getBody()).extracting(Problem::getErrors).isNotNull();
     }
 
     @Test
@@ -205,7 +198,8 @@ class GlobalExceptionHandlerTest {
       var problem = response.getBody();
       assertThat(problem.getErrors())
           .hasSize(2)
-          .contains(new FieldError().field("email").message("invalid email format"),
+          .contains(
+              new FieldError().field("email").message("invalid email format"),
               new FieldError().field("age").message("must be at least 18"));
     }
 
@@ -287,11 +281,8 @@ class GlobalExceptionHandlerTest {
   class AccessDeniedExceptionTests {
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "Access denied",
-        "Insufficient permissions",
-        "User does not have required role"
-    })
+    @ValueSource(
+        strings = {"Access denied", "Insufficient permissions", "User does not have required role"})
     @DisplayName("should handle AccessDeniedException with various messages")
     void shouldHandleAccessDenied(String message) {
       // Given
@@ -315,11 +306,7 @@ class GlobalExceptionHandlerTest {
     class AuthenticationExceptionTests {
 
       @ParameterizedTest
-      @ValueSource(strings = {
-          "Invalid credentials",
-          "Token expired",
-          "Invalid or missing token"
-      })
+      @ValueSource(strings = {"Invalid credentials", "Token expired", "Invalid or missing token"})
       @DisplayName("should handle AuthenticationException with various messages")
       void shouldHandleAuthenticationException(String message) {
         // Given
@@ -350,18 +337,14 @@ class GlobalExceptionHandlerTest {
     void shouldHandleDataIntegrity() {
       // Given
       var cause = new RuntimeException("Unique constraint violation");
-      var exception = new DataIntegrityViolationException(
-          "Data integrity violation", cause);
+      var exception = new DataIntegrityViolationException("Data integrity violation", cause);
 
       // When
       var response = handler.handleDataIntegrity(exception, webRequest);
 
       // Then
-      assertThat(response.getStatusCode())
-          .isEqualTo(HttpStatus.CONFLICT);
-      assertThat(response.getBody())
-          .isNotNull()
-          .returns(409, Problem::getStatus);
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+      assertThat(response.getBody()).isNotNull().returns(409, Problem::getStatus);
     }
   }
 
@@ -370,16 +353,11 @@ class GlobalExceptionHandlerTest {
   class HttpMessageNotReadableExceptionTests {
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "Malformed JSON",
-        "Invalid request body",
-        "Missing required field"
-    })
+    @ValueSource(strings = {"Malformed JSON", "Invalid request body", "Missing required field"})
     @DisplayName("should handle HttpMessageNotReadableException with various messages")
     void shouldHandleNotReadable(String message) {
       // Given
-      var exception = mock(
-          HttpMessageNotReadableException.class);
+      var exception = mock(HttpMessageNotReadableException.class);
       when(exception.getMessage()).thenReturn(message);
 
       // When
@@ -419,7 +397,8 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("should return field error with json path when cause is MismatchedInputException with path")
+    @DisplayName(
+        "should return field error with json path when cause is MismatchedInputException with path")
     void shouldHandleMismatchedInputWithPath() {
       // Given
       var ref1 = new JacksonException.Reference(String.class, "amount");
@@ -492,10 +471,7 @@ class GlobalExceptionHandlerTest {
   class ValidationExceptionTests {
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "Category ID must be set",
-        "Unknown category with id: 123"
-    })
+    @ValueSource(strings = {"Category ID must be set", "Unknown category with id: 123"})
     @DisplayName("should handle ValidationException as 400 with the author-controlled message")
     void shouldHandleValidation(String message) {
       // Given
@@ -518,11 +494,8 @@ class GlobalExceptionHandlerTest {
   class IllegalArgumentExceptionTests {
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "Invalid argument",
-        "Invalid ID format",
-        "Page number must be positive"
-    })
+    @ValueSource(
+        strings = {"Invalid argument", "Invalid ID format", "Page number must be positive"})
     @DisplayName("should handle IllegalArgumentException with various messages")
     void shouldHandleIllegalArgument(String message) {
       // Given
@@ -546,11 +519,12 @@ class GlobalExceptionHandlerTest {
   class UnsupportedOperationExceptionTests {
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "Operation not supported",
-        "Feature not implemented",
-        "This operation is not allowed"
-    })
+    @ValueSource(
+        strings = {
+          "Operation not supported",
+          "Feature not implemented",
+          "This operation is not allowed"
+        })
     @DisplayName("should handle UnsupportedOperationException with various messages")
     void shouldHandleUnsupported(String message) {
       // Given
@@ -578,7 +552,8 @@ class GlobalExceptionHandlerTest {
     @DisplayName("should handle DateTimeParseException as 400 with the parsed string in the detail")
     void shouldHandleDateTimeParse() {
       // Given
-      var exception = new DateTimeParseException("Text 'invalid' could not be parsed", "invalid", 0);
+      var exception =
+          new DateTimeParseException("Text 'invalid' could not be parsed", "invalid", 0);
 
       // When
       var response = handler.handleDateTimeParse(exception, webRequest);
@@ -608,8 +583,7 @@ class GlobalExceptionHandlerTest {
 
       // Then
       assertThat(response.getBody()).isNotNull();
-      assertThat(response.getBody().getInstance())
-          .isEqualTo(URI.create(""));
+      assertThat(response.getBody().getInstance()).isEqualTo(URI.create(""));
     }
   }
 
@@ -618,11 +592,8 @@ class GlobalExceptionHandlerTest {
   class GenericExceptionTests {
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "Unexpected error",
-        "Something went wrong",
-        "Database connection failed"
-    })
+    @ValueSource(
+        strings = {"Unexpected error", "Something went wrong", "Database connection failed"})
     @DisplayName("should handle generic Exception")
     void shouldHandleGeneric(String message) {
       // Given
@@ -641,5 +612,4 @@ class GlobalExceptionHandlerTest {
           .returns(HttpStatus.INTERNAL_SERVER_ERROR.value(), Problem::getStatus);
     }
   }
-
 }

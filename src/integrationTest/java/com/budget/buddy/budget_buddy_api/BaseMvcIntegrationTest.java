@@ -1,5 +1,9 @@
 package com.budget.buddy.budget_buddy_api;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+
+import java.util.Collections;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
@@ -7,19 +11,12 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.Collections;
-import java.util.UUID;
-
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-
 @AutoConfigureMockMvc
 public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
 
-  @Autowired
-  protected ObjectMapper objectMapper;
+  @Autowired protected ObjectMapper objectMapper;
 
-  @Autowired
-  protected MockMvcTester mvc;
+  @Autowired protected MockMvcTester mvc;
 
   protected String json(Object obj) {
     return objectMapper.writeValueAsString(obj);
@@ -30,25 +27,23 @@ public abstract class BaseMvcIntegrationTest extends BaseIntegrationTest {
   }
 
   /**
-   * Creates a unique OIDC subject for test isolation.
-   * The provisioning filter will auto-create the local user on first request.
+   * Creates a unique OIDC subject for test isolation. The provisioning filter will auto-create the
+   * local user on first request.
    */
   protected String createTestUser() {
     return "test-sub-" + UUID.randomUUID();
   }
 
-  /**
-   * Returns a JWT request post-processor for the given OIDC subject.
-   */
+  /** Returns a JWT request post-processor for the given OIDC subject. */
   private static final String TEST_ISSUER = "https://test-issuer.example.com";
+
   private static final String TEST_AUDIENCE = "budget-buddy-api";
 
   protected static RequestPostProcessor jwtForUser(String oidcSubject) {
-    return jwt().jwt(j -> j
-        .subject(oidcSubject)
-        .audience(Collections.singleton(TEST_AUDIENCE))
-        .issuer(TEST_ISSUER)
-    );
+    return jwt()
+        .jwt(j ->
+            j.subject(oidcSubject)
+                .audience(Collections.singleton(TEST_AUDIENCE))
+                .issuer(TEST_ISSUER));
   }
-
 }

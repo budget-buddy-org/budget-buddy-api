@@ -11,7 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Abstract base service class providing common CRUDL operations for entities. Subclasses can extend this class to implement specific business logic for different entity types.
+ * Abstract base service class providing common CRUDL operations for entities. Subclasses can extend
+ * this class to implement specific business logic for different entity types.
  *
  * @param <E> entity type extending BaseEntity
  * @param <ID> identifier type
@@ -36,17 +37,14 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, C,
   private final Iterable<BaseEntityValidator<E>> validators;
 
   protected AbstractBaseEntityService(
-      BaseEntityRepository<E, ID> repository,
-      BaseEntityMapper<E, C, R, U, L> mapper
-  ) {
+      BaseEntityRepository<E, ID> repository, BaseEntityMapper<E, C, R, U, L> mapper) {
     this(repository, mapper, Collections.emptyList());
   }
 
   protected AbstractBaseEntityService(
       BaseEntityRepository<E, ID> repository,
       BaseEntityMapper<E, C, R, U, L> mapper,
-      Iterable<BaseEntityValidator<E>> validators
-  ) {
+      Iterable<BaseEntityValidator<E>> validators) {
     this.repository = repository;
     this.mapper = mapper;
     this.validators = validators;
@@ -133,7 +131,8 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, C,
    * @throws EntityNotFoundException if the entity is not found
    */
   protected E readInternal(ID id) {
-    return repository.findById(id)
+    return repository
+        .findById(id)
         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));
   }
 
@@ -197,5 +196,4 @@ public abstract class AbstractBaseEntityService<E extends BaseEntity<ID>, ID, C,
   protected void validate(E entity) {
     validators.forEach(v -> v.validate(entity));
   }
-
 }

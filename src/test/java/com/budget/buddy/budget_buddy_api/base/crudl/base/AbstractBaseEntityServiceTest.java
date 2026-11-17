@@ -23,11 +23,9 @@ import org.springframework.data.domain.PageRequest;
 @ExtendWith(MockitoExtension.class)
 class AbstractBaseEntityServiceTest {
 
-  @Mock
-  private BaseEntityMapper<DummyEntity, Object, Object, Object, Object> mapper;
+  @Mock private BaseEntityMapper<DummyEntity, Object, Object, Object, Object> mapper;
 
-  @Mock
-  private BaseEntityRepository<DummyEntity, String> repository;
+  @Mock private BaseEntityRepository<DummyEntity, String> repository;
 
   private AbstractBaseEntityService<DummyEntity, String, Object, Object, Object, Object> service;
 
@@ -89,7 +87,6 @@ class AbstractBaseEntityServiceTest {
       verify(repository).findById(id);
       verifyNoInteractions(mapper);
     }
-
   }
 
   @Nested
@@ -148,8 +145,7 @@ class AbstractBaseEntityServiceTest {
       when(repository.findById(id)).thenReturn(Optional.of(entity));
 
       // When
-      assertThatNoException()
-          .isThrownBy(() -> service.delete(id));
+      assertThatNoException().isThrownBy(() -> service.delete(id));
 
       // Then
       verify(repository).delete(entity);
@@ -231,7 +227,6 @@ class AbstractBaseEntityServiceTest {
       assertThat(actualCount).isEqualTo(expectedCount);
       verify(repository).count();
     }
-
   }
 
   @Nested
@@ -264,6 +259,5 @@ class AbstractBaseEntityServiceTest {
       assertThat(actual).isFalse();
       verify(repository).existsById(id);
     }
-
   }
 }

@@ -10,10 +10,12 @@ import org.springframework.data.domain.Page;
 @DisplayName("UserPreferencesMapper Unit Tests")
 class UserPreferencesMapperTest {
 
-  private final UserPreferencesMapper mapper = new UserPreferencesMapperImpl(new CurrencyMapperImpl());
+  private final UserPreferencesMapper mapper =
+      new UserPreferencesMapperImpl(new CurrencyMapperImpl());
 
   @Test
-  @DisplayName("toPage should throw UnsupportedOperationException — preferences is a singleton resource")
+  @DisplayName(
+      "toPage should throw UnsupportedOperationException — preferences is a singleton resource")
   void toPage_ShouldThrow() {
     var emptyPage = Page.<UserPreferencesEntity>empty();
     assertThatThrownBy(() -> mapper.toPage(emptyPage))

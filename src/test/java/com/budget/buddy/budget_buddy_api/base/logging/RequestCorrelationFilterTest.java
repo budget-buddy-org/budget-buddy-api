@@ -19,8 +19,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 @ExtendWith(MockitoExtension.class)
 class RequestCorrelationFilterTest {
 
-  @Mock
-  private FilterChain filterChain;
+  @Mock private FilterChain filterChain;
 
   private RequestCorrelationFilter filter;
   private MockHttpServletRequest request;
@@ -57,8 +56,7 @@ class RequestCorrelationFilterTest {
 
       filter.doFilterInternal(request, response, filterChain);
 
-      assertThat(response.getHeader(RequestCorrelationFilter.REQUEST_ID_HEADER))
-          .isNotBlank();
+      assertThat(response.getHeader(RequestCorrelationFilter.REQUEST_ID_HEADER)).isNotBlank();
       verify(filterChain).doFilter(request, response);
     }
 
@@ -68,8 +66,7 @@ class RequestCorrelationFilterTest {
 
       filter.doFilterInternal(request, response, filterChain);
 
-      assertThat(response.getHeader(RequestCorrelationFilter.REQUEST_ID_HEADER))
-          .isNotBlank();
+      assertThat(response.getHeader(RequestCorrelationFilter.REQUEST_ID_HEADER)).isNotBlank();
       verify(filterChain).doFilter(request, response);
     }
   }
@@ -97,9 +94,12 @@ class RequestCorrelationFilterTest {
     void should_PopulateMdc_During_Request() throws ServletException, IOException {
       var capturedRequestId = new String[1];
 
-      filter.doFilterInternal(request, response, (req, res) -> {
-        capturedRequestId[0] = MDC.get(RequestCorrelationFilter.REQUEST_ID_MDC_KEY);
-      });
+      filter.doFilterInternal(
+          request,
+          response,
+          (req, res) -> {
+            capturedRequestId[0] = MDC.get(RequestCorrelationFilter.REQUEST_ID_MDC_KEY);
+          });
 
       assertThat(capturedRequestId[0]).isNotBlank();
     }

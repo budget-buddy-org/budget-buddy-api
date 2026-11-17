@@ -26,17 +26,16 @@ import org.springframework.data.domain.Sort.Direction;
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
 
-  @Mock
-  private TransactionRepository repository;
-  @Mock
-  private TransactionMapper mapper;
+  @Mock private TransactionRepository repository;
+  @Mock private TransactionMapper mapper;
 
   private TransactionService transactionService;
   private final UUID currentUserId = UUID.randomUUID();
 
   @BeforeEach
   void setUp() {
-    transactionService = new TransactionService(repository, mapper, Collections.emptySet(), () -> currentUserId);
+    transactionService =
+        new TransactionService(repository, mapper, Collections.emptySet(), () -> currentUserId);
   }
 
   @Nested

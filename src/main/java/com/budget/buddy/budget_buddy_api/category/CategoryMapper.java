@@ -11,11 +11,11 @@ import org.springframework.data.domain.Page;
 
 @Mapper(config = MapstructConfig.class)
 public interface CategoryMapper
-    extends OwnableEntityMapper<CategoryEntity, CategoryWrite, Category, CategoryWrite, PaginatedCategories> {
+    extends OwnableEntityMapper<
+        CategoryEntity, CategoryWrite, Category, CategoryWrite, PaginatedCategories> {
 
   @Override
   @Mapping(source = "content", target = "items")
   @Mapping(source = "entityPage", target = "meta")
   PaginatedCategories toPage(Page<CategoryEntity> entityPage);
-
 }

@@ -17,10 +17,12 @@ class CorsIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_RespondWithCorsHeaders_When_PreflightFromAllowedOrigin() {
-      var result = mvc.options().uri("/v1/categories")
-          .header("Origin", ALLOWED_ORIGIN)
-          .header("Access-Control-Request-Method", "POST")
-          .exchange();
+      var result =
+          mvc.options()
+              .uri("/v1/categories")
+              .header("Origin", ALLOWED_ORIGIN)
+              .header("Access-Control-Request-Method", "POST")
+              .exchange();
 
       assertThat(result)
           .as("preflight from allowed origin should succeed")
@@ -38,10 +40,12 @@ class CorsIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_RejectPreflight_When_OriginNotAllowed() {
-      var result = mvc.options().uri("/v1/categories")
-          .header("Origin", DISALLOWED_ORIGIN)
-          .header("Access-Control-Request-Method", "POST")
-          .exchange();
+      var result =
+          mvc.options()
+              .uri("/v1/categories")
+              .header("Origin", DISALLOWED_ORIGIN)
+              .header("Access-Control-Request-Method", "POST")
+              .exchange();
 
       assertThat(result)
           .as("preflight from disallowed origin should be rejected")
@@ -53,10 +57,12 @@ class CorsIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_RespondWithCorsHeaders_When_PreflightToAuthenticatedEndpoint() {
-      var result = mvc.options().uri("/v1/categories")
-          .header("Origin", ALLOWED_ORIGIN)
-          .header("Access-Control-Request-Method", "GET")
-          .exchange();
+      var result =
+          mvc.options()
+              .uri("/v1/categories")
+              .header("Origin", ALLOWED_ORIGIN)
+              .header("Access-Control-Request-Method", "GET")
+              .exchange();
 
       assertThat(result)
           .as("preflight to authenticated endpoint from allowed origin should succeed")
@@ -72,9 +78,7 @@ class CorsIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_IncludeCorsHeader_When_SimpleRequestFromAllowedOrigin() {
-      var result = mvc.get().uri("/actuator/health")
-          .header("Origin", ALLOWED_ORIGIN)
-          .exchange();
+      var result = mvc.get().uri("/actuator/health").header("Origin", ALLOWED_ORIGIN).exchange();
 
       assertThat(result.getResponse().getHeader("Access-Control-Allow-Origin"))
           .as("allowed origin should be reflected in simple request response")
@@ -83,9 +87,7 @@ class CorsIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_RejectSimpleRequest_When_OriginNotAllowed() {
-      var result = mvc.get().uri("/actuator/health")
-          .header("Origin", DISALLOWED_ORIGIN)
-          .exchange();
+      var result = mvc.get().uri("/actuator/health").header("Origin", DISALLOWED_ORIGIN).exchange();
 
       assertThat(result)
           .as("simple request from disallowed origin should be rejected")

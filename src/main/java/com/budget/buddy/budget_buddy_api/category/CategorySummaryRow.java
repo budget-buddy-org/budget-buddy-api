@@ -8,5 +8,4 @@ public record CategorySummaryRow(
     Long monthlyBudget,
     long spent,
     int transactionCount,
-    int excludedTransactionCount
-) {}
+    int excludedTransactionCount) {}

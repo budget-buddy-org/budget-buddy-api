@@ -8,8 +8,7 @@ import org.springframework.context.ApplicationContext;
 
 class ApplicationContextIntegrationTest extends BaseIntegrationTest {
 
-  @Autowired
-  private ApplicationContext context;
+  @Autowired private ApplicationContext context;
 
   @Test
   void contextLoads() {

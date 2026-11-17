@@ -1,8 +1,16 @@
 package com.budget.buddy.budget_buddy_api.category;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.budget.buddy.budget_buddy_api.base.exception.EntityNotFoundException;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Category;
 import com.budget.buddy.budget_buddy_contracts.generated.model.CategoryWrite;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -10,29 +18,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
 
-  @Mock
-  private CategoryRepository repository;
-  @Mock
-  private CategoryMapper mapper;
+  @Mock private CategoryRepository repository;
+  @Mock private CategoryMapper mapper;
 
   private CategoryService categoryService;
   private final UUID currentUserId = UUID.randomUUID();
 
   @BeforeEach
   void setUp() {
-    categoryService = new CategoryService(repository, mapper, Collections.emptySet(), () -> currentUserId);
+    categoryService =
+        new CategoryService(repository, mapper, Collections.emptySet(), () -> currentUserId);
   }
 
   @Nested
@@ -67,7 +65,8 @@ class CategoryServiceTest {
       var entity = new CategoryEntity();
       var model = new Category();
 
-      when(repository.findByIdAndOwnerId(categoryId, currentUserId)).thenReturn(Optional.of(entity));
+      when(repository.findByIdAndOwnerId(categoryId, currentUserId))
+          .thenReturn(Optional.of(entity));
       when(mapper.toModel(entity)).thenReturn(model);
 
       // When
@@ -90,7 +89,8 @@ class CategoryServiceTest {
 
       // When & Then
       assertThatThrownBy(() -> categoryService.read(categoryId))
-          .as("Should throw EntityNotFoundException when the category is not found or not owned by user")
+          .as(
+              "Should throw EntityNotFoundException when the category is not found or not owned by user")
           .isInstanceOf(EntityNotFoundException.class);
     }
 
@@ -102,7 +102,8 @@ class CategoryServiceTest {
       var entity = new CategoryEntity();
       var model = new Category();
 
-      when(repository.findByIdAndOwnerId(categoryId, currentUserId)).thenReturn(Optional.of(entity));
+      when(repository.findByIdAndOwnerId(categoryId, currentUserId))
+          .thenReturn(Optional.of(entity));
       when(repository.save(entity)).thenReturn(entity);
       when(mapper.toModel(entity)).thenReturn(model);
 
@@ -110,9 +111,7 @@ class CategoryServiceTest {
       var result = categoryService.update(categoryId, updateRequest);
 
       // Then
-      assertThat(result)
-          .as("Update result should match the mapped model")
-          .isEqualTo(model);
+      assertThat(result).as("Update result should match the mapped model").isEqualTo(model);
 
       verify(mapper).updateEntity(updateRequest, entity);
       verify(repository).save(entity);
@@ -123,7 +122,8 @@ class CategoryServiceTest {
       // Given
       var categoryId = UUID.randomUUID();
       var entity = new CategoryEntity();
-      when(repository.findByIdAndOwnerId(categoryId, currentUserId)).thenReturn(Optional.of(entity));
+      when(repository.findByIdAndOwnerId(categoryId, currentUserId))
+          .thenReturn(Optional.of(entity));
 
       // When
       categoryService.delete(categoryId);

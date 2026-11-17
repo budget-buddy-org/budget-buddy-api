@@ -8,5 +8,4 @@ import org.mapstruct.Mapper;
 public interface CategorySummaryMapper {
 
   CategorySpendingRow toModel(CategorySummaryRow row);
-
 }

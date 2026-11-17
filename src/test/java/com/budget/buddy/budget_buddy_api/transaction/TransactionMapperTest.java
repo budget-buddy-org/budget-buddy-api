@@ -1,9 +1,12 @@
 package com.budget.buddy.budget_buddy_api.transaction;
 
+import static com.budget.buddy.budget_buddy_api.transaction.TransactionType.EXPENSE;
+import static com.budget.buddy.budget_buddy_api.transaction.TransactionType.INCOME;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.budget.buddy.budget_buddy_api.base.mapper.CurrencyMapperImpl;
 import com.budget.buddy.budget_buddy_contracts.generated.model.Transaction;
+import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType;
 import com.budget.buddy.budget_buddy_contracts.generated.model.TransactionWrite;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,20 +22,15 @@ import org.junit.jupiter.api.Test;
 class TransactionMapperTest {
 
   private static final LocalDate FIXED_DATE = LocalDate.of(2024, Month.JUNE, 15);
-  private static final OffsetDateTime FIXED_CREATED_AT = OffsetDateTime.of(
-      LocalDateTime.of(2024, Month.JUNE, 14, 10, 0, 0, 0),
-      ZoneOffset.UTC
-  );
-  private static final OffsetDateTime FIXED_UPDATED_AT = OffsetDateTime.of(
-      LocalDateTime.of(2024, Month.JUNE, 15, 9, 0, 0, 0),
-      ZoneOffset.UTC
-  );
+  private static final OffsetDateTime FIXED_CREATED_AT =
+      OffsetDateTime.of(LocalDateTime.of(2024, Month.JUNE, 14, 10, 0, 0, 0), ZoneOffset.UTC);
+  private static final OffsetDateTime FIXED_UPDATED_AT =
+      OffsetDateTime.of(LocalDateTime.of(2024, Month.JUNE, 15, 9, 0, 0, 0), ZoneOffset.UTC);
   private static final Currency EUR = Currency.getInstance("EUR");
   private static final Currency USD = Currency.getInstance("USD");
 
-  private final TransactionMapper transactionMapper = new TransactionMapperImpl(
-      new CurrencyMapperImpl()
-  );
+  private final TransactionMapper transactionMapper =
+      new TransactionMapperImpl(new CurrencyMapperImpl());
 
   @Nested
   class ToEntity {
@@ -41,13 +39,9 @@ class TransactionMapperTest {
     void should_MapTransactionWriteToTransactionEntity() {
       // Given
       var categoryId = UUID.randomUUID();
-      var create = new TransactionWrite(
-          categoryId,
-          1000L,
-          com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.EXPENSE,
-          "EUR",
-          FIXED_DATE
-      ).description("Test transaction");
+      var create =
+          new TransactionWrite(categoryId, 1000L, TransactionType.EXPENSE, "EUR", FIXED_DATE)
+              .description("Test transaction");
 
       // When
       var entity = transactionMapper.toEntity(create);
@@ -58,7 +52,7 @@ class TransactionMapperTest {
           .isNotNull()
           .returns(categoryId, TransactionEntity::getCategoryId)
           .returns(1000L, TransactionEntity::getAmount)
-          .returns(TransactionType.EXPENSE, TransactionEntity::getType)
+          .returns(EXPENSE, TransactionEntity::getType)
           .returns(EUR, TransactionEntity::getCurrency)
           .returns(FIXED_DATE, TransactionEntity::getDate)
           .returns("Test transaction", TransactionEntity::getDescription);
@@ -67,12 +61,13 @@ class TransactionMapperTest {
     @Test
     void should_MapNullDescription_When_Cleared() {
       // Given
-      var create = new TransactionWrite()
-          .categoryId(UUID.randomUUID())
-          .amount(1000L)
-          .type(com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.EXPENSE)
-          .currency("EUR")
-          .date(FIXED_DATE);
+      var create =
+          new TransactionWrite()
+              .categoryId(UUID.randomUUID())
+              .amount(1000L)
+              .type(TransactionType.EXPENSE)
+              .currency("EUR")
+              .date(FIXED_DATE);
 
       // When
       var entity = transactionMapper.toEntity(create);
@@ -99,7 +94,7 @@ class TransactionMapperTest {
       entity.setOwnerId(ownerId);
       entity.setCategoryId(categoryId);
       entity.setAmount(500L);
-      entity.setType(TransactionType.INCOME);
+      entity.setType(INCOME);
       entity.setCurrency(USD);
       entity.setDate(FIXED_DATE);
       entity.setDescription("Income description");
@@ -132,7 +127,7 @@ class TransactionMapperTest {
       entity1.setId(id1);
       entity1.setCategoryId(UUID.randomUUID());
       entity1.setAmount(100L);
-      entity1.setType(TransactionType.EXPENSE);
+      entity1.setType(EXPENSE);
       entity1.setCurrency(Currency.getInstance("EUR"));
       entity1.setDate(FIXED_DATE);
       entity1.setDescription("D1");
@@ -142,7 +137,7 @@ class TransactionMapperTest {
       entity2.setId(id2);
       entity2.setCategoryId(UUID.randomUUID());
       entity2.setAmount(200L);
-      entity2.setType(TransactionType.INCOME);
+      entity2.setType(INCOME);
       entity2.setCurrency(USD);
       entity2.setDate(FIXED_DATE);
       entity2.setDescription("D2");
@@ -151,9 +146,7 @@ class TransactionMapperTest {
       var models = transactionMapper.toModelList(List.of(entity1, entity2));
 
       // Then
-      assertThat(models)
-          .as("Mapped model list should have correct size and elements")
-          .hasSize(2);
+      assertThat(models).as("Mapped model list should have correct size and elements").hasSize(2);
 
       assertThat(models.get(0))
           .as("First model should match first entity")
@@ -182,7 +175,7 @@ class TransactionMapperTest {
       var entity = new TransactionEntity();
       entity.setCategoryId(UUID.randomUUID());
       entity.setAmount(100L);
-      entity.setType(TransactionType.EXPENSE);
+      entity.setType(EXPENSE);
       entity.setCurrency(Currency.getInstance("EUR"));
       entity.setDate(FIXED_DATE);
       entity.setDescription("Old Desc");
@@ -192,12 +185,13 @@ class TransactionMapperTest {
       entity.setUpdatedAt(originalUpdatedAt);
       entity.setVersion(originalVersion);
 
-      var update = new TransactionWrite()
-          .categoryId(UUID.randomUUID())
-          .amount(200L)
-          .type(com.budget.buddy.budget_buddy_contracts.generated.model.TransactionType.INCOME)
-          .currency("USD")
-          .date(FIXED_DATE);
+      var update =
+          new TransactionWrite()
+              .categoryId(UUID.randomUUID())
+              .amount(200L)
+              .type(TransactionType.INCOME)
+              .currency("USD")
+              .date(FIXED_DATE);
 
       // When
       transactionMapper.updateEntity(update, entity);

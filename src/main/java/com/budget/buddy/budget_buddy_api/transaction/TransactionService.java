@@ -13,19 +13,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service for managing user transactions. Extends {@link OwnableEntityService} to provide basic CRUD operations and includes custom filtering for transactions.
+ * Service for managing user transactions. Extends {@link OwnableEntityService} to provide basic
+ * CRUD operations and includes custom filtering for transactions.
  */
 @Transactional(readOnly = true)
 @Service
-public class TransactionService extends
-    OwnableEntityService<TransactionEntity, UUID, TransactionWrite, Transaction, TransactionWrite, PaginatedTransactions> {
+public class TransactionService
+    extends OwnableEntityService<
+        TransactionEntity,
+        UUID,
+        TransactionWrite,
+        Transaction,
+        TransactionWrite,
+        PaginatedTransactions> {
 
   public TransactionService(
       TransactionRepository repository,
       TransactionMapper mapper,
       Set<BaseEntityValidator<TransactionEntity>> validators,
-      OwnerIdProvider<UUID> ownerIdProvider
-  ) {
+      OwnerIdProvider<UUID> ownerIdProvider) {
     super(repository, mapper, validators, ownerIdProvider);
   }
 
@@ -52,5 +58,4 @@ public class TransactionService extends
   protected TransactionMapper getMapper() {
     return (TransactionMapper) super.getMapper();
   }
-
 }

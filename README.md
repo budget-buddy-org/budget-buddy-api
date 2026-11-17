@@ -84,7 +84,6 @@ Authentication is handled by an external OIDC provider. The API is a stateless r
 | `POST`   | `/v1/categories`              | Create category                  |
 | `GET`    | `/v1/categories/{categoryId}` | Get category                     |
 | `PUT`    | `/v1/categories/{categoryId}` | Replace category (full update)   |
-| `PATCH`  | `/v1/categories/{categoryId}` | Update category (partial update) |
 | `DELETE` | `/v1/categories/{categoryId}` | Delete category                  |
 
 ### Transactions
@@ -95,7 +94,6 @@ Authentication is handled by an external OIDC provider. The API is a stateless r
 | `POST`   | `/v1/transactions`                 | Create transaction                  |
 | `GET`    | `/v1/transactions/{transactionId}` | Get transaction                     |
 | `PUT`    | `/v1/transactions/{transactionId}` | Replace transaction (full update)   |
-| `PATCH`  | `/v1/transactions/{transactionId}` | Update transaction (partial update) |
 | `DELETE` | `/v1/transactions/{transactionId}` | Delete transaction                  |
 
 All endpoints require `Authorization: Bearer <access_token>` (JWT issued by the OIDC provider).
@@ -109,6 +107,19 @@ To build the project, you need to provide GitHub credentials to access the `budg
 ./gradlew build -Pgpr.user=YOUR_USERNAME -Pgpr.key=YOUR_TOKEN
 ```
 
+### Java formatting
+
+Spotless formats all Java source sets (production, unit tests, and integration tests)
+with the default Google Java Format style. It also applies the default import ordering,
+removes unused imports, and replaces fully qualified type references with imports where possible.
+
+```bash
+./gradlew spotlessApply         # Format Java sources
+./gradlew spotlessCheck         # Check formatting without changing files
+```
+
+Formatting is also checked automatically by `./gradlew check` and `./gradlew build`.
+
 ### Build Docker image
 
 ```bash
@@ -118,7 +129,7 @@ To build the project, you need to provide GitHub credentials to access the `budg
 ## Tests
 
 ```bash
-./gradlew test                  # Run all tests (unit + integration)
+./gradlew test                  # Run unit tests
 ./gradlew integrationTest       # Run integration tests (requires Docker)
 ./gradlew check                 # Run all tests + quality checks
 ```
@@ -129,14 +140,10 @@ To build the project, you need to provide GitHub credentials to access the `budg
 GET /actuator/health
 ```
 
-### PATCH Behavior
+### Update behavior
 
-The API supports JSON Merge Patch semantics for fields that can be cleared:
-- **Provided value**: Updates the field to the new value.
-- **Explicit `null`**: Sets the field to `null` in the database.
-- **Omitted field**: Leaves the existing value unchanged.
-
-This is implemented using MapStruct with `JsonNullable` support in the `BaseEntityMapper`.
+`PUT` fully replaces writable fields, including clearing nullable fields when omitted
+or explicitly set to `null`. PATCH endpoints are not supported.
 
 ### Error Responses (RFC 9457)
 

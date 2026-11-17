@@ -19,12 +19,11 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Transaction controller for CRUDL operations on transactions.
- */
+/** Transaction controller for CRUDL operations on transactions. */
 @RestController
 public class TransactionController
-    extends BaseEntityController<UUID, TransactionWrite, Transaction, TransactionWrite, PaginatedTransactions>
+    extends BaseEntityController<
+        UUID, TransactionWrite, Transaction, TransactionWrite, PaginatedTransactions>
     implements TransactionsApi {
 
   private static final Sort DEFAULT_SORT = Sort.by(Direction.DESC, "date");
@@ -49,7 +48,8 @@ public class TransactionController
   }
 
   @Override
-  public ResponseEntity<List<MonthlySummary>> getTransactionsSummaryTrend(String from, String to, String currency) {
+  public ResponseEntity<List<MonthlySummary>> getTransactionsSummaryTrend(
+      String from, String to, String currency) {
     return ResponseEntity.ok(summaryService.getTrend(from, to, currency));
   }
 
@@ -64,22 +64,23 @@ public class TransactionController
       @Nullable LocalDate start,
       @Nullable LocalDate end,
       @Nullable TransactionType type,
-      String sort
-  ) {
+      String sort) {
     var pageable = PageRequest.of(page, size, buildSort(sort));
-    var filter = TransactionFilter.builder()
-        .categoryId(categoryId)
-        .start(start)
-        .end(end)
-        .type(mapper.toModel(type))
-        .query(query)
-        .amountMin(amountMin)
-        .amountMax(amountMax)
-        .build();
+    var filter =
+        TransactionFilter.builder()
+            .categoryId(categoryId)
+            .start(start)
+            .end(end)
+            .type(mapper.toModel(type))
+            .query(query)
+            .amountMin(amountMin)
+            .amountMax(amountMax)
+            .build();
     return listTransactions(filter, pageable);
   }
 
-  ResponseEntity<PaginatedTransactions> listTransactions(TransactionFilter filter, Pageable pageable) {
+  ResponseEntity<PaginatedTransactions> listTransactions(
+      TransactionFilter filter, Pageable pageable) {
     return ResponseEntity.ok(service.list(filter, pageable));
   }
 
@@ -99,7 +100,8 @@ public class TransactionController
   }
 
   @Override
-  public ResponseEntity<Transaction> updateTransaction(UUID transactionId, TransactionWrite transactionUpdate) {
+  public ResponseEntity<Transaction> updateTransaction(
+      UUID transactionId, TransactionWrite transactionUpdate) {
     return super.updateInternal(transactionId, transactionUpdate);
   }
 

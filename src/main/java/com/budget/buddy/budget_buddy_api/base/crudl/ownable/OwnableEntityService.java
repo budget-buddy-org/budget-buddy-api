@@ -13,10 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Base class for services managing entities that belong to a specific owner.
  *
- * <p>All CRUDL operations are automatically scoped to the owner returned by the
- * injected {@link OwnerIdProvider}. Subclasses inherit this scoping without any
- * additional wiring — the parent's {@code update/delete} flow is reused
- * verbatim because it dispatches through the overridden {@link #readInternal(Object)}.
+ * <p>All CRUDL operations are automatically scoped to the owner returned by the injected {@link
+ * OwnerIdProvider}. Subclasses inherit this scoping without any additional wiring — the parent's
+ * {@code update/delete} flow is reused verbatim because it dispatches through the overridden {@link
+ * #readInternal(Object)}.
  *
  * @param <E> the entity type
  * @param <ID> the identifier type
@@ -35,8 +35,7 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, C, R, U, L>
       OwnableEntityRepository<E, ID> repository,
       BaseEntityMapper<E, C, R, U, L> mapper,
       Iterable<BaseEntityValidator<E>> entityValidators,
-      OwnerIdProvider<ID> ownerIdProvider
-  ) {
+      OwnerIdProvider<ID> ownerIdProvider) {
     super(repository, mapper, entityValidators);
     this.ownerIdProvider = ownerIdProvider;
   }
@@ -53,7 +52,8 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, C, R, U, L>
 
   @Override
   protected E readInternal(ID id) {
-    return getRepository().findByIdAndOwnerId(id, ownerIdProvider.get())
+    return getRepository()
+        .findByIdAndOwnerId(id, ownerIdProvider.get())
         .orElseThrow(() -> new EntityNotFoundException(ENTITY_NOT_FOUND_MESSAGE.formatted(id)));
   }
 
@@ -75,9 +75,7 @@ public class OwnableEntityService<E extends OwnableEntity<ID>, ID, C, R, U, L>
     return getRepository().countByOwnerId(ownerIdProvider.get());
   }
 
-  /**
-   * Deletes every entity owned by the current owner. Used when clearing all of a user's data.
-   */
+  /** Deletes every entity owned by the current owner. Used when clearing all of a user's data. */
   @Transactional
   public void deleteAllByOwnerId() {
     getRepository().deleteAllByOwnerId(ownerIdProvider.get());
