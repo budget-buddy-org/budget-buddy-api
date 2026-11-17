@@ -15,4 +15,4 @@ permissions:
   packages: read
 jobs:
   image:
-    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-image-check.yml@306f06148d1b17242b36121967613ded7380ddaf
+    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-image-check.yml@f7140d62236354f8698c220180658c573fa2b6ec
