@@ -3,9 +3,6 @@ on:
   pull_request:
     paths:
       - '.github/workflows/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
       - 'build.gradle*'
       - 'settings.gradle*'
       - 'gradle/**'
@@ -18,4 +15,4 @@ permissions:
   packages: read
 jobs:
   image:
-    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-image-check.yml@0b05bd0245bda46e60f8998361a8ed05772368ff
+    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-image-check.yml@f7140d62236354f8698c220180658c573fa2b6ec

@@ -19,11 +19,3 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "chore"
-
-  # Maintain dependencies for npm (semantic-release tooling)
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    commit-message:
-      prefix: "chore"
