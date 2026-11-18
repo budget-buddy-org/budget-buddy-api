@@ -20,4 +20,4 @@ permissions:
 
 jobs:
   dependency-submission:
-    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-dependency-submission.yml@ca6bffbd7f206e9fe5d612fcf40fe061678cc5dd
+    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-dependency-submission.yml@0b14ee3095313a6906c77a8989ae4c46b6790f22

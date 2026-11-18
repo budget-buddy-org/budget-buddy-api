@@ -22,7 +22,7 @@ jobs:
       packages: write
       security-events: write
       id-token: write
-    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-publish.yml@ca6bffbd7f206e9fe5d612fcf40fe061678cc5dd
+    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-publish.yml@0b14ee3095313a6906c77a8989ae4c46b6790f22
     with:
       ref: ${{ inputs.ref || github.event.release.tag_name || github.ref }}
       publish: ${{ github.event_name == 'release' || inputs.publish }}
