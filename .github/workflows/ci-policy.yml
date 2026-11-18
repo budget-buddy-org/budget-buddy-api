@@ -7,4 +7,4 @@ permissions:
   contents: read
 jobs:
   policy:
-    uses: budget-buddy-org/ci-workflows/.github/workflows/consumer-policy.yml@f7140d62236354f8698c220180658c573fa2b6ec
+    uses: budget-buddy-org/ci-workflows/.github/workflows/consumer-policy.yml@ca6bffbd7f206e9fe5d612fcf40fe061678cc5dd

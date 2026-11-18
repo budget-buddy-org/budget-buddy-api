@@ -164,3 +164,10 @@ For validation errors (`400 Bad Request`), the response is extended with an `err
   ]
 }
 ```
+
+### Releases
+
+Git tags and GitHub Releases are the version and release-note sources.
+Application releases do not create version-bump or changelog commits.
+Production image builds receive the verified release version from shared CI.
+Local builds use a development version; web preview builds use the source revision.

@@ -8,6 +8,8 @@ plugins {
   id("org.sonarqube") version "7.6.0.18749"
 }
 
+version = providers.gradleProperty("releaseVersion").orElse("0.0.0-SNAPSHOT").get()
+
 group = "com.budget.buddy"
 description = "API for Budget Buddy App"
 
