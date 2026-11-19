@@ -169,3 +169,5 @@ tasks.sonar {
   dependsOn(tasks.jacocoTestReport)
   dependsOn(testing.suites.named("integrationTest"))
 }
+
+tasks.bootJar { archiveFileName.set("app.jar") }

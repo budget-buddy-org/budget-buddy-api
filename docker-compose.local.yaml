@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:${DB_IMAGE_TAG:-18.7-alpine}
+    image: cgr.dev/chainguard/postgres:latest
     platform: ${DOCKER_PLATFORM:-linux/arm64}
     environment:
       POSTGRES_DB: budgetbuddy

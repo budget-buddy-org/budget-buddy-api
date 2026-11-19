@@ -8,6 +8,8 @@ on:
       - 'gradle/**'
       - 'gradlew'
       - 'gradle.properties'
+      - 'Dockerfile'
+      - '.dockerignore'
       - 'src/**'
   workflow_dispatch:
 permissions:
