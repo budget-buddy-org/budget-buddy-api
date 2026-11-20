@@ -5,10 +5,13 @@ changing tests.
 
 ## Source sets & how to run
 
-| Tier            | Location                       | Base class                                       | Runs with                                  |
-|-----------------|--------------------------------|--------------------------------------------------|--------------------------------------------|
-| **Unit**        | `src/test/java/...`            | none (plain JUnit + Mockito)                     | `./gradlew test`                           |
-| **Integration** | `src/integrationTest/java/...` | `BaseIntegrationTest` / `BaseMvcIntegrationTest` | `./gradlew integrationTest` (needs Docker) |
+| Tier            | Location                       | Base class                                                          | Runs with                                  |
+|-----------------|--------------------------------|---------------------------------------------------------------------|--------------------------------------------|
+| **Unit**        | `src/test/java/...`            | none (plain JUnit + Mockito)                                        | `./gradlew test`                           |
+| **Integration** | `src/integrationTest/java/...` | `BaseIntegrationTest` / `BaseMvcIntegrationTest` / `BaseOwnableIntegrationTest` | `./gradlew integrationTest` (needs Docker) |
+
+- `BaseOwnableIntegrationTest` extends `BaseIntegrationTest` and provides `upsertRandomUser()` (creates a user with
+  random OIDC claims) and `userRepository` — use it for cross-user isolation tests.
 
 ```bash
 ./gradlew test                                          # unit
@@ -33,12 +36,8 @@ test class is named `<Feature>IntegrationTest`.
 
 ```java
 assertThat(entity.getOwnerId())
-    .
-
-as("Transaction owner ID should be set to the current user ID")
-    .
-
-isEqualTo(currentUserId);
+    .as("Transaction owner ID should be set to the current user ID")
+    .isEqualTo(currentUserId);
 ```
 
 - **Prefer `record`-style chained assertions** for multi-field checks:
@@ -59,31 +58,17 @@ For services, validators, mappers, and other isolated logic.
 
 ```java
 var filterCaptor = ArgumentCaptor.forClass(TransactionFilter.class);
-
-verify(repository).
-
-findAllByFilter(filterCaptor.capture(),any());
-
-assertThat(filterCaptor.getValue().
-
-ownerId()).
-
-isEqualTo(currentUserId);
+verify(repository).findAllByFilter(filterCaptor.capture(), any());
+assertThat(filterCaptor.getValue().ownerId()).isEqualTo(currentUserId);
 ```
 
 - For thrown exceptions, assert the **type and message** — and the right type. Domain validation failures throw
   `ValidationException` (see `TransactionValidator`), not `IllegalArgumentException`:
 
 ```java
-assertThatThrownBy(() ->validator.
-
-validate(entity))
-    .
-
-isInstanceOf(ValidationException .class)
-    .
-
-hasMessage("Unknown category with id: "+categoryId);
+assertThatThrownBy(() -> validator.validate(entity))
+    .isInstanceOf(ValidationException.class)
+    .hasMessage("Unknown category with id: " + categoryId);
 ```
 
 - Use `verifyNoInteractions(...)` / `verifyNoMoreInteractions(...)` to pin down "and nothing else happened" on the
@@ -128,7 +113,7 @@ When you add or change an endpoint or domain rule, the change is not done until 
 - **Error mapping:** when you add a `GlobalExceptionHandler` branch, add a handler test asserting the status and
   `Problem` body shape.
 
-## Anti-patterns to avoid
+## Antipatterns to avoid
 
 - **No tautological assertions.** `assertThat(e).returns(e.getId(), BaseEntity::getId)` compares a value to itself and
   can never fail — assert against an expected literal or a separately-captured value instead.

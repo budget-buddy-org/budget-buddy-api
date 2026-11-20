@@ -6,7 +6,7 @@ This file provides guidance for AI agents (Claude Code, Junie, etc.) when workin
 
 ## Quick Start
 
-**Stack:** Java 25, Spring Boot 4.0.6, Spring Data JDBC, PostgreSQL, Liquibase, MapStruct, Lombok
+**Stack:** Java 25, Spring Boot 4.1.2, Spring Data JDBC, PostgreSQL, Liquibase, MapStruct, Lombok
 
 **Prerequisites:** The `budget-buddy-contracts` dependency is fetched from GitHub Packages. Set these before building:
 
@@ -145,19 +145,17 @@ Domain features (`category`, `transaction`) are **package-by-feature** and exten
 - **Entity** — extend `OwnableEntity<UUID>` (inherits `id`, `version`, `createdAt`, `updatedAt` from `BaseEntity` and
   adds `ownerId` for per-user isolation). Identity is assigned by `BaseEntityListener` on insert.
 - **Repository** — extend `OwnableEntityRepository<E, UUID>` (gives `findByIdAndOwnerId`, `findAllByOwnerId`,
-  `existsByIdAndOwnerId`, `countByOwnerId`). Add derived-query methods as needed.
-- **Service** — extend `OwnableEntityService<E, UUID, R, C, U>`. All CRUDL operations are auto-scoped to the current
+  `existsByIdAndOwnerId`, `countByOwnerId`, `deleteAllByOwnerId`). Add derived-query methods as needed.
+- **Service** — extend `OwnableEntityService<E, ID, C, R, U, L>`. All CRUDL operations are auto-scoped to the current
   owner; you inherit isolation with no extra code. When a subclass needs the concrete repository/mapper type, **override
   the getter covariantly** rather than re-declaring a field:
-  ```java
-
-@Override
-private TransactionRepository getRepository() { return (TransactionRepository) super.getRepository(); }
-
-```
-- **Controller** — extend `BaseEntityController<…>` **and** `implements <Domain>Api` (the generated interface). Delegate
-  to the `*Internal` helpers (`createInternal`, `readInternal`, …) and **always override `createdURI()`**. Build
-  pagination envelopes with the inherited `toMeta(Page)` helper.
+    ```java
+    @Override
+    private TransactionRepository getRepository() { return (TransactionRepository) super.getRepository(); }
+    ```
+- **Controller** — extend `BaseEntityController<ID, C, R, U, L>` **and** `implements <Domain>Api` (the generated
+  interface). Delegate to the `*Internal` helpers (`createInternal`, `readInternal`, …) and **always override
+  `createdURI()`**.
 - **Mapper** — see MapStruct conventions below.
 - **Validator** *(optional)* — implement `BaseEntityValidator<E>` as a `@Component`; it's auto-collected into the
   service's validator set and run before every save.
@@ -176,10 +174,11 @@ implement the regenerated interfaces.
 ### MapStruct Mappers
 
 - Annotate mappers with `@Mapper(config = MapstructConfig.class)` — the shared config sets the Spring component model
-  and constructor injection. Extend `BaseEntityMapper<E, R, C, U, L>`.
+  and constructor injection. Extend `BaseEntityMapper<E, C, R, U, L>`.
 - **Never map onto immutable/identity fields**: `id`, `version`, `createdAt`, `updatedAt`, `ownerId` are `@Mapping(...,
   ignore = true)` on `toEntity`/`updateEntity` (the base interface already declares these — keep them when overriding).
-- `toModel` / `toModelList` map entity → contract DTO; `toPageResponse(items, meta)` builds the paginated envelope.
+- `toModel` / `toModelList` map entity → contract DTO; `toPage(Page<E>)` builds the paginated response, and
+  `toPaginationMeta(Page<?>)` creates a `PaginationMeta` object.
 
 ### Persistence & Entities
 
@@ -188,9 +187,8 @@ implement the regenerated interfaces.
   use Java property names (e.g. `"createdAt"`) in `Sort.by(...)` and let Spring Data JDBC map them to column names.
 - **Optimistic locking** via the `@Version` field inherited from `BaseEntity`; **auditing**
   (`createdAt`/`updatedAt`) is automatic — never set these by hand.
-- **Custom type conversion** lives in `CustomJdbcConverters` (e.g. `Currency`, Postgres enums, timestamp→
-  `OffsetDateTime`).
-  Register new converters there.
+- **Custom type conversion** lives in `JdbcConfig.jdbcCustomConversions()` (e.g. `Currency`, Postgres enums,
+  timestamp→`OffsetDateTime`). Register new converters there.
 
 ### Database Migrations (Liquibase)
 
