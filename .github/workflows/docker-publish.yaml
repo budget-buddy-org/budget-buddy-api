@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.ref || github.event.release.tag_name || github.ref }}
-      - uses: budget-buddy-org/ci-workflows/.github/actions/image-metadata@503a07e77a57e40c0febeb4c6028256f82ec5835
+      - uses: budget-buddy-org/ci-workflows/.github/actions/image-metadata@ea9c69008cf58b7f2a40d2d6860f5bdf7d10cb95
         id: metadata
         with:
           version-file: gradle.properties
@@ -59,8 +59,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.prepare.outputs.source-sha }}
-      - uses: budget-buddy-org/ci-workflows/.github/actions/setup-container@503a07e77a57e40c0febeb4c6028256f82ec5835
-      - uses: budget-buddy-org/ci-workflows/.github/actions/setup-gradle@503a07e77a57e40c0febeb4c6028256f82ec5835
+      - uses: budget-buddy-org/ci-workflows/.github/actions/setup-container@ea9c69008cf58b7f2a40d2d6860f5bdf7d10cb95
+      - uses: budget-buddy-org/ci-workflows/.github/actions/setup-gradle@ea9c69008cf58b7f2a40d2d6860f5bdf7d10cb95
       - name: Build and push a staging image on the native platform
         id: build
         env:
@@ -83,7 +83,7 @@ jobs:
           EOF
           digest=$(jq -r '.["containerimage.digest"]' "$RUNNER_TEMP/image.json")
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
-      - uses: budget-buddy-org/ci-workflows/.github/actions/image-record@503a07e77a57e40c0febeb4c6028256f82ec5835
+      - uses: budget-buddy-org/ci-workflows/.github/actions/image-record@ea9c69008cf58b7f2a40d2d6860f5bdf7d10cb95
         with:
           digest: ${{ steps.build.outputs.digest }}
           platform: ${{ matrix.platform }}
@@ -96,7 +96,7 @@ jobs:
       packages: write
       security-events: write
       id-token: write
-    uses: budget-buddy-org/ci-workflows/.github/workflows/publish-image.yml@503a07e77a57e40c0febeb4c6028256f82ec5835
+    uses: budget-buddy-org/ci-workflows/.github/workflows/publish-image.yml@ea9c69008cf58b7f2a40d2d6860f5bdf7d10cb95
     with:
       version: ${{ needs.prepare.outputs.version }}
       source-sha: ${{ needs.prepare.outputs.source-sha }}
