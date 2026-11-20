@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.ref || github.event.release.tag_name || github.ref }}
-      - uses: budget-buddy-org/ci-workflows/.github/actions/image-metadata@077f1a008b140892a14e6fff203aae3a97c830fb
+      - uses: budget-buddy-org/ci-workflows/.github/actions/image-metadata@503a07e77a57e40c0febeb4c6028256f82ec5835
         id: metadata
         with:
           version-file: gradle.properties
@@ -59,8 +59,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.prepare.outputs.source-sha }}
-      - uses: budget-buddy-org/ci-workflows/.github/actions/setup-container@077f1a008b140892a14e6fff203aae3a97c830fb
-      - uses: budget-buddy-org/ci-workflows/.github/actions/setup-gradle@077f1a008b140892a14e6fff203aae3a97c830fb
+      - uses: budget-buddy-org/ci-workflows/.github/actions/setup-container@503a07e77a57e40c0febeb4c6028256f82ec5835
+      - uses: budget-buddy-org/ci-workflows/.github/actions/setup-gradle@503a07e77a57e40c0febeb4c6028256f82ec5835
       - name: Build and push a staging image on the native platform
         id: build
         env:
@@ -68,9 +68,10 @@ jobs:
           IMAGE: ${{ needs.prepare.outputs.image }}
           PLATFORM: ${{ matrix.platform }}
           ARCH: ${{ matrix.arch }}
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           tag="$IMAGE:ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-$ARCH"
-          ./gradlew bootBuildImage -x test --imagePlatform="$PLATFORM" --imageName="$tag"
+          ./gradlew bootBuildImage -x test --imagePlatform="$PLATFORM" --imageName="$tag" -Pversion="$VERSION"
           docker push "$tag"
           ref=$(docker image inspect "$tag" --format '{{index .RepoDigests 0}}')
           # Buildpacks emit Docker media types; export OCI before the shared
@@ -82,7 +83,7 @@ jobs:
           EOF
           digest=$(jq -r '.["containerimage.digest"]' "$RUNNER_TEMP/image.json")
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
-      - uses: budget-buddy-org/ci-workflows/.github/actions/image-record@077f1a008b140892a14e6fff203aae3a97c830fb
+      - uses: budget-buddy-org/ci-workflows/.github/actions/image-record@503a07e77a57e40c0febeb4c6028256f82ec5835
         with:
           digest: ${{ steps.build.outputs.digest }}
           platform: ${{ matrix.platform }}
@@ -95,7 +96,7 @@ jobs:
       packages: write
       security-events: write
       id-token: write
-    uses: budget-buddy-org/ci-workflows/.github/workflows/publish-image.yml@077f1a008b140892a14e6fff203aae3a97c830fb
+    uses: budget-buddy-org/ci-workflows/.github/workflows/publish-image.yml@503a07e77a57e40c0febeb4c6028256f82ec5835
     with:
       version: ${{ needs.prepare.outputs.version }}
       source-sha: ${{ needs.prepare.outputs.source-sha }}
