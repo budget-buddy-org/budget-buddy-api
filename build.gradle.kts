@@ -2,10 +2,10 @@ plugins {
   java
   `jvm-test-suite`
   jacoco
-  id("com.diffplug.spotless") version "8.11.0"
   id("org.springframework.boot") version "4.1.2"
   id("io.spring.dependency-management") version "1.1.7"
   id("org.sonarqube") version "7.6.0.18749"
+  id("com.diffplug.spotless") version "8.11.0"
 }
 
 group = "com.budget.buddy"
@@ -54,8 +54,6 @@ dependencies {
   implementation("com.github.ben-manes.caffeine:caffeine")
   implementation("org.mapstruct:mapstruct:${mapstructVersion}")
   implementation("org.jspecify:jspecify")
-
-  compileOnly("org.projectlombok:lombok")
 
   runtimeOnly("org.postgresql:postgresql")
 
