@@ -39,16 +39,16 @@ permissions:
 
 jobs:
   ci:
-    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-ci.yml@077f1a008b140892a14e6fff203aae3a97c830fb
+    uses: budget-buddy-org/ci-workflows/.github/workflows/gradle-ci.yml@503a07e77a57e40c0febeb4c6028256f82ec5835
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   release:
     needs: ci
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.dry-run-release)
-    uses: budget-buddy-org/ci-workflows/.github/workflows/release.yml@077f1a008b140892a14e6fff203aae3a97c830fb
+    uses: budget-buddy-org/ci-workflows/.github/workflows/release.yml@503a07e77a57e40c0febeb4c6028256f82ec5835
     with:
-      profile: gradle-app
+      profile: application
       dry-run: ${{ github.event_name == 'workflow_dispatch' }}
     secrets:
       RELEASE_BOT_ID: ${{ secrets.RELEASE_BOT_ID }}
