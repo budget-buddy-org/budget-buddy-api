@@ -8,7 +8,7 @@ updates:
     # Shared library changes also need matching runtime/lockfile metadata.
     # The central rollout coordinator owns these updates.
     ignore:
-      - dependency-name: "budget-buddy-org/ci-workflows*"
+      - dependency-name: "budget-buddy-org/budget-buddy-workflows*"
     commit-message:
       prefix: "chore"
 
