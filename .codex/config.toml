@@ -1,6 +1,0 @@
-  [mcp_servers.idea]
-    command = "/Applications/IntelliJ IDEA.app/Contents/MacOS/idea"
-    args = ["stdioMcpServer"]
-
-    [mcp_servers.idea.env]
-      IJ_MCP_SERVER_PORT = "64342"
