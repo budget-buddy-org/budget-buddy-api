@@ -24,16 +24,15 @@ public class UserPreferencesDefaultsProvider {
   private final HttpServletRequest request;
 
   public UserPreferences get() {
-    return resolveLocale().map(this::fromLocale).orElseGet(UserPreferences::new);
+    return resolveLocale()
+        .map(this::fromLocale)
+        .orElseGet(() -> new UserPreferences(null, null, null));
   }
 
   private UserPreferences fromLocale(Locale locale) {
-    var preferences = new UserPreferences();
-    preferences.setLanguage(locale.getLanguage());
-
-    resolveCurrency(locale).map(Currency::getCurrencyCode).ifPresent(preferences::setCurrency);
-
-    return preferences;
+    var language = locale.getLanguage();
+    var currency = resolveCurrency(locale).map(Currency::getCurrencyCode).orElse(null);
+    return new UserPreferences(language, currency, null);
   }
 
   private Optional<Locale> resolveLocale() {

@@ -50,9 +50,9 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
             .uri("/v1/categories")
             .with(jwtForUser(ownerId))
             .contentType(MediaType.APPLICATION_JSON)
-            .content(json(new CategoryWrite().name(name)))
+            .content(json(new CategoryWrite(name, null)))
             .exchange();
-    return parseBody(result, Category.class).getId();
+    return parseBody(result, Category.class).id();
   }
 
   private void createTransaction(
@@ -62,13 +62,7 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
       TransactionType type,
       String currency,
       LocalDate date) {
-    var body =
-        new TransactionWrite()
-            .categoryId(categoryId)
-            .amount(amount)
-            .type(type)
-            .currency(currency)
-            .date(date);
+    var body = new TransactionWrite(categoryId, amount, type, currency, date, null);
     mvc.post()
         .uri("/v1/transactions")
         .with(jwtForUser(ownerId))
@@ -115,14 +109,14 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
       var summary = getSummary(userId);
 
       assertThat(summary)
-          .returns(MARCH, MonthlySummary::getMonth)
-          .returns(EUR, MonthlySummary::getCurrency)
-          .returns(0L, MonthlySummary::getIncome)
-          .returns(0L, MonthlySummary::getExpense)
-          .returns(0L, MonthlySummary::getBalance)
-          .returns(0, MonthlySummary::getIncomeCount)
-          .returns(0, MonthlySummary::getExpenseCount)
-          .returns(0, MonthlySummary::getExcludedTransactionCount);
+          .returns(MARCH, MonthlySummary::month)
+          .returns(EUR, MonthlySummary::currency)
+          .returns(0L, MonthlySummary::income)
+          .returns(0L, MonthlySummary::expense)
+          .returns(0L, MonthlySummary::balance)
+          .returns(0, MonthlySummary::incomeCount)
+          .returns(0, MonthlySummary::expenseCount)
+          .returns(0, MonthlySummary::excludedTransactionCount);
     }
   }
 
@@ -139,12 +133,12 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
       var summary = getSummary(userId);
 
       assertThat(summary)
-          .returns(7500L, MonthlySummary::getIncome)
-          .returns(1000L, MonthlySummary::getExpense)
-          .returns(6500L, MonthlySummary::getBalance)
-          .returns(2, MonthlySummary::getIncomeCount)
-          .returns(1, MonthlySummary::getExpenseCount)
-          .returns(0, MonthlySummary::getExcludedTransactionCount);
+          .returns(7500L, MonthlySummary::income)
+          .returns(1000L, MonthlySummary::expense)
+          .returns(6500L, MonthlySummary::balance)
+          .returns(2, MonthlySummary::incomeCount)
+          .returns(1, MonthlySummary::expenseCount)
+          .returns(0, MonthlySummary::excludedTransactionCount);
     }
   }
 
@@ -162,12 +156,12 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
       var summary = getSummary(userId);
 
       assertThat(summary)
-          .returns(4000L, MonthlySummary::getIncome)
-          .returns(2000L, MonthlySummary::getExpense)
-          .returns(2000L, MonthlySummary::getBalance)
-          .returns(1, MonthlySummary::getIncomeCount)
-          .returns(1, MonthlySummary::getExpenseCount)
-          .returns(2, MonthlySummary::getExcludedTransactionCount);
+          .returns(4000L, MonthlySummary::income)
+          .returns(2000L, MonthlySummary::expense)
+          .returns(2000L, MonthlySummary::balance)
+          .returns(1, MonthlySummary::incomeCount)
+          .returns(1, MonthlySummary::expenseCount)
+          .returns(2, MonthlySummary::excludedTransactionCount);
     }
   }
 
@@ -185,8 +179,8 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
       var summary = getSummary(userId);
 
       assertThat(summary)
-          .returns(300L, MonthlySummary::getExpense)
-          .returns(2, MonthlySummary::getExpenseCount);
+          .returns(300L, MonthlySummary::expense)
+          .returns(2, MonthlySummary::expenseCount);
     }
   }
 
@@ -206,10 +200,10 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
       var summary = getSummary(userId);
 
       assertThat(summary)
-          .returns(1000L, MonthlySummary::getExpense)
-          .returns(0L, MonthlySummary::getIncome)
-          .returns(1, MonthlySummary::getExpenseCount)
-          .returns(0, MonthlySummary::getIncomeCount);
+          .returns(1000L, MonthlySummary::expense)
+          .returns(0L, MonthlySummary::income)
+          .returns(1, MonthlySummary::expenseCount)
+          .returns(0, MonthlySummary::incomeCount);
     }
   }
 
@@ -251,8 +245,7 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
       var trend = getTrend(userId, "2026-01");
 
       assertThat(trend)
-          .extracting(
-              MonthlySummary::getMonth, MonthlySummary::getIncome, MonthlySummary::getExpense)
+          .extracting(MonthlySummary::month, MonthlySummary::income, MonthlySummary::expense)
           .containsExactly(
               tuple("2026-01", 0L, 1000L), tuple("2026-02", 2000L, 0L), tuple(MARCH, 0L, 500L));
     }
@@ -268,14 +261,14 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(trend).hasSize(3);
       assertThat(trend.get(1))
-          .returns("2026-02", MonthlySummary::getMonth)
-          .returns(0L, MonthlySummary::getIncome)
-          .returns(0L, MonthlySummary::getExpense)
-          .returns(0L, MonthlySummary::getBalance)
-          .returns(0, MonthlySummary::getIncomeCount)
-          .returns(0, MonthlySummary::getExpenseCount)
-          .returns(0, MonthlySummary::getExcludedTransactionCount)
-          .returns(EUR, MonthlySummary::getCurrency);
+          .returns("2026-02", MonthlySummary::month)
+          .returns(0L, MonthlySummary::income)
+          .returns(0L, MonthlySummary::expense)
+          .returns(0L, MonthlySummary::balance)
+          .returns(0, MonthlySummary::incomeCount)
+          .returns(0, MonthlySummary::expenseCount)
+          .returns(0, MonthlySummary::excludedTransactionCount)
+          .returns(EUR, MonthlySummary::currency);
     }
 
     @Test
@@ -287,8 +280,8 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(trend)
           .singleElement()
-          .returns(MARCH, MonthlySummary::getMonth)
-          .returns(7500L, MonthlySummary::getIncome);
+          .returns(MARCH, MonthlySummary::month)
+          .returns(7500L, MonthlySummary::income);
     }
 
     @Test
@@ -302,7 +295,7 @@ class TransactionSummaryIntegrationTest extends BaseMvcIntegrationTest {
       var trend = getTrend(userId, "2026-01");
 
       assertThat(trend)
-          .extracting(MonthlySummary::getMonth, MonthlySummary::getExpense)
+          .extracting(MonthlySummary::month, MonthlySummary::expense)
           .containsExactly(tuple("2026-01", 0L), tuple("2026-02", 1000L), tuple(MARCH, 0L));
     }
 

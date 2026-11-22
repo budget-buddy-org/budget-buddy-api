@@ -35,8 +35,8 @@ class UserPreferencesDefaultsProviderTest {
 
       var result = provider.get();
 
-      assertThat(result.getLanguage()).isNull();
-      assertThat(result.getCurrency()).isNull();
+      assertThat(result.language()).isNull();
+      assertThat(result.currency()).isNull();
     }
 
     @Test
@@ -47,8 +47,8 @@ class UserPreferencesDefaultsProviderTest {
 
       var result = provider.get();
 
-      assertThat(result.getLanguage()).isNull();
-      assertThat(result.getCurrency()).isNull();
+      assertThat(result.language()).isNull();
+      assertThat(result.currency()).isNull();
     }
 
     @Test
@@ -58,8 +58,8 @@ class UserPreferencesDefaultsProviderTest {
 
       var result = provider.get();
 
-      assertThat(result.getLanguage()).isEqualTo("zh");
-      assertThat(result.getCurrency()).isNull();
+      assertThat(result.language()).isEqualTo("zh");
+      assertThat(result.currency()).isNull();
     }
 
     @Test
@@ -68,8 +68,8 @@ class UserPreferencesDefaultsProviderTest {
 
       var result = provider.get();
 
-      assertThat(result.getLanguage()).isEqualTo("en");
-      assertThat(result.getCurrency()).isEqualTo("USD");
+      assertThat(result.language()).isEqualTo("en");
+      assertThat(result.currency()).isEqualTo("USD");
     }
   }
 }

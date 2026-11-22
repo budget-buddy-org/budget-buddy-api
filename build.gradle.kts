@@ -2,10 +2,10 @@ plugins {
   java
   `jvm-test-suite`
   jacoco
-  id("org.springframework.boot") version "4.1.2"
+  id("org.springframework.boot") version "4.1.3"
   id("io.spring.dependency-management") version "1.1.7"
   id("org.sonarqube") version "7.6.0.18749"
-  id("com.diffplug.spotless") version "8.11.0"
+  id("com.diffplug.spotless") version "8.12.0"
 }
 
 group = "com.budget.buddy"
@@ -41,13 +41,14 @@ repositories {
 dependencies {
   val mapstructVersion = "1.6.3"
   val lombokMapstructBindingVersion = "0.2.0"
-  val budgetBuddyContractsVersion = "6.1.3"
+  val budgetBuddyContractsVersion = "7.0.0"
 
   implementation("com.budgetbuddy:budget-buddy-contracts:${budgetBuddyContractsVersion}")
   implementation("org.springframework.boot:spring-boot-starter-webmvc")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+  implementation("org.springframework.boot:spring-boot-starter-validation")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-cache")
   implementation("org.springframework.boot:spring-boot-starter-liquibase")

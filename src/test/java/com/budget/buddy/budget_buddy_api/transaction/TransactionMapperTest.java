@@ -40,8 +40,8 @@ class TransactionMapperTest {
       // Given
       var categoryId = UUID.randomUUID();
       var create =
-          new TransactionWrite(categoryId, 1000L, TransactionType.EXPENSE, "EUR", FIXED_DATE)
-              .description("Test transaction");
+          new TransactionWrite(
+              categoryId, 1000L, TransactionType.EXPENSE, "EUR", FIXED_DATE, "Test transaction");
 
       // When
       var entity = transactionMapper.toEntity(create);
@@ -62,12 +62,8 @@ class TransactionMapperTest {
     void should_MapNullDescription_When_Cleared() {
       // Given
       var create =
-          new TransactionWrite()
-              .categoryId(UUID.randomUUID())
-              .amount(1000L)
-              .type(TransactionType.EXPENSE)
-              .currency("EUR")
-              .date(FIXED_DATE);
+          new TransactionWrite(
+              UUID.randomUUID(), 1000L, TransactionType.EXPENSE, "EUR", FIXED_DATE, null);
 
       // When
       var entity = transactionMapper.toEntity(create);
@@ -106,13 +102,13 @@ class TransactionMapperTest {
       assertThat(model)
           .as("Mapped transaction model should have correct values")
           .isNotNull()
-          .returns(id, Transaction::getId)
-          .returns(categoryId, Transaction::getCategoryId)
-          .returns(500L, Transaction::getAmount)
-          .returns("INCOME", m -> m.getType().getValue())
-          .returns("USD", Transaction::getCurrency)
-          .returns(FIXED_DATE, Transaction::getDate)
-          .returns("Income description", Transaction::getDescription);
+          .returns(id, Transaction::id)
+          .returns(categoryId, Transaction::categoryId)
+          .returns(500L, Transaction::amount)
+          .returns("INCOME", m -> m.type().getValue())
+          .returns("USD", Transaction::currency)
+          .returns(FIXED_DATE, Transaction::date)
+          .returns("Income description", Transaction::description);
     }
   }
 
@@ -150,13 +146,13 @@ class TransactionMapperTest {
 
       assertThat(models.get(0))
           .as("First model should match first entity")
-          .returns(id1, Transaction::getId)
-          .returns(100L, Transaction::getAmount);
+          .returns(id1, Transaction::id)
+          .returns(100L, Transaction::amount);
 
       assertThat(models.get(1))
           .as("Second model should match second entity")
-          .returns(id2, Transaction::getId)
-          .returns(200L, Transaction::getAmount);
+          .returns(id2, Transaction::id)
+          .returns(200L, Transaction::amount);
     }
   }
 
@@ -186,12 +182,8 @@ class TransactionMapperTest {
       entity.setVersion(originalVersion);
 
       var update =
-          new TransactionWrite()
-              .categoryId(UUID.randomUUID())
-              .amount(200L)
-              .type(TransactionType.INCOME)
-              .currency("USD")
-              .date(FIXED_DATE);
+          new TransactionWrite(
+              UUID.randomUUID(), 200L, TransactionType.INCOME, "USD", FIXED_DATE, null);
 
       // When
       transactionMapper.updateEntity(update, entity);
@@ -199,7 +191,7 @@ class TransactionMapperTest {
       // Then
       assertThat(entity)
           .as("CategoryId and amount should be updated")
-          .returns(update.getCategoryId(), TransactionEntity::getCategoryId)
+          .returns(update.categoryId(), TransactionEntity::getCategoryId)
           .returns(200L, TransactionEntity::getAmount)
           .extracting(TransactionEntity::getDescription)
           .as("Description should be overwritten with null in update (PUT) operation")

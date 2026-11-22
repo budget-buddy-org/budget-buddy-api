@@ -33,10 +33,10 @@ class MeDataDeletionIntegrationTest extends BaseMvcIntegrationTest {
             .uri("/v1/categories")
             .with(jwtForUser(ownerId))
             .contentType(MediaType.APPLICATION_JSON)
-            .content(json(new CategoryWrite().name(name)))
+            .content(json(new CategoryWrite(name, null)))
             .exchange();
 
-    return parseBody(result, Category.class).getId();
+    return parseBody(result, Category.class).id();
   }
 
   private void createTransaction(String ownerId, UUID categoryId) {
@@ -46,23 +46,24 @@ class MeDataDeletionIntegrationTest extends BaseMvcIntegrationTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(
             json(
-                new TransactionWrite()
-                    .categoryId(categoryId)
-                    .amount(1000L)
-                    .type(TransactionType.EXPENSE)
-                    .currency("EUR")
-                    .date(LocalDate.of(2026, Month.MARCH, 1))))
+                new TransactionWrite(
+                    categoryId,
+                    1000L,
+                    TransactionType.EXPENSE,
+                    "EUR",
+                    LocalDate.of(2026, Month.MARCH, 1),
+                    null)))
         .exchange();
   }
 
   private long categoryCount(String ownerId) throws Exception {
     var result = mvc.get().uri("/v1/categories").with(jwtForUser(ownerId)).exchange();
-    return parseBody(result, PaginatedCategories.class).getMeta().getTotal();
+    return parseBody(result, PaginatedCategories.class).meta().total();
   }
 
   private long transactionCount(String ownerId) throws Exception {
     var result = mvc.get().uri("/v1/transactions").with(jwtForUser(ownerId)).exchange();
-    return parseBody(result, PaginatedTransactions.class).getMeta().getTotal();
+    return parseBody(result, PaginatedTransactions.class).meta().total();
   }
 
   @BeforeEach

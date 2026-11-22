@@ -19,7 +19,7 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
   private String otherUserId;
 
   private UserPreferencesWrite validPreferences() {
-    return new UserPreferencesWrite().language("en").currency("EUR").timezone("Europe/Tallinn");
+    return new UserPreferencesWrite("en", "EUR", "Europe/Tallinn");
   }
 
   @BeforeEach
@@ -38,8 +38,8 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var body = parseBody(result, UserPreferences.class);
-      assertThat(body.getLanguage()).isEqualTo("en");
-      assertThat(body.getCurrency()).isEqualTo("USD");
+      assertThat(body.language()).isEqualTo("en");
+      assertThat(body.currency()).isEqualTo("USD");
     }
 
     @Test
@@ -48,9 +48,9 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var body = parseBody(result, UserPreferences.class);
-      assertThat(body.getLanguage()).as("no headers → no derived defaults").isNull();
-      assertThat(body.getCurrency()).isNull();
-      assertThat(body.getTimezone()).isNull();
+      assertThat(body.language()).as("no headers → no derived defaults").isNull();
+      assertThat(body.currency()).isNull();
+      assertThat(body.timezone()).isNull();
     }
 
     @Test
@@ -76,9 +76,9 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       assertThat(parseBody(result, UserPreferences.class))
-          .returns("en", UserPreferences::getLanguage)
-          .returns("EUR", UserPreferences::getCurrency)
-          .returns("Europe/Tallinn", UserPreferences::getTimezone);
+          .returns("en", UserPreferences::language)
+          .returns("EUR", UserPreferences::currency)
+          .returns("Europe/Tallinn", UserPreferences::timezone);
     }
 
     @Test
@@ -93,8 +93,8 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
       var result = mvc.get().uri(URI).with(jwtForUser(userId)).exchange();
 
       assertThat(parseBody(result, UserPreferences.class))
-          .returns("en", UserPreferences::getLanguage)
-          .returns("EUR", UserPreferences::getCurrency);
+          .returns("en", UserPreferences::language)
+          .returns("EUR", UserPreferences::currency);
     }
 
     @Test
@@ -110,19 +110,14 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
           .uri(URI)
           .with(jwtForUser(userId))
           .contentType(MediaType.APPLICATION_JSON)
-          .content(
-              json(
-                  new UserPreferencesWrite()
-                      .language("de")
-                      .currency("USD")
-                      .timezone("Europe/Berlin")))
+          .content(json(new UserPreferencesWrite("de", "USD", "Europe/Berlin")))
           .exchange();
 
       var result = mvc.get().uri(URI).with(jwtForUser(userId)).exchange();
       assertThat(parseBody(result, UserPreferences.class))
-          .returns("de", UserPreferences::getLanguage)
-          .returns("USD", UserPreferences::getCurrency)
-          .returns("Europe/Berlin", UserPreferences::getTimezone);
+          .returns("de", UserPreferences::language)
+          .returns("USD", UserPreferences::currency)
+          .returns("Europe/Berlin", UserPreferences::timezone);
     }
 
     @Test
@@ -132,12 +127,7 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
               .uri(URI)
               .with(jwtForUser(userId))
               .contentType(MediaType.APPLICATION_JSON)
-              .content(
-                  json(
-                      new UserPreferencesWrite()
-                          .language("en")
-                          .currency("euro")
-                          .timezone("Europe/Tallinn")))
+              .content(json(new UserPreferencesWrite("en", "euro", "Europe/Tallinn")))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
@@ -154,7 +144,7 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
 
       var result = mvc.get().uri(URI).with(jwtForUser(otherUserId)).exchange();
 
-      assertThat(parseBody(result, UserPreferences.class).getCurrency())
+      assertThat(parseBody(result, UserPreferences.class).currency())
           .as("another user's preferences are not visible")
           .isNull();
     }

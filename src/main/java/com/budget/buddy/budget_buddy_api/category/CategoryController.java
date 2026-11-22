@@ -59,6 +59,6 @@ public class CategoryController
 
   @Override
   protected URI createdURI(Category created) {
-    return URI.create("/v1/categories/" + created.getId());
+    return URI.create("/v1/categories/" + created.id());
   }
 }

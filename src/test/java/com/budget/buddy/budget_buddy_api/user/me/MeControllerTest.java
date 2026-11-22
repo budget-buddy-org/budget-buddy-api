@@ -10,6 +10,7 @@ import com.budget.buddy.budget_buddy_api.user.me.preferences.UserPreferencesServ
 import com.budget.buddy.budget_buddy_contracts.generated.model.ClientSettingsWrite;
 import com.budget.buddy.budget_buddy_contracts.generated.model.UserPreferences;
 import com.budget.buddy.budget_buddy_contracts.generated.model.UserPreferencesWrite;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -60,7 +61,7 @@ class MeControllerTest {
 
     @Test
     void upsertCurrentUserClientSettings_ShouldThrowUnsupportedOperationException() {
-      var body = new ClientSettingsWrite();
+      var body = new ClientSettingsWrite(Map.of());
       assertThatThrownBy(() -> controller.upsertCurrentUserClientSettings("app", body))
           .isInstanceOf(UnsupportedOperationException.class)
           .hasMessageContaining("upsertCurrentUserClientSettings");
@@ -103,7 +104,7 @@ class MeControllerTest {
 
     @Test
     void should_ReturnPreferencesFrom200() {
-      var prefs = new UserPreferences().language("en");
+      var prefs = new UserPreferences("en", null, null);
       when(preferencesService.get()).thenReturn(prefs);
 
       var response = controller.getCurrentUserPreferences();
@@ -118,9 +119,8 @@ class MeControllerTest {
 
     @Test
     void should_DelegateUpdateAndReturn200() {
-      var write =
-          new UserPreferencesWrite().language("de").currency("EUR").timezone("Europe/Berlin");
-      var updated = new UserPreferences().language("de");
+      var write = new UserPreferencesWrite("de", "EUR", "Europe/Berlin");
+      var updated = new UserPreferences("de", null, null);
       when(preferencesService.update(write)).thenReturn(updated);
 
       var response = controller.updateCurrentUserPreferences(write);

@@ -39,8 +39,8 @@ class FieldErrorFactoryTest {
 
       // Then
       assertThat(result)
-          .returns("username", FieldError::getField)
-          .returns("must not be blank", FieldError::getMessage);
+          .returns("username", FieldError::field)
+          .returns("must not be blank", FieldError::message);
     }
 
     @Test
@@ -54,9 +54,7 @@ class FieldErrorFactoryTest {
       FieldError result = FieldErrorFactory.from(violation);
 
       // Then
-      assertThat(result)
-          .returns("null", FieldError::getField)
-          .returns("invalid", FieldError::getMessage);
+      assertThat(result).returns("null", FieldError::field).returns("invalid", FieldError::message);
     }
 
     @Test
@@ -83,8 +81,8 @@ class FieldErrorFactoryTest {
 
       // Then
       assertThat(result)
-          .returns("email", FieldError::getField)
-          .returns("invalid format", FieldError::getMessage);
+          .returns("email", FieldError::field)
+          .returns("invalid format", FieldError::message);
     }
 
     @Test
@@ -98,8 +96,8 @@ class FieldErrorFactoryTest {
 
       // Then
       assertThat(result)
-          .returns("email", FieldError::getField)
-          .returns("Invalid value", FieldError::getMessage);
+          .returns("email", FieldError::field)
+          .returns("Invalid value", FieldError::message);
     }
 
     @Test

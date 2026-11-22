@@ -48,7 +48,18 @@ public class GlobalExceptionHandler {
 
   private static ResponseEntity<Problem> problemResponse(
       HttpStatus status, String title, @Nullable String detail, WebRequest request) {
-    return buildProblemResponse(new Problem(), status, title, detail, request);
+    return buildProblemResponse(
+        new Problem(
+            URI.create("about:blank"),
+            title,
+            status.value(),
+            detail,
+            URI.create(getRequestUri(request)),
+            List.of()),
+        status,
+        title,
+        detail,
+        request);
   }
 
   private static ResponseEntity<Problem> buildProblemResponse(
@@ -57,19 +68,19 @@ public class GlobalExceptionHandler {
       String title,
       @Nullable String detail,
       WebRequest request) {
-    problem
-        .type(URI.create("about:blank"))
-        .title(title)
-        .status(status.value())
-        .instance(URI.create(getRequestUri(request)));
-
-    // detail is optional (RFC 9457); setDetail accepts null, the fluent detail() builder does not
-    problem.setDetail(detail);
+    var responseProblem =
+        new Problem(
+            URI.create("about:blank"),
+            title,
+            status.value(),
+            detail,
+            URI.create(getRequestUri(request)),
+            problem.errors());
 
     var headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
 
-    return new ResponseEntity<>(problem, headers, status);
+    return new ResponseEntity<>(responseProblem, headers, status);
   }
 
   private static String getRequestUri(WebRequest request) {
@@ -94,7 +105,14 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors().stream().map(FieldErrorFactory::from).toList();
 
     log.debug("Validation failed: {} field error(s)", errors.size());
-    var problem = new Problem().errors(errors);
+    var problem =
+        new Problem(
+            URI.create("about:blank"),
+            HttpStatus.BAD_REQUEST.getReasonPhrase(),
+            HttpStatus.BAD_REQUEST.value(),
+            null,
+            URI.create(getRequestUri(request)),
+            errors);
     return buildProblemResponse(
         problem,
         HttpStatus.BAD_REQUEST,
@@ -116,7 +134,14 @@ public class GlobalExceptionHandler {
     var errors = ex.getConstraintViolations().stream().map(FieldErrorFactory::from).toList();
 
     log.debug("Constraint violations: {} error(s)", errors.size());
-    var problem = new Problem().errors(errors);
+    var problem =
+        new Problem(
+            URI.create("about:blank"),
+            HttpStatus.BAD_REQUEST.getReasonPhrase(),
+            HttpStatus.BAD_REQUEST.value(),
+            null,
+            URI.create(getRequestUri(request)),
+            errors);
     return buildProblemResponse(
         problem,
         HttpStatus.BAD_REQUEST,
@@ -219,7 +244,14 @@ public class GlobalExceptionHandler {
 
   private static ResponseEntity<Problem> fieldErrorResponse(
       String field, String message, WebRequest request) {
-    var problem = new Problem().errors(List.of(new FieldError().field(field).message(message)));
+    var problem =
+        new Problem(
+            URI.create("about:blank"),
+            HttpStatus.BAD_REQUEST.getReasonPhrase(),
+            HttpStatus.BAD_REQUEST.value(),
+            null,
+            URI.create(getRequestUri(request)),
+            List.of(new FieldError(field, message)));
     return buildProblemResponse(
         problem,
         HttpStatus.BAD_REQUEST,

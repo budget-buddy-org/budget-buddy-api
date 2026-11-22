@@ -44,9 +44,9 @@ class TransactionServiceTest {
     @Test
     void should_CreateTransaction_WithOwnerId() {
       // Given
-      var createRequest = new TransactionWrite();
+      var createRequest = new TransactionWrite(null, null, null, null, null, null);
       var entity = new TransactionEntity();
-      var model = new Transaction();
+      var model = new Transaction(null, null, null, null, null, null, null);
 
       when(mapper.toEntity(createRequest)).thenReturn(entity);
       when(repository.save(entity)).thenReturn(entity);
@@ -74,7 +74,9 @@ class TransactionServiceTest {
       var filter = TransactionFilter.builder().build();
       var pageable = PageRequest.of(0, 10, direction, "date");
       var entity = new TransactionEntity();
-      var models = new PaginatedTransactions().items(List.of(new Transaction()));
+      var models =
+          new PaginatedTransactions(
+              List.of(new Transaction(null, null, null, null, null, null, null)), null);
       var entities = new PageImpl<>(List.of(entity), pageable, 1);
       var enrichedFilter = filter.withOwnerId(currentUserId);
       when(repository.findAllByFilter(enrichedFilter, pageable)).thenReturn(entities);

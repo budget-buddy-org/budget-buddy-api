@@ -63,8 +63,8 @@ class GlobalExceptionHandlerTest {
 
     assertThat(response)
         .extracting(HttpEntity::getBody)
-        .returns(PROBLEM_TYPE, Problem::getType)
-        .returns(URI.create(REQUEST_URI), Problem::getInstance);
+        .returns(PROBLEM_TYPE, Problem::type)
+        .returns(URI.create(REQUEST_URI), Problem::instance);
   }
 
   @BeforeEach
@@ -102,12 +102,12 @@ class GlobalExceptionHandlerTest {
       assertThat(response)
           .returns(HttpStatus.BAD_REQUEST, ResponseEntity::getStatusCode)
           .extracting(ResponseEntity::getBody)
-          .returns(HttpStatus.BAD_REQUEST.value(), Problem::getStatus)
-          .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::getTitle)
-          .returns("One or more fields are invalid", Problem::getDetail)
-          .returns(PROBLEM_TYPE, Problem::getType);
+          .returns(HttpStatus.BAD_REQUEST.value(), Problem::status)
+          .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::title)
+          .returns("One or more fields are invalid", Problem::detail)
+          .returns(PROBLEM_TYPE, Problem::type);
 
-      assertThat(response.getBody()).extracting(Problem::getErrors).isNotNull();
+      assertThat(response.getBody()).extracting(Problem::errors).isNotNull();
     }
 
     @Test
@@ -126,9 +126,7 @@ class GlobalExceptionHandlerTest {
       // Then
       assertResponseEntity(response);
       var problem = response.getBody();
-      assertThat(problem.getErrors())
-          .hasSize(1)
-          .containsExactly(new FieldError().field("field").message("message"));
+      assertThat(problem.errors()).hasSize(1).containsExactly(new FieldError("field", "message"));
     }
   }
 
@@ -141,11 +139,11 @@ class GlobalExceptionHandlerTest {
       assertThat(response)
           .returns(HttpStatus.BAD_REQUEST, ResponseEntity::getStatusCode)
           .extracting(ResponseEntity::getBody)
-          .returns(HttpStatus.BAD_REQUEST.value(), Problem::getStatus)
-          .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::getTitle)
-          .returns("Constraint violations", Problem::getDetail);
+          .returns(HttpStatus.BAD_REQUEST.value(), Problem::status)
+          .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::title)
+          .returns("Constraint violations", Problem::detail);
 
-      assertThat(response.getBody()).extracting(Problem::getErrors).isNotNull();
+      assertThat(response.getBody()).extracting(Problem::errors).isNotNull();
     }
 
     @Test
@@ -167,9 +165,9 @@ class GlobalExceptionHandlerTest {
       // Then
       assertResponseEntity(response);
       var problem = response.getBody();
-      assertThat(problem.getErrors())
+      assertThat(problem.errors())
           .hasSize(1)
-          .containsExactly(new FieldError().field("username").message("must be unique"));
+          .containsExactly(new FieldError("username", "must be unique"));
     }
 
     @Test
@@ -196,11 +194,11 @@ class GlobalExceptionHandlerTest {
       // Then
       assertResponseEntity(response);
       var problem = response.getBody();
-      assertThat(problem.getErrors())
+      assertThat(problem.errors())
           .hasSize(2)
           .contains(
-              new FieldError().field("email").message("invalid email format"),
-              new FieldError().field("age").message("must be at least 18"));
+              new FieldError("email", "invalid email format"),
+              new FieldError("age", "must be at least 18"));
     }
 
     @Test
@@ -222,9 +220,9 @@ class GlobalExceptionHandlerTest {
       // Then
       assertResponseEntity(response);
       var problem = response.getBody();
-      assertThat(problem.getErrors())
+      assertThat(problem.errors())
           .hasSize(1)
-          .containsExactly(new FieldError().field("null").message("validation failed"));
+          .containsExactly(new FieldError("null", "validation failed"));
     }
   }
 
@@ -247,7 +245,7 @@ class GlobalExceptionHandlerTest {
       assertThat(response)
           .returns(HttpStatus.NOT_FOUND, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
-          .returns(HttpStatus.NOT_FOUND.getReasonPhrase(), Problem::getTitle);
+          .returns(HttpStatus.NOT_FOUND.getReasonPhrase(), Problem::title);
     }
   }
 
@@ -270,9 +268,9 @@ class GlobalExceptionHandlerTest {
       assertThat(response)
           .returns(HttpStatus.NOT_FOUND, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
-          .returns(HttpStatus.NOT_FOUND.getReasonPhrase(), Problem::getTitle)
-          .returns("Resource not found", Problem::getDetail)
-          .returns(HttpStatus.NOT_FOUND.value(), Problem::getStatus);
+          .returns(HttpStatus.NOT_FOUND.getReasonPhrase(), Problem::title)
+          .returns("Resource not found", Problem::detail)
+          .returns(HttpStatus.NOT_FOUND.value(), Problem::status);
     }
   }
 
@@ -296,9 +294,9 @@ class GlobalExceptionHandlerTest {
       assertThat(response)
           .returns(HttpStatus.FORBIDDEN, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
-          .returns(HttpStatus.FORBIDDEN.getReasonPhrase(), Problem::getTitle)
-          .returns("Access denied", Problem::getDetail)
-          .returns(HttpStatus.FORBIDDEN.value(), Problem::getStatus);
+          .returns(HttpStatus.FORBIDDEN.getReasonPhrase(), Problem::title)
+          .returns("Access denied", Problem::detail)
+          .returns(HttpStatus.FORBIDDEN.value(), Problem::status);
     }
 
     @Nested
@@ -321,9 +319,9 @@ class GlobalExceptionHandlerTest {
         assertThat(response)
             .returns(HttpStatus.UNAUTHORIZED, ResponseEntity::getStatusCode)
             .extracting(HttpEntity::getBody)
-            .returns(HttpStatus.UNAUTHORIZED.getReasonPhrase(), Problem::getTitle)
-            .returns("Authentication failed", Problem::getDetail)
-            .returns(HttpStatus.UNAUTHORIZED.value(), Problem::getStatus);
+            .returns(HttpStatus.UNAUTHORIZED.getReasonPhrase(), Problem::title)
+            .returns("Authentication failed", Problem::detail)
+            .returns(HttpStatus.UNAUTHORIZED.value(), Problem::status);
       }
     }
   }
@@ -344,7 +342,7 @@ class GlobalExceptionHandlerTest {
 
       // Then
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-      assertThat(response.getBody()).isNotNull().returns(409, Problem::getStatus);
+      assertThat(response.getBody()).isNotNull().returns(409, Problem::status);
     }
   }
 
@@ -368,8 +366,8 @@ class GlobalExceptionHandlerTest {
       assertThat(response.getBody()).isNotNull();
       var problem = response.getBody();
       assertThat(problem)
-          .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::getTitle)
-          .returns(400, Problem::getStatus);
+          .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::title)
+          .returns(400, Problem::status);
     }
 
     @Test
@@ -387,12 +385,12 @@ class GlobalExceptionHandlerTest {
       // Then
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
       assertThat(response.getBody()).isNotNull();
-      assertThat(response.getBody().getErrors())
+      assertThat(response.getBody().errors())
           .hasSize(1)
           .first()
           .satisfies(e -> {
-            assertThat(e.getField()).isEqualTo("unknownField");
-            assertThat(e.getMessage()).isEqualTo("unknown field");
+            assertThat(e.field()).isEqualTo("unknownField");
+            assertThat(e.message()).isEqualTo("unknown field");
           });
     }
 
@@ -414,12 +412,12 @@ class GlobalExceptionHandlerTest {
       // Then
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
       assertThat(response.getBody()).isNotNull();
-      assertThat(response.getBody().getErrors())
+      assertThat(response.getBody().errors())
           .hasSize(1)
           .first()
           .satisfies(e -> {
-            assertThat(e.getField()).isEqualTo("amount.[0]");
-            assertThat(e.getMessage()).isEqualTo("invalid value");
+            assertThat(e.field()).isEqualTo("amount.[0]");
+            assertThat(e.message()).isEqualTo("invalid value");
           });
     }
 
@@ -438,10 +436,10 @@ class GlobalExceptionHandlerTest {
       // Then
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
       assertThat(response.getBody()).isNotNull();
-      assertThat(response.getBody().getErrors())
+      assertThat(response.getBody().errors())
           .hasSize(1)
           .first()
-          .satisfies(e -> assertThat(e.getField()).isEqualTo("null"));
+          .satisfies(e -> assertThat(e.field()).isEqualTo("null"));
     }
 
     @Test
@@ -459,10 +457,10 @@ class GlobalExceptionHandlerTest {
       // Then
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
       assertThat(response.getBody()).isNotNull();
-      assertThat(response.getBody().getErrors())
+      assertThat(response.getBody().errors())
           .hasSize(1)
           .first()
-          .satisfies(e -> assertThat(e.getField()).isEqualTo("null"));
+          .satisfies(e -> assertThat(e.field()).isEqualTo("null"));
     }
   }
 
@@ -484,8 +482,8 @@ class GlobalExceptionHandlerTest {
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getBody())
-          .returns(message, Problem::getDetail)
-          .returns(400, Problem::getStatus);
+          .returns(message, Problem::detail)
+          .returns(400, Problem::status);
     }
   }
 
@@ -509,8 +507,8 @@ class GlobalExceptionHandlerTest {
       assertThat(response.getBody()).isNotNull();
       var problem = response.getBody();
       assertThat(problem)
-          .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::getTitle)
-          .returns(400, Problem::getStatus);
+          .returns(HttpStatus.BAD_REQUEST.getReasonPhrase(), Problem::title)
+          .returns(400, Problem::status);
     }
   }
 
@@ -538,9 +536,9 @@ class GlobalExceptionHandlerTest {
       assertThat(response.getBody()).isNotNull();
       var problem = response.getBody();
       assertThat(problem)
-          .returns(HttpStatus.NOT_IMPLEMENTED.getReasonPhrase(), Problem::getTitle)
-          .returns("Operation not supported", Problem::getDetail)
-          .returns(501, Problem::getStatus);
+          .returns(HttpStatus.NOT_IMPLEMENTED.getReasonPhrase(), Problem::title)
+          .returns("Operation not supported", Problem::detail)
+          .returns(501, Problem::status);
     }
   }
 
@@ -562,8 +560,8 @@ class GlobalExceptionHandlerTest {
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
       assertThat(response.getBody()).isNotNull();
       assertThat(response.getBody())
-          .returns(400, Problem::getStatus)
-          .returns("Invalid date or time value: invalid", Problem::getDetail);
+          .returns(400, Problem::status)
+          .returns("Invalid date or time value: invalid", Problem::detail);
     }
   }
 
@@ -583,7 +581,7 @@ class GlobalExceptionHandlerTest {
 
       // Then
       assertThat(response.getBody()).isNotNull();
-      assertThat(response.getBody().getInstance()).isEqualTo(URI.create(""));
+      assertThat(response.getBody().instance()).isEqualTo(URI.create(""));
     }
   }
 
@@ -607,9 +605,9 @@ class GlobalExceptionHandlerTest {
       assertThat(response)
           .returns(HttpStatus.INTERNAL_SERVER_ERROR, ResponseEntity::getStatusCode)
           .extracting(HttpEntity::getBody)
-          .returns(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), Problem::getTitle)
-          .returns("An unexpected error occurred", Problem::getDetail)
-          .returns(HttpStatus.INTERNAL_SERVER_ERROR.value(), Problem::getStatus);
+          .returns(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), Problem::title)
+          .returns("An unexpected error occurred", Problem::detail)
+          .returns(HttpStatus.INTERNAL_SERVER_ERROR.value(), Problem::status);
     }
   }
 }

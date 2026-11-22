@@ -33,9 +33,9 @@ class MeDeleteCurrentUserIntegrationTest extends BaseMvcIntegrationTest {
             .uri("/v1/categories")
             .with(jwtForUser(ownerId))
             .contentType(MediaType.APPLICATION_JSON)
-            .content(json(new CategoryWrite().name(name)))
+            .content(json(new CategoryWrite(name, null)))
             .exchange();
-    return parseBody(result, Category.class).getId();
+    return parseBody(result, Category.class).id();
   }
 
   private void createTransaction(String ownerId, UUID categoryId) {
@@ -45,12 +45,13 @@ class MeDeleteCurrentUserIntegrationTest extends BaseMvcIntegrationTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(
             json(
-                new TransactionWrite()
-                    .categoryId(categoryId)
-                    .amount(500L)
-                    .type(TransactionType.EXPENSE)
-                    .currency("EUR")
-                    .date(LocalDate.of(2026, 1, 1))))
+                new TransactionWrite(
+                    categoryId,
+                    500L,
+                    TransactionType.EXPENSE,
+                    "EUR",
+                    LocalDate.of(2026, 1, 1),
+                    null)))
         .exchange();
   }
 
@@ -59,23 +60,18 @@ class MeDeleteCurrentUserIntegrationTest extends BaseMvcIntegrationTest {
         .uri(PREFERENCES_URI)
         .with(jwtForUser(ownerId))
         .contentType(MediaType.APPLICATION_JSON)
-        .content(
-            json(
-                new UserPreferencesWrite()
-                    .language("en")
-                    .currency("EUR")
-                    .timezone("Europe/Tallinn")))
+        .content(json(new UserPreferencesWrite("en", "EUR", "Europe/Tallinn")))
         .exchange();
   }
 
   private long categoryCount(String ownerId) throws Exception {
     var result = mvc.get().uri("/v1/categories").with(jwtForUser(ownerId)).exchange();
-    return parseBody(result, PaginatedCategories.class).getMeta().getTotal();
+    return parseBody(result, PaginatedCategories.class).meta().total();
   }
 
   private long transactionCount(String ownerId) throws Exception {
     var result = mvc.get().uri("/v1/transactions").with(jwtForUser(ownerId)).exchange();
-    return parseBody(result, PaginatedTransactions.class).getMeta().getTotal();
+    return parseBody(result, PaginatedTransactions.class).meta().total();
   }
 
   @BeforeEach
@@ -113,7 +109,7 @@ class MeDeleteCurrentUserIntegrationTest extends BaseMvcIntegrationTest {
           parseBody(
               mvc.get().uri(PREFERENCES_URI).with(jwtForUser(userId)).exchange(),
               UserPreferences.class);
-      assertThat(prefs.getCurrency()).as("preferences are gone").isNull();
+      assertThat(prefs.currency()).as("preferences are gone").isNull();
     }
 
     @Test
@@ -128,7 +124,7 @@ class MeDeleteCurrentUserIntegrationTest extends BaseMvcIntegrationTest {
           parseBody(
               mvc.get().uri(PREFERENCES_URI).with(jwtForUser(otherUserId)).exchange(),
               UserPreferences.class);
-      assertThat(prefs.getCurrency()).as("other user's preferences untouched").isEqualTo("EUR");
+      assertThat(prefs.currency()).as("other user's preferences untouched").isEqualTo("EUR");
     }
 
     @Test

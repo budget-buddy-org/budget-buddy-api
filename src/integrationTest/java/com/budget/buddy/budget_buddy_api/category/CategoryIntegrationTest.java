@@ -31,7 +31,7 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
             .uri("/v1/categories")
             .with(jwtForUser(ownerId))
             .contentType(MediaType.APPLICATION_JSON)
-            .content(json(new CategoryWrite().name(name).monthlyBudget(monthlyBudget)))
+            .content(json(new CategoryWrite(name, monthlyBudget)))
             .exchange();
 
     return parseBody(result, Category.class);
@@ -52,8 +52,8 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
     void should_CreateCategory_When_ValidRequest() throws Exception {
       var category = createCategory(userId, "Groceries");
 
-      assertThat(category.getId()).isNotNull();
-      assertThat(category.getName()).isEqualTo("Groceries");
+      assertThat(category.id()).isNotNull();
+      assertThat(category.name()).isEqualTo("Groceries");
     }
 
     @Test
@@ -62,7 +62,7 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
           mvc.post()
               .uri("/v1/categories")
               .contentType(MediaType.APPLICATION_JSON)
-              .content(json(new CategoryWrite().name("Groceries")))
+              .content(json(new CategoryWrite("Groceries", null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
@@ -75,7 +75,7 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
               .uri("/v1/categories")
               .with(jwtForUser(userId))
               .contentType(MediaType.APPLICATION_JSON)
-              .content(json(new CategoryWrite().name("Groceries")))
+              .content(json(new CategoryWrite("Groceries", null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.CREATED).containsHeader("Location");
@@ -90,12 +90,12 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
       var created = createCategory(userId, "Food");
 
       var result =
-          mvc.get().uri("/v1/categories/{id}", created.getId()).with(jwtForUser(userId)).exchange();
+          mvc.get().uri("/v1/categories/{id}", created.id()).with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var category = parseBody(result, Category.class);
-      assertThat(category.getId()).isEqualTo(created.getId());
-      assertThat(category.getName()).isEqualTo("Food");
+      assertThat(category.id()).isEqualTo(created.id());
+      assertThat(category.name()).isEqualTo("Food");
     }
 
     @Test
@@ -103,7 +103,7 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
       var created = createCategory(otherUserId, "Other's category");
 
       var result =
-          mvc.get().uri("/v1/categories/{id}", created.getId()).with(jwtForUser(userId)).exchange();
+          mvc.get().uri("/v1/categories/{id}", created.id()).with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
     }
@@ -123,7 +123,7 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return401_When_NotAuthenticated() throws Exception {
       var created = createCategory(userId, "Food");
 
-      var result = mvc.get().uri("/v1/categories/{id}", created.getId()).exchange();
+      var result = mvc.get().uri("/v1/categories/{id}", created.id()).exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
@@ -139,18 +139,18 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
 
       var result =
           mvc.put()
-              .uri("/v1/categories/{id}", created.getId())
+              .uri("/v1/categories/{id}", created.id())
               .with(jwtForUser(userId))
               .contentType(MediaType.APPLICATION_JSON)
-              .content(json(new CategoryWrite().name(newCategoryName)))
+              .content(json(new CategoryWrite(newCategoryName, null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var updated = parseBody(result, Category.class);
 
       assertThat(updated)
-          .returns(created.getId(), Category::getId)
-          .returns(newCategoryName, Category::getName);
+          .returns(created.id(), (Category::id))
+          .returns(newCategoryName, Category::name);
     }
 
     @Test
@@ -159,10 +159,10 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
 
       var result =
           mvc.put()
-              .uri("/v1/categories/{id}", created.getId())
+              .uri("/v1/categories/{id}", created.id())
               .with(jwtForUser(userId))
               .contentType(MediaType.APPLICATION_JSON)
-              .content(json(new CategoryWrite().name("Hacked")))
+              .content(json(new CategoryWrite("Hacked", null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
@@ -174,9 +174,9 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
 
       var result =
           mvc.put()
-              .uri("/v1/categories/{id}", created.getId())
+              .uri("/v1/categories/{id}", created.id())
               .contentType(MediaType.APPLICATION_JSON)
-              .content(json(new CategoryWrite().name("Hacked")))
+              .content(json(new CategoryWrite("Hacked", null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
@@ -191,15 +191,12 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
       var created = createCategory(userId, "Food");
 
       var deleteResult =
-          mvc.delete()
-              .uri("/v1/categories/{id}", created.getId())
-              .with(jwtForUser(userId))
-              .exchange();
+          mvc.delete().uri("/v1/categories/{id}", created.id()).with(jwtForUser(userId)).exchange();
 
       assertThat(deleteResult).hasStatus(HttpStatus.NO_CONTENT);
 
       var getResult =
-          mvc.get().uri("/v1/categories/{id}", created.getId()).with(jwtForUser(userId)).exchange();
+          mvc.get().uri("/v1/categories/{id}", created.id()).with(jwtForUser(userId)).exchange();
 
       assertThat(getResult).hasStatus(HttpStatus.NOT_FOUND);
     }
@@ -209,10 +206,7 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
       var created = createCategory(otherUserId, "Other's category");
 
       var result =
-          mvc.delete()
-              .uri("/v1/categories/{id}", created.getId())
-              .with(jwtForUser(userId))
-              .exchange();
+          mvc.delete().uri("/v1/categories/{id}", created.id()).with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
     }
@@ -221,7 +215,7 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return401_When_NotAuthenticated() throws Exception {
       var created = createCategory(userId, "Food");
 
-      var result = mvc.delete().uri("/v1/categories/{id}", created.getId()).exchange();
+      var result = mvc.delete().uri("/v1/categories/{id}", created.id()).exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
@@ -236,15 +230,15 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
 
       var result =
           mvc.put()
-              .uri("/v1/categories/{id}", created.getId())
+              .uri("/v1/categories/{id}", created.id())
               .with(jwtForUser(userId))
               .contentType(MediaType.APPLICATION_JSON)
-              .content(json(new CategoryWrite().name("Groceries")))
+              .content(json(new CategoryWrite("Groceries", null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var updated = parseBody(result, Category.class);
-      assertThat(updated.getMonthlyBudget()).isNull();
+      assertThat(updated.monthlyBudget()).isNull();
     }
 
     @Test
@@ -253,15 +247,15 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
 
       var result =
           mvc.put()
-              .uri("/v1/categories/{id}", created.getId())
+              .uri("/v1/categories/{id}", created.id())
               .with(jwtForUser(userId))
               .contentType(MediaType.APPLICATION_JSON)
-              .content(json(new CategoryWrite().name("Groceries").monthlyBudget(12345L)))
+              .content(json(new CategoryWrite("Groceries", 12345L)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var updated = parseBody(result, Category.class);
-      assertThat(updated.getMonthlyBudget()).isEqualTo(12345L);
+      assertThat(updated.monthlyBudget()).isEqualTo(12345L);
     }
   }
 
@@ -278,9 +272,9 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedCategories.class);
-      assertThat(page.getItems()).hasSize(2);
-      assertThat(page.getItems())
-          .extracting(Category::getName)
+      assertThat(page.items()).hasSize(2);
+      assertThat(page.items())
+          .extracting(Category::name)
           .containsExactly("My Food", "My Transport");
     }
 
@@ -290,8 +284,8 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedCategories.class);
-      assertThat(page.getItems()).isEmpty();
-      assertThat(page.getMeta().getTotal()).isZero();
+      assertThat(page.items()).isEmpty();
+      assertThat(page.meta().total()).isZero();
     }
 
     @Test
@@ -306,11 +300,11 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedCategories.class);
-      assertThat(page.getItems()).hasSize(2);
-      assertThat(page.getMeta())
-          .returns(1, PaginationMeta::getPage)
-          .returns(2, PaginationMeta::getSize)
-          .returns(4L, PaginationMeta::getTotal);
+      assertThat(page.items()).hasSize(2);
+      assertThat(page.meta())
+          .returns(1, PaginationMeta::page)
+          .returns(2, PaginationMeta::size)
+          .returns(4L, PaginationMeta::total);
     }
 
     @Test
