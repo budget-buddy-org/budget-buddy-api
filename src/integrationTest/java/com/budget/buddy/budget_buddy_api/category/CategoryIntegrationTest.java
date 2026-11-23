@@ -116,7 +116,7 @@ class CategoryIntegrationTest extends BaseMvcIntegrationTest {
               .with(jwtForUser(userId))
               .exchange();
 
-      assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
+      assertThat(result).hasStatus(HttpStatus.NOT_FOUND).bodyJson().doesNotHavePath("$.errors");
     }
 
     @Test

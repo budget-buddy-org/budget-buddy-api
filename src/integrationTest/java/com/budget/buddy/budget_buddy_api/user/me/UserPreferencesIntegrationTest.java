@@ -130,7 +130,7 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
               .content(json(new UserPreferencesWrite("en", "euro", "Europe/Tallinn")))
               .exchange();
 
-      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
+      assertThat(result).hasStatus(HttpStatus.BAD_REQUEST).bodyJson().hasPath("$.errors[0].field");
     }
 
     @Test

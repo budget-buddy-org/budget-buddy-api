@@ -12,7 +12,6 @@ import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -44,44 +43,22 @@ public class GlobalExceptionHandler {
 
   private static ResponseEntity<Problem> problemResponse(
       HttpStatus status, @Nullable String detail, WebRequest request) {
-    return problemResponse(status, status.getReasonPhrase(), detail, request);
+    return problemResponse(status, detail, request, List.of());
   }
 
   private static ResponseEntity<Problem> problemResponse(
-      HttpStatus status, String title, @Nullable String detail, WebRequest request) {
-    return buildProblemResponse(
+      HttpStatus status, @Nullable String detail, WebRequest request, List<FieldError> errors) {
+    var problem =
         new Problem(
             PROBLEM_TYPE,
-            title,
+            status.getReasonPhrase(),
             status.value(),
             detail,
             URI.create(getRequestUri(request)),
-            List.of()),
-        status,
-        title,
-        detail,
-        request);
-  }
-
-  private static ResponseEntity<Problem> buildProblemResponse(
-      Problem problem,
-      HttpStatus status,
-      String title,
-      @Nullable String detail,
-      WebRequest request) {
-    var responseProblem =
-        new Problem(
-            PROBLEM_TYPE,
-            title,
-            status.value(),
-            detail,
-            URI.create(getRequestUri(request)),
-            problem.errors());
-
-    var headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
-
-    return new ResponseEntity<>(responseProblem, headers, status);
+            errors);
+    return ResponseEntity.status(status)
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(problem);
   }
 
   private static String getRequestUri(WebRequest request) {
@@ -106,20 +83,8 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors().stream().map(FieldErrorFactory::from).toList();
 
     log.debug("Validation failed: {} field error(s)", errors.size());
-    var problem =
-        new Problem(
-            PROBLEM_TYPE,
-            HttpStatus.BAD_REQUEST.getReasonPhrase(),
-            HttpStatus.BAD_REQUEST.value(),
-            null,
-            URI.create(getRequestUri(request)),
-            errors);
-    return buildProblemResponse(
-        problem,
-        HttpStatus.BAD_REQUEST,
-        HttpStatus.BAD_REQUEST.getReasonPhrase(),
-        "One or more fields are invalid",
-        request);
+    return problemResponse(
+        HttpStatus.BAD_REQUEST, "One or more fields are invalid", request, errors);
   }
 
   /**
@@ -135,20 +100,7 @@ public class GlobalExceptionHandler {
     var errors = ex.getConstraintViolations().stream().map(FieldErrorFactory::from).toList();
 
     log.debug("Constraint violations: {} error(s)", errors.size());
-    var problem =
-        new Problem(
-            PROBLEM_TYPE,
-            HttpStatus.BAD_REQUEST.getReasonPhrase(),
-            HttpStatus.BAD_REQUEST.value(),
-            null,
-            URI.create(getRequestUri(request)),
-            errors);
-    return buildProblemResponse(
-        problem,
-        HttpStatus.BAD_REQUEST,
-        HttpStatus.BAD_REQUEST.getReasonPhrase(),
-        "Constraint violations",
-        request);
+    return problemResponse(HttpStatus.BAD_REQUEST, "Constraint violations", request, errors);
   }
 
   /**
@@ -245,20 +197,11 @@ public class GlobalExceptionHandler {
 
   private static ResponseEntity<Problem> fieldErrorResponse(
       String field, String message, WebRequest request) {
-    var problem =
-        new Problem(
-            PROBLEM_TYPE,
-            HttpStatus.BAD_REQUEST.getReasonPhrase(),
-            HttpStatus.BAD_REQUEST.value(),
-            null,
-            URI.create(getRequestUri(request)),
-            List.of(new FieldError(field, message)));
-    return buildProblemResponse(
-        problem,
+    return problemResponse(
         HttpStatus.BAD_REQUEST,
-        HttpStatus.BAD_REQUEST.getReasonPhrase(),
         "One or more fields are invalid",
-        request);
+        request,
+        List.of(new FieldError(field, message)));
   }
 
   private static String jsonPath(MismatchedInputException ex) {

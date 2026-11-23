@@ -56,12 +56,14 @@ class MeDeleteCurrentUserIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   private void storePreferences(String ownerId) {
-    mvc.put()
-        .uri(PREFERENCES_URI)
-        .with(jwtForUser(ownerId))
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(json(new UserPreferencesWrite("en", "EUR", "Europe/Tallinn")))
-        .exchange();
+    var result =
+        mvc.put()
+            .uri(PREFERENCES_URI)
+            .with(jwtForUser(ownerId))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json(new UserPreferencesWrite("en", "EUR", "Europe/Tallinn")))
+            .exchange();
+    assertThat(result).hasStatus(HttpStatus.OK);
   }
 
   private long categoryCount(String ownerId) throws Exception {
@@ -100,7 +102,8 @@ class MeDeleteCurrentUserIntegrationTest extends BaseMvcIntegrationTest {
 
     @Test
     void should_CascadeDeleteAllUserData() throws Exception {
-      mvc.delete().uri(ME_URI).with(jwtForUser(userId)).exchange();
+      var deletion = mvc.delete().uri(ME_URI).with(jwtForUser(userId)).exchange();
+      assertThat(deletion).hasStatus(HttpStatus.NO_CONTENT);
 
       // The deleted user's JWT re-provisions a fresh account — expect empty data
       assertThat(transactionCount(userId)).as("transactions are gone").isZero();
@@ -109,7 +112,9 @@ class MeDeleteCurrentUserIntegrationTest extends BaseMvcIntegrationTest {
           parseBody(
               mvc.get().uri(PREFERENCES_URI).with(jwtForUser(userId)).exchange(),
               UserPreferences.class);
-      assertThat(prefs.currency()).as("preferences are gone").isNull();
+      assertThat(prefs)
+          .as("re-provisioned account preferences")
+          .isEqualTo(new UserPreferences("en", "USD", "UTC"));
     }
 
     @Test
