@@ -39,9 +39,9 @@ class CategoryServiceTest {
     @Test
     void should_CreateCategory_WithOwnerId() {
       // Given
-      var createRequest = new CategoryWrite().name("Groceries");
+      var createRequest = new CategoryWrite("Groceries", null);
       var entity = new CategoryEntity();
-      var model = new Category();
+      var model = new Category(null, null, null);
 
       when(mapper.toEntity(createRequest)).thenReturn(entity);
       when(repository.save(entity)).thenReturn(entity);
@@ -63,7 +63,7 @@ class CategoryServiceTest {
       // Given
       var categoryId = UUID.randomUUID();
       var entity = new CategoryEntity();
-      var model = new Category();
+      var model = new Category(null, null, null);
 
       when(repository.findByIdAndOwnerId(categoryId, currentUserId))
           .thenReturn(Optional.of(entity));
@@ -98,9 +98,9 @@ class CategoryServiceTest {
     void should_UpdateCategory_When_OwnedByUser() {
       // Given
       var categoryId = UUID.randomUUID();
-      var updateRequest = new CategoryWrite().name("New Name");
+      var updateRequest = new CategoryWrite("New Name", null);
       var entity = new CategoryEntity();
-      var model = new Category();
+      var model = new Category(null, null, null);
 
       when(repository.findByIdAndOwnerId(categoryId, currentUserId))
           .thenReturn(Optional.of(entity));

@@ -42,11 +42,7 @@ public interface BaseEntityMapper<E extends BaseEntity<?>, C, R, U, L> {
   L toPage(Page<E> page);
 
   default PaginationMeta toPaginationMeta(Page<?> page) {
-    var meta = new PaginationMeta();
-    meta.setPage(page.getNumber());
-    meta.setSize(page.getSize());
-    meta.setTotal(page.getTotalElements());
-    return meta;
+    return new PaginationMeta(page.getNumber(), page.getSize(), page.getTotalElements());
   }
 
   /**

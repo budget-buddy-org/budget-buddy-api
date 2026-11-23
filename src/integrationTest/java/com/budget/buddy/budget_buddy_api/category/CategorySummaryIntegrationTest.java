@@ -33,7 +33,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
   }
 
   private UUID createCategory(String ownerId, String name, Long monthlyBudget) throws Exception {
-    var body = new CategoryWrite().name(name).monthlyBudget(monthlyBudget);
+    var body = new CategoryWrite(name, monthlyBudget);
     var result =
         mvc.post()
             .uri("/v1/categories")
@@ -42,7 +42,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
             .content(json(body))
             .exchange();
     return parseBody(result, com.budget.buddy.budget_buddy_contracts.generated.model.Category.class)
-        .getId();
+        .id();
   }
 
   private void createTransaction(
@@ -52,13 +52,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       TransactionType type,
       String currency,
       LocalDate date) {
-    var body =
-        new TransactionWrite()
-            .categoryId(categoryId)
-            .amount(amount)
-            .type(type)
-            .currency(currency)
-            .date(date);
+    var body = new TransactionWrite(categoryId, amount, type, currency, date, null);
     mvc.post()
         .uri("/v1/transactions")
         .with(jwtForUser(ownerId))
@@ -94,15 +88,15 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
 
       var summary = getSummary(userId);
 
-      assertThat(summary.getMonth()).isEqualTo("2026-03");
-      assertThat(summary.getCurrency()).isEqualTo("EUR");
-      assertThat(summary.getItems()).hasSize(1);
-      var row = summary.getItems().getFirst();
-      assertThat(row.getCategoryId()).isEqualTo(catId);
-      assertThat(row.getCategoryName()).isEqualTo("Groceries");
-      assertThat(row.getSpent()).isZero();
-      assertThat(row.getTransactionCount()).isZero();
-      assertThat(row.getExcludedTransactionCount()).isZero();
+      assertThat(summary.month()).isEqualTo("2026-03");
+      assertThat(summary.currency()).isEqualTo("EUR");
+      assertThat(summary.items()).hasSize(1);
+      var row = summary.items().getFirst();
+      assertThat(row.categoryId()).isEqualTo(catId);
+      assertThat(row.categoryName()).isEqualTo("Groceries");
+      assertThat(row.spent()).isZero();
+      assertThat(row.transactionCount()).isZero();
+      assertThat(row.excludedTransactionCount()).isZero();
     }
   }
 
@@ -125,8 +119,8 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
-      assertThat(row.getSpent()).isEqualTo(1000L);
-      assertThat(row.getTransactionCount()).isEqualTo(1);
+      assertThat(row.spent()).isEqualTo(1000L);
+      assertThat(row.transactionCount()).isEqualTo(1);
     }
   }
 
@@ -156,9 +150,9 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
-      assertThat(row.getSpent()).isEqualTo(2000L);
-      assertThat(row.getTransactionCount()).isEqualTo(1);
-      assertThat(row.getExcludedTransactionCount()).isEqualTo(2);
+      assertThat(row.spent()).isEqualTo(2000L);
+      assertThat(row.transactionCount()).isEqualTo(1);
+      assertThat(row.excludedTransactionCount()).isEqualTo(2);
     }
   }
 
@@ -172,7 +166,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
-      assertThat(row.getMonthlyBudget()).isNull();
+      assertThat(row.monthlyBudget()).isNull();
     }
 
     @Test
@@ -182,7 +176,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
-      assertThat(row.getMonthlyBudget()).isZero();
+      assertThat(row.monthlyBudget()).isZero();
     }
 
     @Test
@@ -192,7 +186,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
-      assertThat(row.getMonthlyBudget()).isEqualTo(50000L);
+      assertThat(row.monthlyBudget()).isEqualTo(50000L);
     }
   }
 
@@ -219,8 +213,8 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
-      assertThat(row.getSpent()).isEqualTo(300L);
-      assertThat(row.getTransactionCount()).isEqualTo(2);
+      assertThat(row.spent()).isEqualTo(300L);
+      assertThat(row.transactionCount()).isEqualTo(2);
     }
   }
 
@@ -234,8 +228,8 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
 
       var summary = getSummary(userId);
 
-      assertThat(summary.getItems()).hasSize(1);
-      assertThat(summary.getItems().getFirst().getCategoryId()).isEqualTo(myCategory);
+      assertThat(summary.items()).hasSize(1);
+      assertThat(summary.items().getFirst().categoryId()).isEqualTo(myCategory);
     }
 
     @Test
@@ -260,7 +254,7 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
       var summary = getSummary(userId);
 
       var row = rowForCategory(summary, catId);
-      assertThat(row.getSpent()).isEqualTo(1000L);
+      assertThat(row.spent()).isEqualTo(1000L);
     }
   }
 
@@ -292,8 +286,8 @@ class CategorySummaryIntegrationTest extends BaseMvcIntegrationTest {
   // ── private helpers ────────────────────────────────────────────────────────
 
   private CategorySpendingRow rowForCategory(CategorySpendingSummary summary, UUID categoryId) {
-    return summary.getItems().stream()
-        .filter(r -> categoryId.equals(r.getCategoryId()))
+    return summary.items().stream()
+        .filter(r -> categoryId.equals(r.categoryId()))
         .findFirst()
         .orElseThrow(() -> new AssertionError("Category " + categoryId + " not found in summary"));
   }

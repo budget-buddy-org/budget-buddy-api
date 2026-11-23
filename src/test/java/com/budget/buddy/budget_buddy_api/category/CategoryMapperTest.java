@@ -26,7 +26,7 @@ class CategoryMapperTest {
     @Test
     void should_MapCategoryWriteToCategoryEntity() {
       // Given
-      var create = new CategoryWrite().name("Groceries").monthlyBudget(50000L);
+      var create = new CategoryWrite("Groceries", 50000L);
 
       // When
       var entity = categoryMapper.toEntity(create);
@@ -43,7 +43,7 @@ class CategoryMapperTest {
     @Test
     void should_MapNullMonthlyBudget_When_Cleared() {
       // Given
-      var create = new CategoryWrite().name("Groceries");
+      var create = new CategoryWrite("Groceries", null);
 
       // When
       var entity = categoryMapper.toEntity(create);
@@ -74,9 +74,9 @@ class CategoryMapperTest {
       assertThat(model)
           .as("Mapped model should not be null")
           .isNotNull()
-          .returns(id, Category::getId)
-          .returns("Groceries", Category::getName)
-          .returns(50000L, Category::getMonthlyBudget);
+          .returns(id, Category::id)
+          .returns("Groceries", Category::name)
+          .returns(50000L, Category::monthlyBudget);
     }
   }
 
@@ -103,13 +103,13 @@ class CategoryMapperTest {
 
       assertThat(models.get(0))
           .as("First model should match first entity")
-          .returns(id1, Category::getId)
-          .returns("Cat 1", Category::getName);
+          .returns(id1, Category::id)
+          .returns("Cat 1", Category::name);
 
       assertThat(models.get(1))
           .as("Second model should match second entity")
-          .returns(id2, Category::getId)
-          .returns("Cat 2", Category::getName);
+          .returns(id2, Category::id)
+          .returns("Cat 2", Category::name);
     }
   }
 
@@ -133,7 +133,7 @@ class CategoryMapperTest {
       entity.setUpdatedAt(originalUpdatedAt);
       entity.setVersion(originalVersion);
 
-      var update = new CategoryWrite().name("New Name");
+      var update = new CategoryWrite("New Name", null);
 
       // When
       categoryMapper.updateEntity(update, entity);

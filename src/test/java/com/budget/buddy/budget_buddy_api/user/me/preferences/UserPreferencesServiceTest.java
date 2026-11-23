@@ -44,7 +44,7 @@ class UserPreferencesServiceTest {
     void should_ReturnMappedPreferences_When_RowExists() {
       // Given
       var entity = new UserPreferencesEntity();
-      var model = new UserPreferences();
+      var model = new UserPreferences(null, null, null);
       when(repository.findByOwnerId(userId)).thenReturn(Optional.of(entity));
       when(mapper.toModel(entity)).thenReturn(model);
 
@@ -55,8 +55,7 @@ class UserPreferencesServiceTest {
     @Test
     void should_ReturnHttpDerivedDefaults_When_NoRowExists() {
       // Given
-      var defaults =
-          new UserPreferences().language("en").currency("USD").timezone("America/New_York");
+      var defaults = new UserPreferences("en", "USD", "America/New_York");
       when(repository.findByOwnerId(userId)).thenReturn(Optional.empty());
       when(defaultsProvider.get()).thenReturn(defaults);
 
@@ -72,9 +71,8 @@ class UserPreferencesServiceTest {
     @Test
     void should_CreateRowScopedToCurrentUser_When_NoneExists() {
       // Given
-      var write =
-          new UserPreferencesWrite().language("de").currency("USD").timezone("Europe/Berlin");
-      var model = new UserPreferences();
+      var write = new UserPreferencesWrite("de", "USD", "Europe/Berlin");
+      var model = new UserPreferences(null, null, null);
       var fresh = new UserPreferencesEntity();
       when(repository.findByOwnerId(userId)).thenReturn(Optional.empty());
       when(mapper.toEntity(write)).thenReturn(fresh);
@@ -97,13 +95,12 @@ class UserPreferencesServiceTest {
     @Test
     void should_UpdateExistingRow_When_AlreadyStored() {
       // Given
-      var write =
-          new UserPreferencesWrite().language("de").currency("USD").timezone("Europe/Berlin");
+      var write = new UserPreferencesWrite("de", "USD", "Europe/Berlin");
       var existing = new UserPreferencesEntity();
       existing.setOwnerId(userId);
       when(repository.findByOwnerId(userId)).thenReturn(Optional.of(existing));
       when(repository.save(existing)).thenReturn(existing);
-      when(mapper.toModel(existing)).thenReturn(new UserPreferences());
+      when(mapper.toModel(existing)).thenReturn(new UserPreferences(null, null, null));
 
       // When
       service.update(write);

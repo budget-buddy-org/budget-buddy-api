@@ -7,8 +7,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
@@ -29,47 +30,17 @@ class UserPreferencesDefaultsProviderTest {
   @Nested
   class Get {
 
-    @Test
-    void should_ReturnNullPreferences_When_NoAcceptLanguageHeader() {
-      when(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE)).thenReturn(null);
+    @ParameterizedTest(name = "Accept-Language {0} yields {1} and {2}")
+    @CsvSource({", en, USD", "not a valid@@tag!!, en, USD", "zh, zh, USD", "de-DE, de, EUR"})
+    void should_DerivePreferencesFromAcceptLanguage(
+        String header, String expectedLanguage, String expectedCurrency) {
+      when(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE)).thenReturn(header);
 
       var result = provider.get();
 
-      assertThat(result.getLanguage()).isNull();
-      assertThat(result.getCurrency()).isNull();
-    }
-
-    @Test
-    void should_ReturnNullPreferences_When_AcceptLanguageIsMalformed() {
-      // Syntactically invalid language tag causes Locale.LanguageRange.parse to throw
-      // IllegalArgumentException — the catch block returns Optional.empty()
-      when(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE)).thenReturn("not a valid@@tag!!");
-
-      var result = provider.get();
-
-      assertThat(result.getLanguage()).isNull();
-      assertThat(result.getCurrency()).isNull();
-    }
-
-    @Test
-    void should_ReturnLanguageWithoutCurrency_When_LocaleHasNoCountry() {
-      // "zh" resolves to Locale.CHINESE which has no country — currency lookup fails silently
-      when(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE)).thenReturn("zh");
-
-      var result = provider.get();
-
-      assertThat(result.getLanguage()).isEqualTo("zh");
-      assertThat(result.getCurrency()).isNull();
-    }
-
-    @Test
-    void should_ReturnLanguageAndCurrency_When_LocaleHasCountry() {
-      when(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE)).thenReturn("en-US");
-
-      var result = provider.get();
-
-      assertThat(result.getLanguage()).isEqualTo("en");
-      assertThat(result.getCurrency()).isEqualTo("USD");
+      assertThat(result.language()).isEqualTo(expectedLanguage);
+      assertThat(result.currency()).isEqualTo(expectedCurrency);
+      assertThat(result.timezone()).isEqualTo("UTC");
     }
   }
 }

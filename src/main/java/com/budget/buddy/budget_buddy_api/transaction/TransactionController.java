@@ -107,7 +107,7 @@ public class TransactionController
 
   @Override
   protected URI createdURI(Transaction created) {
-    return URI.create("/v1/transactions/" + created.getId());
+    return URI.create("/v1/transactions/" + created.id());
   }
 
   private static Sort buildSort(String sortStr) {

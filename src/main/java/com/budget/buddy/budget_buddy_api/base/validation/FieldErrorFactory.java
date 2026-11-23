@@ -15,7 +15,7 @@ public final class FieldErrorFactory {
     var field =
         violation.getPropertyPath() != null ? violation.getPropertyPath().toString() : "null";
 
-    return new FieldError().field(field).message(violation.getMessage());
+    return new FieldError(field, violation.getMessage());
   }
 
   public static FieldError from(org.springframework.validation.FieldError fieldError) {
@@ -23,6 +23,6 @@ public final class FieldErrorFactory {
     var defaultMessage = fieldError.getDefaultMessage();
     var message = defaultMessage != null ? defaultMessage : "Invalid value";
 
-    return new FieldError().field(fieldError.getField()).message(message);
+    return new FieldError(fieldError.getField(), message);
   }
 }

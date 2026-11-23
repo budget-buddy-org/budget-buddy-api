@@ -31,10 +31,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
             .uri("/v1/categories")
             .with(jwtForUser(ownerId))
             .contentType(MediaType.APPLICATION_JSON)
-            .content(json(new CategoryWrite().name(name)))
+            .content(json(new CategoryWrite(name, null)))
             .exchange();
 
-    return parseBody(result, Category.class).getId();
+    return parseBody(result, Category.class).id();
   }
 
   private Transaction createTransaction(String ownerId, UUID categoryId) throws Exception {
@@ -51,13 +51,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       String ownerId, UUID categoryId, String description, long amount, LocalDate date)
       throws Exception {
     var body =
-        new TransactionWrite()
-            .categoryId(categoryId)
-            .amount(amount)
-            .type(TransactionType.EXPENSE)
-            .currency("EUR")
-            .date(date)
-            .description(description);
+        new TransactionWrite(categoryId, amount, TransactionType.EXPENSE, "EUR", date, description);
 
     var result =
         mvc.post()
@@ -87,10 +81,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_CreateTransaction_When_ValidRequest() throws Exception {
       var transaction = createTransaction(userId, userCategoryId);
 
-      assertThat(transaction.getId()).isNotNull();
-      assertThat(transaction.getAmount()).isEqualTo(1000);
-      assertThat(transaction.getCurrency()).isEqualTo("EUR");
-      assertThat(transaction.getType()).isEqualTo(TransactionType.EXPENSE);
+      assertThat(transaction.id()).isNotNull();
+      assertThat(transaction.amount()).isEqualTo(1000);
+      assertThat(transaction.currency()).isEqualTo("EUR");
+      assertThat(transaction.type()).isEqualTo(TransactionType.EXPENSE);
     }
 
     @Test
@@ -102,12 +96,13 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .contentType(MediaType.APPLICATION_JSON)
               .content(
                   json(
-                      new TransactionWrite()
-                          .categoryId(userCategoryId)
-                          .amount(500L)
-                          .type(TransactionType.INCOME)
-                          .currency("EUR")
-                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+                      new TransactionWrite(
+                          userCategoryId,
+                          500L,
+                          TransactionType.INCOME,
+                          "EUR",
+                          LocalDate.of(2026, Month.MARCH, 1),
+                          null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.CREATED).containsHeader("Location");
@@ -122,12 +117,13 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .contentType(MediaType.APPLICATION_JSON)
               .content(
                   json(
-                      new TransactionWrite()
-                          .categoryId(otherUserCategoryId)
-                          .amount(1000L)
-                          .type(TransactionType.EXPENSE)
-                          .currency("EUR")
-                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+                      new TransactionWrite(
+                          otherUserCategoryId,
+                          1000L,
+                          TransactionType.EXPENSE,
+                          "EUR",
+                          LocalDate.of(2026, Month.MARCH, 1),
+                          null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
@@ -142,12 +138,13 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .contentType(MediaType.APPLICATION_JSON)
               .content(
                   json(
-                      new TransactionWrite()
-                          .categoryId(UUID.randomUUID())
-                          .amount(1000L)
-                          .type(TransactionType.EXPENSE)
-                          .currency("EUR")
-                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+                      new TransactionWrite(
+                          UUID.randomUUID(),
+                          1000L,
+                          TransactionType.EXPENSE,
+                          "EUR",
+                          LocalDate.of(2026, Month.MARCH, 1),
+                          null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
@@ -161,12 +158,13 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
               .contentType(MediaType.APPLICATION_JSON)
               .content(
                   json(
-                      new TransactionWrite()
-                          .categoryId(userCategoryId)
-                          .amount(1000L)
-                          .type(TransactionType.EXPENSE)
-                          .currency("EUR")
-                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+                      new TransactionWrite(
+                          userCategoryId,
+                          1000L,
+                          TransactionType.EXPENSE,
+                          "EUR",
+                          LocalDate.of(2026, Month.MARCH, 1),
+                          null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
@@ -181,15 +179,12 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var created = createTransaction(userId, userCategoryId);
 
       var result =
-          mvc.get()
-              .uri("/v1/transactions/{id}", created.getId())
-              .with(jwtForUser(userId))
-              .exchange();
+          mvc.get().uri("/v1/transactions/{id}", created.id()).with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var transaction = parseBody(result, Transaction.class);
-      assertThat(transaction.getId()).isEqualTo(created.getId());
-      assertThat(transaction.getAmount()).isEqualTo(1000);
+      assertThat(transaction.id()).isEqualTo(created.id());
+      assertThat(transaction.amount()).isEqualTo(1000);
     }
 
     @Test
@@ -197,10 +192,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var created = createTransaction(otherUserId, otherUserCategoryId);
 
       var result =
-          mvc.get()
-              .uri("/v1/transactions/{id}", created.getId())
-              .with(jwtForUser(userId))
-              .exchange();
+          mvc.get().uri("/v1/transactions/{id}", created.id()).with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
     }
@@ -220,7 +212,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return401_When_NotAuthenticated() throws Exception {
       var created = createTransaction(userId, userCategoryId);
 
-      var result = mvc.get().uri("/v1/transactions/{id}", created.getId()).exchange();
+      var result = mvc.get().uri("/v1/transactions/{id}", created.id()).exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
@@ -234,16 +226,17 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       var created = createTransaction(userId, userCategoryId, "original");
 
       var updateBody =
-          new TransactionWrite()
-              .categoryId(userCategoryId)
-              .amount(5000L)
-              .type(TransactionType.INCOME)
-              .currency("USD")
-              .date(LocalDate.of(2026, Month.JUNE, 1));
+          new TransactionWrite(
+              userCategoryId,
+              5000L,
+              TransactionType.INCOME,
+              "USD",
+              LocalDate.of(2026, Month.JUNE, 1),
+              null);
 
       var result =
           mvc.put()
-              .uri("/v1/transactions/{id}", created.getId())
+              .uri("/v1/transactions/{id}", created.id())
               .with(jwtForUser(userId))
               .contentType(MediaType.APPLICATION_JSON)
               .content(json(updateBody))
@@ -252,11 +245,11 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
       assertThat(result).hasStatus(HttpStatus.OK);
       var updated = parseBody(result, Transaction.class);
       assertThat(updated)
-          .returns(created.getId(), Transaction::getId)
-          .returns(5000L, Transaction::getAmount)
-          .returns("USD", Transaction::getCurrency)
-          .returns(TransactionType.INCOME, Transaction::getType);
-      assertThat(updated.getDescription())
+          .returns(created.id(), Transaction::id)
+          .returns(5000L, Transaction::amount)
+          .returns("USD", Transaction::currency)
+          .returns(TransactionType.INCOME, Transaction::type);
+      assertThat(updated.description())
           .as("Description should be cleared when not provided in PUT body")
           .isNull();
     }
@@ -267,17 +260,18 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       var result =
           mvc.put()
-              .uri("/v1/transactions/{id}", created.getId())
+              .uri("/v1/transactions/{id}", created.id())
               .with(jwtForUser(userId))
               .contentType(MediaType.APPLICATION_JSON)
               .content(
                   json(
-                      new TransactionWrite()
-                          .categoryId(otherUserCategoryId)
-                          .amount(1000L)
-                          .type(TransactionType.EXPENSE)
-                          .currency("EUR")
-                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+                      new TransactionWrite(
+                          otherUserCategoryId,
+                          1000L,
+                          TransactionType.EXPENSE,
+                          "EUR",
+                          LocalDate.of(2026, Month.MARCH, 1),
+                          null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.BAD_REQUEST);
@@ -289,17 +283,18 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       var result =
           mvc.put()
-              .uri("/v1/transactions/{id}", created.getId())
+              .uri("/v1/transactions/{id}", created.id())
               .with(jwtForUser(userId))
               .contentType(MediaType.APPLICATION_JSON)
               .content(
                   json(
-                      new TransactionWrite()
-                          .categoryId(userCategoryId)
-                          .amount(1000L)
-                          .type(TransactionType.EXPENSE)
-                          .currency("EUR")
-                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+                      new TransactionWrite(
+                          userCategoryId,
+                          1000L,
+                          TransactionType.EXPENSE,
+                          "EUR",
+                          LocalDate.of(2026, Month.MARCH, 1),
+                          null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.NOT_FOUND);
@@ -311,16 +306,17 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       var result =
           mvc.put()
-              .uri("/v1/transactions/{id}", created.getId())
+              .uri("/v1/transactions/{id}", created.id())
               .contentType(MediaType.APPLICATION_JSON)
               .content(
                   json(
-                      new TransactionWrite()
-                          .categoryId(userCategoryId)
-                          .amount(1000L)
-                          .type(TransactionType.EXPENSE)
-                          .currency("EUR")
-                          .date(LocalDate.of(2026, Month.MARCH, 1))))
+                      new TransactionWrite(
+                          userCategoryId,
+                          1000L,
+                          TransactionType.EXPENSE,
+                          "EUR",
+                          LocalDate.of(2026, Month.MARCH, 1),
+                          null)))
               .exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
@@ -336,17 +332,14 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       var deleteResult =
           mvc.delete()
-              .uri("/v1/transactions/{id}", created.getId())
+              .uri("/v1/transactions/{id}", created.id())
               .with(jwtForUser(userId))
               .exchange();
 
       assertThat(deleteResult).hasStatus(HttpStatus.NO_CONTENT);
 
       var getResult =
-          mvc.get()
-              .uri("/v1/transactions/{id}", created.getId())
-              .with(jwtForUser(userId))
-              .exchange();
+          mvc.get().uri("/v1/transactions/{id}", created.id()).with(jwtForUser(userId)).exchange();
 
       assertThat(getResult).hasStatus(HttpStatus.NOT_FOUND);
     }
@@ -357,7 +350,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       var result =
           mvc.delete()
-              .uri("/v1/transactions/{id}", created.getId())
+              .uri("/v1/transactions/{id}", created.id())
               .with(jwtForUser(userId))
               .exchange();
 
@@ -368,7 +361,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
     void should_Return401_When_NotAuthenticated() throws Exception {
       var created = createTransaction(userId, userCategoryId);
 
-      var result = mvc.delete().uri("/v1/transactions/{id}", created.getId()).exchange();
+      var result = mvc.delete().uri("/v1/transactions/{id}", created.id()).exchange();
 
       assertThat(result).hasStatus(HttpStatus.UNAUTHORIZED);
     }
@@ -387,10 +380,10 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems())
+      assertThat(page.items())
           .hasSize(2)
-          .extracting(Transaction::getId)
-          .containsExactly(txn2.getId(), txn1.getId());
+          .extracting(Transaction::id)
+          .containsExactly(txn2.id(), txn1.id());
     }
 
     @Test
@@ -407,10 +400,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems())
-          .hasSize(1)
-          .first()
-          .returns(userCategoryId, Transaction::getCategoryId);
+      assertThat(page.items()).hasSize(1).first().returns(userCategoryId, Transaction::categoryId);
     }
 
     @Test
@@ -421,12 +411,13 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .contentType(MediaType.APPLICATION_JSON)
           .content(
               json(
-                  new TransactionWrite()
-                      .categoryId(userCategoryId)
-                      .amount(100L)
-                      .type(TransactionType.EXPENSE)
-                      .currency("EUR")
-                      .date(LocalDate.of(2026, Month.JANUARY, 1))))
+                  new TransactionWrite(
+                      userCategoryId,
+                      100L,
+                      TransactionType.EXPENSE,
+                      "EUR",
+                      LocalDate.of(2026, Month.JANUARY, 1),
+                      null)))
           .exchange();
 
       mvc.post()
@@ -435,12 +426,13 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
           .contentType(MediaType.APPLICATION_JSON)
           .content(
               json(
-                  new TransactionWrite()
-                      .categoryId(userCategoryId)
-                      .amount(200L)
-                      .type(TransactionType.EXPENSE)
-                      .currency("EUR")
-                      .date(LocalDate.of(2026, Month.JUNE, 1))))
+                  new TransactionWrite(
+                      userCategoryId,
+                      200L,
+                      TransactionType.EXPENSE,
+                      "EUR",
+                      LocalDate.of(2026, Month.JUNE, 1),
+                      null)))
           .exchange();
 
       var result =
@@ -451,7 +443,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems()).hasSize(1).first().returns(100L, Transaction::getAmount);
+      assertThat(page.items()).hasSize(1).first().returns(100L, Transaction::amount);
     }
 
     @Test
@@ -460,8 +452,8 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems()).isEmpty();
-      assertThat(page.getMeta().getTotal()).isZero();
+      assertThat(page.items()).isEmpty();
+      assertThat(page.meta().total()).isZero();
     }
 
     @Test
@@ -481,7 +473,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems()).singleElement().returns(match.getId(), Transaction::getId);
+      assertThat(page.items()).singleElement().returns(match.id(), Transaction::id);
     }
 
     @Test
@@ -495,7 +487,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems()).singleElement().returns(match.getId(), Transaction::getId);
+      assertThat(page.items()).singleElement().returns(match.id(), Transaction::id);
     }
 
     @Test
@@ -521,9 +513,9 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems())
-          .extracting(Transaction::getId)
-          .containsExactlyInAnyOrder(low.getId(), mid.getId(), high.getId());
+      assertThat(page.items())
+          .extracting(Transaction::id)
+          .containsExactlyInAnyOrder(low.id(), mid.id(), high.id());
     }
 
     @Test
@@ -542,7 +534,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems()).singleElement().returns(exact.getId(), Transaction::getId);
+      assertThat(page.items()).singleElement().returns(exact.id(), Transaction::id);
     }
 
     @Test
@@ -569,7 +561,7 @@ class TransactionIntegrationTest extends BaseMvcIntegrationTest {
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var page = parseBody(result, PaginatedTransactions.class);
-      assertThat(page.getItems()).singleElement().returns(match.getId(), Transaction::getId);
+      assertThat(page.items()).singleElement().returns(match.id(), Transaction::id);
     }
 
     @Test
