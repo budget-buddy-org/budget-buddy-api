@@ -30,36 +30,39 @@ class UserPreferencesDefaultsProviderTest {
   class Get {
 
     @Test
-    void should_ReturnNullPreferences_When_NoAcceptLanguageHeader() {
+    void should_ReturnDefaultPreferences_When_NoAcceptLanguageHeader() {
       when(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE)).thenReturn(null);
 
       var result = provider.get();
 
-      assertThat(result.language()).isNull();
-      assertThat(result.currency()).isNull();
+      assertThat(result.language()).isEqualTo("en");
+      assertThat(result.currency()).isEqualTo("USD");
+      assertThat(result.timezone()).isEqualTo("UTC");
     }
 
     @Test
-    void should_ReturnNullPreferences_When_AcceptLanguageIsMalformed() {
+    void should_ReturnDefaultPreferences_When_AcceptLanguageIsMalformed() {
       // Syntactically invalid language tag causes Locale.LanguageRange.parse to throw
       // IllegalArgumentException — the catch block returns Optional.empty()
       when(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE)).thenReturn("not a valid@@tag!!");
 
       var result = provider.get();
 
-      assertThat(result.language()).isNull();
-      assertThat(result.currency()).isNull();
+      assertThat(result.language()).isEqualTo("en");
+      assertThat(result.currency()).isEqualTo("USD");
+      assertThat(result.timezone()).isEqualTo("UTC");
     }
 
     @Test
-    void should_ReturnLanguageWithoutCurrency_When_LocaleHasNoCountry() {
-      // "zh" resolves to Locale.CHINESE which has no country — currency lookup fails silently
+    void should_ReturnLanguageWithDefaultCurrency_When_LocaleHasNoCountry() {
+      // "zh" resolves to Locale.CHINESE, which has no country, so USD is used as a fallback
       when(request.getHeader(HttpHeaders.ACCEPT_LANGUAGE)).thenReturn("zh");
 
       var result = provider.get();
 
       assertThat(result.language()).isEqualTo("zh");
-      assertThat(result.currency()).isNull();
+      assertThat(result.currency()).isEqualTo("USD");
+      assertThat(result.timezone()).isEqualTo("UTC");
     }
 
     @Test

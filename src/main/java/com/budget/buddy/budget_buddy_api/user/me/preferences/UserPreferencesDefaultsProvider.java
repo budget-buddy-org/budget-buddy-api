@@ -20,19 +20,23 @@ import org.springframework.stereotype.Component;
 public class UserPreferencesDefaultsProvider {
 
   private static final List<Locale> AVAILABLE_LOCALES = List.of(Locale.getAvailableLocales());
+  private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
+  private static final Currency DEFAULT_CURRENCY = Currency.getInstance(Locale.US);
+  private static final String DEFAULT_TIMEZONE = "UTC";
 
   private final HttpServletRequest request;
 
   public UserPreferences get() {
-    return resolveLocale()
-        .map(this::fromLocale)
-        .orElseGet(() -> new UserPreferences(null, null, null));
+    return fromLocale(resolveLocale().orElse(DEFAULT_LOCALE));
   }
 
   private UserPreferences fromLocale(Locale locale) {
     var language = locale.getLanguage();
-    var currency = resolveCurrency(locale).map(Currency::getCurrencyCode).orElse(null);
-    return new UserPreferences(language, currency, null);
+    var currency =
+        resolveCurrency(locale)
+            .map(Currency::getCurrencyCode)
+            .orElse(DEFAULT_CURRENCY.getCurrencyCode());
+    return new UserPreferences(language, currency, DEFAULT_TIMEZONE);
   }
 
   private Optional<Locale> resolveLocale() {

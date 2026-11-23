@@ -43,14 +43,14 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
     }
 
     @Test
-    void should_ReturnNullDefaults_When_NeverStoredAndNoHeaders() throws Exception {
+    void should_ReturnDefaultPreferences_When_NeverStoredAndNoHeaders() throws Exception {
       var result = mvc.get().uri(URI).with(jwtForUser(userId)).exchange();
 
       assertThat(result).hasStatus(HttpStatus.OK);
       var body = parseBody(result, UserPreferences.class);
-      assertThat(body.language()).as("no headers → no derived defaults").isNull();
-      assertThat(body.currency()).isNull();
-      assertThat(body.timezone()).isNull();
+      assertThat(body.language()).as("no headers → default language").isEqualTo("en");
+      assertThat(body.currency()).isEqualTo("USD");
+      assertThat(body.timezone()).isEqualTo("UTC");
     }
 
     @Test
@@ -144,9 +144,12 @@ class UserPreferencesIntegrationTest extends BaseMvcIntegrationTest {
 
       var result = mvc.get().uri(URI).with(jwtForUser(otherUserId)).exchange();
 
-      assertThat(parseBody(result, UserPreferences.class).currency())
-          .as("another user's preferences are not visible")
-          .isNull();
+      var preferences = parseBody(result, UserPreferences.class);
+      assertThat(preferences.currency())
+          .as("another user's stored preferences are not visible")
+          .isEqualTo("USD");
+      assertThat(preferences.language()).isEqualTo("en");
+      assertThat(preferences.timezone()).isEqualTo("UTC");
     }
 
     @Test

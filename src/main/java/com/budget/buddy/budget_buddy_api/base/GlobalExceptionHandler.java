@@ -40,6 +40,7 @@ public class GlobalExceptionHandler {
   private static final String RESOURCE_NOT_FOUND = "Resource not found";
   private static final String ACCESS_DENIED = "Access denied";
   private static final String AUTHENTICATION_FAILED = "Authentication failed";
+  private static final URI PROBLEM_TYPE = URI.create("about:blank");
 
   private static ResponseEntity<Problem> problemResponse(
       HttpStatus status, @Nullable String detail, WebRequest request) {
@@ -50,7 +51,7 @@ public class GlobalExceptionHandler {
       HttpStatus status, String title, @Nullable String detail, WebRequest request) {
     return buildProblemResponse(
         new Problem(
-            URI.create("about:blank"),
+            PROBLEM_TYPE,
             title,
             status.value(),
             detail,
@@ -70,7 +71,7 @@ public class GlobalExceptionHandler {
       WebRequest request) {
     var responseProblem =
         new Problem(
-            URI.create("about:blank"),
+            PROBLEM_TYPE,
             title,
             status.value(),
             detail,
@@ -107,7 +108,7 @@ public class GlobalExceptionHandler {
     log.debug("Validation failed: {} field error(s)", errors.size());
     var problem =
         new Problem(
-            URI.create("about:blank"),
+            PROBLEM_TYPE,
             HttpStatus.BAD_REQUEST.getReasonPhrase(),
             HttpStatus.BAD_REQUEST.value(),
             null,
@@ -136,7 +137,7 @@ public class GlobalExceptionHandler {
     log.debug("Constraint violations: {} error(s)", errors.size());
     var problem =
         new Problem(
-            URI.create("about:blank"),
+            PROBLEM_TYPE,
             HttpStatus.BAD_REQUEST.getReasonPhrase(),
             HttpStatus.BAD_REQUEST.value(),
             null,
@@ -246,7 +247,7 @@ public class GlobalExceptionHandler {
       String field, String message, WebRequest request) {
     var problem =
         new Problem(
-            URI.create("about:blank"),
+            PROBLEM_TYPE,
             HttpStatus.BAD_REQUEST.getReasonPhrase(),
             HttpStatus.BAD_REQUEST.value(),
             null,
