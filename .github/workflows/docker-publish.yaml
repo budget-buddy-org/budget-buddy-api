@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.ref || github.event.release.tag_name || github.ref }}
-      - uses: budget-buddy-org/budget-buddy-workflows/.github/actions/image-metadata@d420795830022b06f9580ceb7f0b888bd5a5ec61
+      - uses: budget-buddy-org/budget-buddy-workflows/.github/actions/image-metadata@301c990d07dae55fc8f03ea63322a208aa8d0d1e
         id: metadata
         with:
           version-file: gradle.properties
@@ -59,8 +59,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.prepare.outputs.source-sha }}
-      - uses: budget-buddy-org/budget-buddy-workflows/.github/actions/setup-container@d420795830022b06f9580ceb7f0b888bd5a5ec61
-      - uses: budget-buddy-org/budget-buddy-workflows/.github/actions/setup-gradle@d420795830022b06f9580ceb7f0b888bd5a5ec61
+      - uses: budget-buddy-org/budget-buddy-workflows/.github/actions/setup-container@301c990d07dae55fc8f03ea63322a208aa8d0d1e
+      - uses: budget-buddy-org/budget-buddy-workflows/.github/actions/setup-gradle@301c990d07dae55fc8f03ea63322a208aa8d0d1e
       - name: Build and push a staging image on the native platform
         id: build
         env:
@@ -83,7 +83,7 @@ jobs:
           EOF
           digest=$(jq -r '.["containerimage.digest"]' "$RUNNER_TEMP/image.json")
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
-      - uses: budget-buddy-org/budget-buddy-workflows/.github/actions/image-record@d420795830022b06f9580ceb7f0b888bd5a5ec61
+      - uses: budget-buddy-org/budget-buddy-workflows/.github/actions/image-record@301c990d07dae55fc8f03ea63322a208aa8d0d1e
         with:
           digest: ${{ steps.build.outputs.digest }}
           platform: ${{ matrix.platform }}
@@ -96,7 +96,7 @@ jobs:
       packages: write
       security-events: write
       id-token: write
-    uses: budget-buddy-org/budget-buddy-workflows/.github/workflows/publish-image.yml@d420795830022b06f9580ceb7f0b888bd5a5ec61
+    uses: budget-buddy-org/budget-buddy-workflows/.github/workflows/publish-image.yml@301c990d07dae55fc8f03ea63322a208aa8d0d1e
     with:
       version: ${{ needs.prepare.outputs.version }}
       source-sha: ${{ needs.prepare.outputs.source-sha }}
